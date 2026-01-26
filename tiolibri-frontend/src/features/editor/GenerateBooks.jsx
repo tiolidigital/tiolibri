@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Button from '../../components/ui/Button'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 export default function GenerateBooks({ projectId, stylePreset = 'classic', typographySettings = {}, coverImageUrl = null }) {
   const [urls, setUrls] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -11,7 +13,7 @@ export default function GenerateBooks({ projectId, stylePreset = 'classic', typo
     setError(null)
 
     try {
-      const res = await fetch('http://localhost:8002/generate', {
+      const res = await fetch(`${API_URL}/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
