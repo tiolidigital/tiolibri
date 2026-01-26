@@ -26,6 +26,7 @@ app.add_middleware(
         "http://localhost:5174",  # Vite alternate
         "http://localhost:3000",  # Legacy
         "http://localhost:3001",  # Vite alternate 2
+        "https://tiolibri.vercel.app",  # Production frontend
     ],
     allow_credentials=True,
     allow_methods=["*"],
