@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../auth/useAuth'
 import { useProjects } from './useProjects'
 import Button from '../../components/ui/Button'
@@ -10,6 +10,10 @@ export default function DashboardPage() {
   const { user, signOut } = useAuth()
   const { projects, loading, error, createProject, deleteProject } = useProjects()
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  useEffect(() => {
+    document.title = 'Dashboard - TIOLIBRI'
+  }, [])
 
   const handleSignOut = async () => {
     try {

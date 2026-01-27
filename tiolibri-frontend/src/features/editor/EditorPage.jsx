@@ -133,6 +133,15 @@ export default function EditorPage() {
     fetchProject()
   }, [projectId])
 
+  // Update document title with project name
+  useEffect(() => {
+    if (project?.title) {
+      document.title = `${project.title} - TIOLIBRI`
+    } else {
+      document.title = 'Editor - TIOLIBRI'
+    }
+  }, [project])
+
   // Load chapter content when selected
   useEffect(() => {
     async function loadContent() {

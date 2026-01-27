@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from './useAuth'
 import Button from '../../components/ui/Button'
@@ -13,6 +13,10 @@ export default function LoginPage() {
 
   const { signIn } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    document.title = 'Login - TIOLIBRI'
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
