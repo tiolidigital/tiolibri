@@ -1,28 +1,35 @@
 /* Modern Preset - Sans-serif, clean */
+
 body {
-  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
-  text-align: var(--text-align, left);
-  font-size: var(--font-size, 16px);
-  line-height: var(--line-height, 1.7);
-  color: #2d3748;
-  margin: var(--margin, 2em 1.5em);
+    font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    text-align: var(--text-align, left);
+    font-size: var(--font-size, 16px);
+    line-height: var(--line-height, 1.7);
+    color: #2d3748;
+    margin: var(--margin, 2em 1.5em);
 }
 
 h1, h2, h3 {
-  font-family: "Inter", Arial, sans-serif;
-  font-weight: 700;
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-  text-align: left;
+    font-family: "Inter", Arial, sans-serif;
+    font-weight: 700;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    text-align: left;
+    page-break-after: avoid;
+    orphans: 2;
+    widows: 2;
 }
 
 h1 {
-  font-size: 2em;
-  margin-bottom: var(--chapter-spacing, 2em);
+    font-size: 2em;
+    margin-bottom: var(--chapter-spacing, 2em);
 }
+
 h2 { font-size: 1.5em; }
 h3 { font-size: 1.2em; }
 
 p {
-  margin-bottom: 1em;
+    margin-bottom: 1em;
+    orphans: 3;
+    widows: 3;
 }

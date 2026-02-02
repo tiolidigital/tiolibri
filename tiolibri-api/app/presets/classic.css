@@ -1,37 +1,44 @@
 /* Classic Preset - Serif, traditional book style */
+
 body {
-  font-family: "Crimson Text", "Georgia", "Times New Roman", serif;
-  text-align: var(--text-align, left);
-  font-size: var(--font-size, 16px);
-  line-height: var(--line-height, 1.7);
-  color: #1a1a1a;
-  margin: 0; /* FORCED - @page controls all margins */
-  hyphens: auto;
+    font-family: "Crimson Text", "Georgia", "Times New Roman", serif;
+    text-align: var(--text-align, left);
+    font-size: var(--font-size, 16px);
+    line-height: var(--line-height, 1.7);
+    color: #1a1a1a;
+    margin: 0; /* FORCED - @page controls all margins */
+    hyphens: auto;
 }
 
 h1, h2, h3 {
-  font-family: "Crimson Text", "Georgia", "Times New Roman", serif;
-  font-weight: 600;
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-  text-align: left; /* Headings always left-aligned */
+    font-family: "Crimson Text", "Georgia", "Times New Roman", serif;
+    font-weight: 600;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    text-align: left; /* Headings always left-aligned */
+    page-break-after: avoid;
+    orphans: 2;
+    widows: 2;
 }
 
 h1 {
-  font-size: 2em;
-  margin-bottom: var(--chapter-spacing, 2em);
+    font-size: 2em;
+    margin-bottom: var(--chapter-spacing, 2em);
 }
+
 h2 { font-size: 1.5em; }
 h3 { font-size: 1.2em; }
 
 p {
-  margin-bottom: 1em;
-  text-indent: 1.5em;
+    margin-bottom: 1em;
+    text-indent: 1.5em;
+    orphans: 3;
+    widows: 3;
 }
 
 p:first-of-type,
 h1 + p,
 h2 + p,
 h3 + p {
-  text-indent: 0;
+    text-indent: 0;
 }

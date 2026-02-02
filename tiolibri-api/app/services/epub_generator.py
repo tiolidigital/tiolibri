@@ -13,26 +13,61 @@ import re
 import uuid
 
 
+def fix_polish_orphans(html_content: str) -> str:
+    """
+    Zamienia zwykłe spacje po jednoliterowych spójnikach/przyimkach
+    na non-breaking spaces (&nbsp;) zgodnie z polskimi zasadami typografii.
+    
+    Obsługuje:
+    - Jednoliterowe: a, i, o, u, w, z (+ wielkie litery)
+    - Dwuliterowe: do, na, po, od, ze, we, ku
+    - Trzyliterowe: bez, pod, nad, dla
+    - Partykuły: by, czy, aż, no
+    
+    Args:
+        html_content: HTML string z treścią rozdziału
+        
+    Returns:
+        HTML string z poprawionymi spacjami
+    """
+    # Lista polskich spójników i przyimków
+    orphans_one = ['a', 'i', 'o', 'u', 'w', 'z', 'A', 'I', 'O', 'U', 'W', 'Z']
+    orphans_two = ['do', 'na', 'po', 'od', 'ze', 'we', 'ku', 'Do', 'Na', 'Po', 'Od', 'Ze', 'We', 'Ku']
+    orphans_three = ['bez', 'pod', 'nad', 'dla', 'Bez', 'Pod', 'Nad', 'Dla']
+    orphans_particles = ['by', 'czy', 'aż', 'no', 'By', 'Czy', 'Aż', 'No']
+    
+    all_orphans = orphans_one + orphans_two + orphans_three + orphans_particles
+    
+    # Regex pattern: word boundary + orphan + space (not already &nbsp;)
+    # Negative lookahead (?!nbsp;) ensures we don't replace already fixed spaces
+    pattern = r'\b(' + '|'.join(re.escape(word) for word in all_orphans) + r') (?!nbsp;)'
+    
+    # Replace space with &nbsp;
+    result = re.sub(pattern, r'\1&nbsp;', html_content)
+    
+    return result
+
+
 def load_css_preset(preset_name: str) -> str:
     """
     Wczytuje CSS preset z pliku.
-
+    
     Args:
         preset_name: Nazwa presetu (classic/modern/minimal)
-
+        
     Returns:
         Zawartość pliku CSS
-
+        
     Raises:
         FileNotFoundError: Gdy preset nie istnieje
     """
     # Użyj Path dla cross-platform compatibility
     base_path = Path(__file__).parent.parent / "presets"
     preset_path = base_path / f"{preset_name}.css"
-
+    
     if not preset_path.exists():
         raise FileNotFoundError(f"CSS preset '{preset_name}' not found at {preset_path}")
-
+    
     with open(preset_path, "r", encoding="utf-8") as f:
         return f.read()
 
@@ -47,27 +82,27 @@ def extract_image_urls(html: str) -> List[str]:
 def download_image(url: str) -> Tuple[Optional[bytes], Optional[str]]:
     """
     Download image and return (data, extension).
-
+    
     Returns:
         Tuple of (image_data, file_extension) or (None, None) on failure
     """
     try:
         with urllib.request.urlopen(url, timeout=10) as response:
             data = response.read()
-
-            # Detect extension from URL
-            path_part = url.split('?')[0]  # Remove query params
-            ext = path_part.split('.')[-1].lower()
-
-            # Map jpg to jpeg for consistency
-            if ext == 'jpg':
-                ext = 'jpeg'
-
-            # Validate extension
-            if ext not in ['jpeg', 'png', 'gif']:
-                ext = 'jpeg'  # default
-
-            return data, ext
+        
+        # Detect extension from URL
+        path_part = url.split('?')[0]  # Remove query params
+        ext = path_part.split('.')[-1].lower()
+        
+        # Map jpg to jpeg for consistency
+        if ext == 'jpg':
+            ext = 'jpeg'
+        
+        # Validate extension
+        if ext not in ['jpeg', 'png', 'gif']:
+            ext = 'jpeg'  # default
+        
+        return data, ext
     except Exception as e:
         print(f"Failed to download image {url}: {e}")
         return None, None
@@ -90,7 +125,7 @@ def generate_epub(
 ) -> str:
     """
     Generuje EPUB z projektu i rozdziałów.
-
+    
     Args:
         project: Dict z danymi projektu (id, title, author, language)
         chapters: Lista rozdziałów (title, content/processed_html)
@@ -103,28 +138,28 @@ def generate_epub(
         margin_bottom: Margines dolny (em)
         margin_left: Margines lewy (em)
         margin_right: Margines prawy (em)
-
+        
     Returns:
         output_path: Ścieżka do wygenerowanego pliku
-
+        
     Raises:
         ValueError: Gdy brak rozdziałów z treścią
         FileNotFoundError: Gdy preset CSS nie istnieje
     """
     # Stwórz obiekt książki
     book = epub.EpubBook()
-
+    
     # Metadata
     book.set_identifier(str(project["id"]))
     book.set_title(project["title"])
     book.set_language(project.get("language", "pl"))
-
+    
     if project.get("author"):
         book.add_author(project["author"])
-
+    
     # Wczytaj CSS preset
     base_css = load_css_preset(style_preset)
-
+    
     # Replace CSS variables with actual values (EPUB reader compatibility)
     margin_value = f"{margin_top}em {margin_right}em {margin_bottom}em {margin_left}em"
     css_final = base_css
@@ -133,7 +168,7 @@ def generate_epub(
     css_final = css_final.replace('var(--line-height, 1.7)', str(line_height))
     css_final = css_final.replace('var(--margin, 2em 1.5em)', margin_value)
     css_final = css_final.replace('var(--chapter-spacing, 2em)', f'{chapter_spacing}em')
-
+    
     # Dodaj CSS jako item
     nav_css = epub.EpubItem(
         uid="style_nav",
@@ -142,7 +177,7 @@ def generate_epub(
         content=css_final.encode('utf-8')
     )
     book.add_item(nav_css)
-
+    
     # Dodaj cover image (jeśli istnieje)
     cover_item = None
     if cover_image_url:
@@ -150,126 +185,167 @@ def generate_epub(
             # Download cover image
             with urllib.request.urlopen(cover_image_url) as response:
                 cover_data = response.read()
-
-                # Determine image type from URL
-                image_ext = cover_image_url.lower().split('.')[-1].split('?')[0]
-                if image_ext == 'jpg':
-                    image_ext = 'jpeg'
-
-                media_type = f'image/{image_ext}'
-
-                # Create cover image item
-                cover_item = epub.EpubItem(
-                    uid="cover_image",
-                    file_name=f"images/cover.{image_ext}",
-                    media_type=media_type,
-                    content=cover_data
-                )
-                book.add_item(cover_item)
-
-                # Set as cover
-                book.set_cover(f"images/cover.{image_ext}", cover_data)
-
-                # Create cover page HTML
-                cover_page = epub.EpubHtml(
-                    title='Cover',
-                    file_name='cover.xhtml',
-                    lang=project.get("language", "pl")
-                )
-                cover_page.content = f'''
-                    <div style="text-align: center; padding: 0; margin: 0;">
-                        <img src="images/cover.{image_ext}" alt="Cover" style="max-width: 100%; height: auto;"/>
-                    </div>
-                '''
-                book.add_item(cover_page)
-        except Exception as e:
-            print(f"Warning: Failed to add cover image: {e}")
-            cover_item = None
-
-    # Dodaj rozdziały
-    epub_chapters = []
-    spine = ['nav']
-
-    # Add cover to spine if it exists
-    if cover_item:
-        spine.insert(0, 'cover')
-
-    # Track downloaded images globally to avoid duplicates
-    image_map = {}  # {original_url: local_filename}
-
-    for idx, chapter in enumerate(chapters, start=1):
-        # Użyj processed_html jeśli istnieje, w przeciwnym razie content
-        content = chapter.get("processed_html") or chapter.get("content", "")
-
-        if not content:
-            continue
-
-        # Extract and download images from chapter content
-        img_urls = extract_image_urls(content)
-
-        for img_url in img_urls:
-            if img_url in image_map:
-                continue  # Already downloaded
-
-            img_data, img_ext = download_image(img_url)
-            if not img_data:
-                continue  # Skip failed downloads
-
-            # Generate unique filename
-            img_filename = f"images/img_{uuid.uuid4().hex[:8]}.{img_ext}"
-
-            # Determine media type
-            media_type = f'image/{img_ext}'
-
-            # Add image to EPUB
-            img_item = epub.EpubItem(
-                uid=f"image_{uuid.uuid4().hex[:8]}",
-                file_name=img_filename,
+            
+            # Determine image type from URL
+            image_ext = cover_image_url.lower().split('.')[-1].split('?')[0]
+            if image_ext == 'jpg':
+                image_ext = 'jpeg'
+            
+            media_type = f'image/{image_ext}'
+            
+            # Create cover image item
+            cover_item = epub.EpubItem(
+                uid="cover_image",
+                file_name=f"images/cover.{image_ext}",
                 media_type=media_type,
-                content=img_data
+                content=cover_data
             )
-            book.add_item(img_item)
-
-            # Map original URL to local path
-            image_map[img_url] = img_filename
-
-        # Replace image URLs with local paths in HTML
-        for original_url, local_path in image_map.items():
-            content = content.replace(f'src="{original_url}"', f'src="{local_path}"')
-
-        # Stwórz rozdział EPUB
-        c = epub.EpubHtml(
-            title=chapter["title"],  # For TOC only
+            book.add_item(cover_item)
+            
+            # Set as cover
+            book.set_cover(f"images/cover.{image_ext}", cover_data)
+            
+            # Create cover page HTML
+            cover_page = epub.EpubHtml(
+                title='Cover',
+                file_name='cover.xhtml',
+                lang=project.get("language", "pl")
+            )
+            cover_page.content = f'''
+            <html xmlns="http://www.w3.org/1999/xhtml">
+            <head><title>Cover</title></head>
+            <body style="text-align: center; margin: 0; padding: 0;">
+                <img src="images/cover.{image_ext}" alt="Cover" style="max-width: 100%; height: auto;" />
+            </body>
+            </html>
+            '''
+            cover_page.add_item(nav_css)
+            book.add_item(cover_page)
+            
+        except Exception as e:
+            print(f"Warning: Could not add cover image: {e}")
+            cover_item = None
+    
+    # Collect all image URLs from all chapters (for deduplication)
+    all_image_urls = set()
+    for chapter in chapters:
+        content = chapter.get("content") or chapter.get("processed_html", "")
+        if content:
+            img_urls = extract_image_urls(content)
+            all_image_urls.update(img_urls)
+    
+    # Download and add images to EPUB (deduplicated)
+    image_map = {}  # url -> local_path mapping
+    for img_url in all_image_urls:
+        if not img_url.startswith('http'):
+            continue
+        
+        img_data, img_ext = download_image(img_url)
+        if not img_data:
+            continue
+        
+        # Generate unique filename
+        img_id = str(uuid.uuid4())[:8]
+        local_path = f"images/{img_id}.{img_ext}"
+        
+        # Create EPUB image item
+        img_item = epub.EpubItem(
+            uid=f"image_{img_id}",
+            file_name=local_path,
+            media_type=f"image/{img_ext}",
+            content=img_data
+        )
+        book.add_item(img_item)
+        
+        # Map URL to local path
+        image_map[img_url] = local_path
+    
+    # Title page
+    title_page = epub.EpubHtml(
+        title='Title Page',
+        file_name='title.xhtml',
+        lang=project.get("language", "pl")
+    )
+    
+    author_html = f'<p class="author">{project["author"]}</p>' if project.get("author") else ""
+    
+    title_page.content = f'''
+    <html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Title Page</title>
+        <link rel="stylesheet" href="style/nav.css" type="text/css" />
+    </head>
+    <body>
+        <div class="title-page">
+            <h1>{project["title"]}</h1>
+            {author_html}
+        </div>
+    </body>
+    </html>
+    '''
+    title_page.add_item(nav_css)
+    book.add_item(title_page)
+    
+    # Chapters
+    epub_chapters = []
+    spine_items = [title_page]
+    
+    if cover_item:
+        spine_items.insert(0, cover_page)
+    
+    for idx, chapter in enumerate(chapters, start=1):
+        content = chapter.get("content") or chapter.get("processed_html", "")
+        
+        if not content or not content.strip():
+            continue
+        
+        # 🆕 FIX POLISH ORPHANS - dodaj &nbsp; po spójnikach
+        content = fix_polish_orphans(content)
+        
+        # Replace image URLs with local paths
+        for img_url, local_path in image_map.items():
+            content = content.replace(f'src="{img_url}"', f'src="{local_path}"')
+        
+        chapter_item = epub.EpubHtml(
+            title=chapter.get("title", f"Chapter {idx}"),
             file_name=f'chapter_{idx}.xhtml',
             lang=project.get("language", "pl")
         )
-
-        # Only add content - no auto-generated heading
-        # User already has <h1> titles inside the content from TipTap editor
-        c.content = content
-        c.add_item(nav_css)
-
-        book.add_item(c)
-        epub_chapters.append(c)
-        spine.append(c)
-
+        
+        chapter_item.content = f'''
+        <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>
+            <title>{chapter.get("title", f"Chapter {idx}")}</title>
+            <link rel="stylesheet" href="style/nav.css" type="text/css" />
+        </head>
+        <body>
+            <div class="book-content">
+                {content}
+            </div>
+        </body>
+        </html>
+        '''
+        
+        chapter_item.add_item(nav_css)
+        book.add_item(chapter_item)
+        
+        epub_chapters.append(chapter_item)
+        spine_items.append(chapter_item)
+    
     if not epub_chapters:
-        raise ValueError("No chapters with content found")
-
-    # Dodaj TOC (Table of Contents)
+        raise ValueError("No valid chapters with content found")
+    
+    # TOC (Table of Contents)
     book.toc = tuple(epub_chapters)
-
-    # Dodaj domyślne NCX i Nav
+    
+    # Spine (reading order)
+    book.spine = spine_items
+    
+    # Add NCX and Nav files
     book.add_item(epub.EpubNcx())
     book.add_item(epub.EpubNav())
-
-    # Spine (kolejność rozdziałów)
-    book.spine = spine
-
-    # Upewnij się że folder docelowy istnieje
-    os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
-
-    # Zapisz EPUB
-    epub.write_epub(output_path, book, {})
-
+    
+    # Write EPUB file
+    epub.write_epub(output_path, book)
+    
     return output_path
