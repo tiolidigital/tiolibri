@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
+import { convertGoogleDocsHtml, isGoogleDocsHtml } from '../../lib/htmlConverter'
 
 export function useChapters(projectId) {
   const [chapters, setChapters] = useState([])
@@ -145,7 +146,7 @@ export function useChapters(projectId) {
   }
 
   const getChapterContent = async (chapterId) => {
-    const chapter = chapters.find(ch => ch.id === chapterId)
+    const chapter = chapters.find((ch) => ch.id === chapterId)
     if (!chapter?.source_file_path) return null
 
     const { data, error } = await supabase.storage
@@ -154,7 +155,16 @@ export function useChapters(projectId) {
 
     if (error) throw error
 
-    return await data.text()
+    let html = await data.text()
+
+    // Convert Google Docs HTML to semantic HTML if needed
+    if (isGoogleDocsHtml(html)) {
+      console.log('🔄 Converting Google Docs HTML to semantic HTML...')
+      html = convertGoogleDocsHtml(html)
+      console.log('✅ Conversion complete')
+    }
+
+    return html
   }
 
   useEffect(() => {
