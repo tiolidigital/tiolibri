@@ -127,11 +127,11 @@ h1, h2, h3 {
 h1 {
     font-size: 18pt;
     margin-top: 2em;
-    page-break-before: always;
 }
 
-h1:first-of-type {
-    page-break-before: avoid;
+.chapter {
+    /* Stable container for chapter content */
+    /* page-break-before is set inline for chapters after first */
 }
 
 p {
@@ -302,16 +302,16 @@ def generate_pdf(
     
     # Chapters
     html_parts.append('<div class="book-content">')
-    
-    for chapter in chapters:
+
+    for i, chapter in enumerate(chapters):
         content = chapter.get("content") or chapter.get("processed_html", "")
-        
+
         if not content or not content.strip():
             continue
-        
+
         # 🆕 FIX POLISH ORPHANS - dodaj &nbsp; po spójnikach
         content = fix_polish_orphans(content)
-        
+
         # Convert image URLs to base64 data URIs
         img_urls = extract_image_urls(content)
         for img_url in img_urls:
@@ -320,9 +320,15 @@ def generate_pdf(
                 if data_uri:
                     # Replace URL with data URI
                     content = content.replace(f'src="{img_url}"', f'src="{data_uri}"')
-        
-        html_parts.append(content)
-    
+
+        # 🆕 STABLE PAGE BREAKS - wrap chapter in div with conditional page-break-before
+        # First chapter: no page-break-before
+        # All subsequent chapters: page-break-before: always
+        if i == 0:
+            html_parts.append(f'<div class="chapter">{content}</div>')
+        else:
+            html_parts.append(f'<div class="chapter" style="page-break-before: always;">{content}</div>')
+
     html_parts.append('</div>')
     html_parts.append('</body>')
     html_parts.append('</html>')
