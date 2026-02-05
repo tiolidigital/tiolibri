@@ -59,6 +59,7 @@ export default function EditorPage() {
     uploadChapter,
     updateChapter,
     deleteChapter,
+    reorderChapters,
     getChapterContent,
   } = useChapters(projectId)
 
@@ -283,6 +284,7 @@ export default function EditorPage() {
                   selectedId={selectedChapterId}
                   onSelect={setSelectedChapterId}
                   onDelete={deleteChapter}
+                  onReorder={reorderChapters}
                 />
               </div>
 

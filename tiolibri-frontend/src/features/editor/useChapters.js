@@ -106,20 +106,41 @@ export function useChapters(projectId) {
   }
 
   const reorderChapters = async (reorderedChapters) => {
-    // Update local state immediately
+    // Update local state immediately for optimistic UI
     setChapters(reorderedChapters)
 
-    // Update sort_order in database
-    const updates = reorderedChapters.map((ch, index) => ({
-      id: ch.id,
-      sort_order: index,
-    }))
+    try {
+      // Prepare order array for backend API
+      const order = reorderedChapters.map((ch, index) => ({
+        chapter_id: ch.id,
+        sort_order: index + 1, // Start from 1
+      }))
 
-    for (const update of updates) {
-      await supabase
-        .from('chapters')
-        .update({ sort_order: update.sort_order })
-        .eq('id', update.id)
+      // Call backend API to update sort_order
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8002'
+      const response = await fetch(`${apiUrl}/projects/${projectId}/chapters/reorder`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ order }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reorder chapters')
+      }
+
+      const result = await response.json()
+
+      // Update local state with server response to ensure consistency
+      if (result.chapters) {
+        setChapters(result.chapters)
+      }
+    } catch (err) {
+      console.error('Failed to reorder chapters:', err)
+      // Revert to original order on error
+      await fetchChapters()
+      throw err
     }
   }
 
