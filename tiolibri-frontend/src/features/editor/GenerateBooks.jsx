@@ -3,10 +3,41 @@ import Button from '../../components/ui/Button'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
-export default function GenerateBooks({ projectId, stylePreset = 'classic', typographySettings = {}, coverImageUrl = null }) {
+export default function GenerateBooks({ projectId, projectTitle = 'book', stylePreset = 'classic', typographySettings = {}, coverImageUrl = null }) {
   const [urls, setUrls] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+
+  // Create safe filename from project title
+  const getSafeFilename = (extension) => {
+    const safeName = projectTitle
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with dash
+      .replace(/^-+|-+$/g, '') // Remove leading/trailing dashes
+    return `${safeName}.${extension}`
+  }
+
+  const handleDownload = async (url, filename) => {
+    try {
+      const response = await fetch(url)
+      const blob = await response.blob()
+      const blobUrl = window.URL.createObjectURL(blob)
+
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      // Clean up
+      window.URL.revokeObjectURL(blobUrl)
+    } catch (err) {
+      console.error('Download failed:', err)
+      // Fallback: open in new tab
+      window.open(url, '_blank')
+    }
+  }
 
   const handleGenerate = async () => {
     setLoading(true)
@@ -74,24 +105,20 @@ export default function GenerateBooks({ projectId, stylePreset = 'classic', typo
       {urls && (
         <div className="flex gap-2">
           {urls.epub && (
-            <a
-              href={urls.epub}
-              download
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+            <button
+              onClick={() => handleDownload(urls.epub, getSafeFilename('epub'))}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer"
             >
               EPUB
-            </a>
+            </button>
           )}
           {urls.pdf && (
-            <a
-              href={urls.pdf}
-              download
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+            <button
+              onClick={() => handleDownload(urls.pdf, getSafeFilename('pdf'))}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer"
             >
               PDF
-            </a>
+            </button>
           )}
         </div>
       )}

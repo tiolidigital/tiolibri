@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 import { convertGoogleDocsHtml, isGoogleDocsHtml } from '../../lib/htmlConverter'
 
-export function useChapters(projectId) {
+export function useChapters(projectId, projectLanguage = 'pl') {
   const [chapters, setChapters] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -160,7 +160,7 @@ export function useChapters(projectId) {
     // Convert Google Docs HTML to semantic HTML if needed
     if (isGoogleDocsHtml(html)) {
       console.log('🔄 Converting Google Docs HTML to semantic HTML...')
-      html = convertGoogleDocsHtml(html)
+      html = convertGoogleDocsHtml(html, projectLanguage)
       console.log('✅ Conversion complete')
     }
 

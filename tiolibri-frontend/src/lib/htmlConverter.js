@@ -6,6 +6,58 @@
  */
 
 /**
+ * Convert American quotation marks to Polish typographic quotes.
+ *
+ * Replaces "text" with „text" (Polish quotation style).
+ * - Opening quote: „ (U+201E - double low-9 quotation mark)
+ * - Closing quote: " (U+201D - right double quotation mark)
+ *
+ * @param {string} text - Text with American quotes
+ * @returns {string} Text with Polish quotes
+ */
+function convertToPolishQuotes(text) {
+  let result = text
+
+  // Convert double quotes: "text" → „text"
+  // Opening quote: " preceded by space, start of string, tag boundary, or dash
+  result = result.replace(/(\s|^|>|—|–)"/g, '$1„')
+
+  // Closing quote: " followed by space, end of string, tag boundary, or punctuation
+  result = result.replace(/"(\s|$|<|,|\.|!|\?|;|:|—|–)/g, '"$1')
+
+  return result
+}
+
+/**
+ * Add non-breaking spaces for Polish typography rules.
+ *
+ * Prevents orphaned single letters and short words at line ends.
+ * Polish typography requires non-breaking spaces before:
+ * - Single letters (a, i, o, u, w, z, A, I, O, U, W, Z, etc.)
+ * - Short prepositions and conjunctions
+ *
+ * @param {string} text - Text to process
+ * @returns {string} Text with non-breaking spaces
+ */
+function addPolishNonBreakingSpaces(text) {
+  let result = text
+
+  // Single letters (including uppercase for headings like "witamina D")
+  // Pattern: space + single letter + space
+  result = result.replace(/\s([aiouwzAIOUWZDdKkVvXx])\s/g, ' $1\u00A0')
+
+  // Common short words that shouldn't be at line end
+  const shortWords = ['we', 'na', 'za', 'od', 'do', 'po', 'ze', 'ku', 'dr', 'prof', 'tj', 'np', 'tzn', 'itd', 'itp']
+  for (const word of shortWords) {
+    // Case-insensitive replacement
+    const regex = new RegExp(`\\s(${word})\\s`, 'gi')
+    result = result.replace(regex, ' $1\u00A0')
+  }
+
+  return result
+}
+
+/**
  * Parse CSS from <style> block and extract class→properties mapping.
  *
  * @param {string} styleContent - CSS string from <style> tag
@@ -159,9 +211,10 @@ function processElement(element, semanticMap) {
  * Convert Google Docs HTML to semantic HTML for TipTap.
  *
  * @param {string} html - Google Docs exported HTML string
+ * @param {string} language - Project language code (e.g., 'pl', 'en')
  * @returns {string} Clean semantic HTML string
  */
-export function convertGoogleDocsHtml(html) {
+export function convertGoogleDocsHtml(html, language = 'pl') {
   // Create a temporary DOM to parse HTML
   const parser = new DOMParser()
   const doc = parser.parseFromString(html, 'text/html')
@@ -205,6 +258,12 @@ export function convertGoogleDocsHtml(html) {
 
   // Clean up extra whitespace
   result = result.replace(/\n\s*\n/g, '\n').trim()
+
+  // Apply Polish typography rules (only for Polish language)
+  if (language === 'pl') {
+    result = convertToPolishQuotes(result)
+    result = addPolishNonBreakingSpaces(result)
+  }
 
   return result
 }

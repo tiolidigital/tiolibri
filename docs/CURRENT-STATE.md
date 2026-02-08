@@ -1,6 +1,6 @@
 TIOLIBRI - Current State
-Ostatnia aktualizacja: 2026-01-26 (Sesja 12)
-Status: 🎉 v1.7.2 COMPLETE - Paginated Preview, SVG Dividers, Responsive Layout
+Ostatnia aktualizacja: 2026-02-05 (Sesja 16)
+Status: 🎉 v2.0 MVP COMPLETE - Production + Chapter Reordering + Google Docs Converter
 
 🎉 MVP Status
 ✅ Co DZIAŁA (100%):
@@ -168,6 +168,56 @@ User kontroluje wszystkie headingi przez TipTap
 
 No more "DominikanaROZDZIA1..." artifacts
 
+Stable Page Breaks (v2.0.1) - stabilne podziały stron w PDF ✅
+
+Each chapter wrapped in <div class="chapter">
+
+First chapter: no page-break-before
+
+Subsequent chapters: style="page-break-before: always;"
+
+Removed h1-based page breaks (fragile with TipTap HTML)
+
+Fix: Editing chapter 1 no longer causes chapter 2 to "jump" pages
+
+Chapter Reordering (v2.0.2) - drag & drop kolejności rozdziałów ✅
+
+Database: sort_order column in chapters table
+
+Backend: POST /projects/{projectId}/chapters/reorder endpoint
+
+Frontend: @dnd-kit integration w ChapterList
+
+6-dot drag handle (⋮⋮) przy każdym rozdziale
+
+Optimistic UI update + backend sync
+
+PDF/EPUB generators używają sort_order
+
+Keyboard navigation support (Tab + Space/Enter)
+
+Error handling z rollback on failure
+
+Google Docs Converter (v2.0.3) - zachowanie formatowania z Google Docs ✅
+
+Frontend: htmlConverter.js utility (DOMParser-based)
+
+Auto-detection: isGoogleDocsHtml() checks for markers
+
+CSS parsing: Extracts .cX classes from <style> block
+
+Semantic mapping: font-weight:700 → <strong>, font-style:italic → <em>
+
+Blockquote detection: border-left + padding-left → <blockquote>
+
+Artifact removal: strips <meta>, <style>, inline styles
+
+Integration: useChapters.getChapterContent() auto-converts
+
+Console logs: 🔄 Converting... / ✅ Conversion complete
+
+Works with nested formatting (bold+italic)
+
 SVG Dividers (v1.7) - dekoracyjne separatory tekstu ✅
 
 Custom TipTap extension (Divider.js)
@@ -252,9 +302,11 @@ Frontend
 
 ✅ Editor - upload HTML (drag & drop → Supabase Storage)
 
-✅ Editor - lista rozdziałów (select, delete)
+✅ Editor - lista rozdziałów (select, delete, drag & drop reorder - v2.0.2)
 
 ✅ Editor - TipTap WYSIWYG (headings, bold, italic, lists, auto-save)
+
+✅ Editor - Google Docs HTML converter (auto-detects, preserves formatting - v2.0.3)
 
 ✅ Editor - edycja metadata (title, author)
 
@@ -296,7 +348,11 @@ Frontend
 
 ✅ Centralized presets.js (fontFamily definitions)
 
-⏳ Deploy (Vercel - TODO)
+✅ Chapter reordering (@dnd-kit integration - v2.0.2)
+
+✅ Google Docs HTML converter (htmlConverter.js - v2.0.3)
+
+✅ Deploy (Vercel - PRODUCTION)
 
 Backend
 ✅ Python Backend setup (FastAPI + Uvicorn @ localhost:8002)
@@ -311,7 +367,9 @@ Backend
 
 ✅ Test endpointy (GET /projects/{project_id}, GET /projects/{project_id}/chapters)
 
-✅ CORS dla frontendu (localhost:5173/5174)
+✅ POST /projects/{project_id}/chapters/reorder endpoint (v2.0.2)
+
+✅ CORS dla frontendu (localhost:5173/5174 + app.tiolibri.com)
 
 ✅ Swagger UI (/docs)
 
@@ -345,7 +403,9 @@ Backend
 
 ✅ Clean chapter headings - no filename artifacts (v1.6.1)
 
-⏳ Deploy (Railway/Render - TODO)
+✅ Stable page breaks - chapter wrapper divs (v2.0.1)
+
+✅ Deploy (Railway + Docker - PRODUCTION)
 
 Supabase
 ✅ Tabele (projects, chapters, assets, generated_files)
@@ -364,16 +424,24 @@ Supabase
 
 ✅ Auth (email + hasło)
 
+✅ sort_order column w chapters table (v2.0.2)
+
 🛠 Tech Stack
 Warstwa	Technologia	Status
 Frontend	React 19 + Vite + Tailwind 4	✅ Działa
 Routing	React Router 7	✅ Działa
 Editor	TipTap Core (MIT)	✅ Działa
-Backend	Python 3.9 + FastAPI	✅ Działa
+Drag & Drop	@dnd-kit (v2.0.2)	✅ Działa
+HTML Parser	DOMParser (native, v2.0.3)	✅ Działa
+Backend	Python 3.11 + FastAPI	✅ Działa
 EPUB	ebooklib	✅ Działa
-PDF	WeasyPrint	✅ Działa
+PDF	WeasyPrint (Docker)	✅ Działa
+HTML Parsing	BeautifulSoup4 + lxml	✅ Działa
 Auth + DB	Supabase (PostgreSQL)	✅ Działa
 Storage	Supabase Storage + storage3==0.8.1	✅ Działa
+Deployment	Docker (Railway) + Vercel	✅ Działa
+DNS	OVH	✅ Działa
+SSL	Let's Encrypt (auto)	✅ Działa
 📁 Struktura Projektu
 text
 TIOLIBRI/
@@ -400,9 +468,11 @@ TIOLIBRI/
 │   │   │   └── editor/              # EditorPage, TipTap, GenerateBooks
 │   │   │                            # TypographyControls, useTypography
 │   │   │                            # BookPreview (v1.6 paginated)
+│   │   │                            # ChapterList + DnD (v2.0.2)
 │   │   │                            # extensions/Divider.js (v1.7)
 │   │   ├── lib/                     # supabase.js, api.js, utils.js
 │   │   │                            # presets.js (v1.5.3)
+│   │   │                            # htmlConverter.js (v2.0.3)
 │   │   └── App.jsx                  # Routing
 │   └── package.json
 │
@@ -411,13 +481,18 @@ TIOLIBRI/
     │   ├── main.py                  # FastAPI app + load_dotenv()
     │   ├── storage.py               # Supabase Storage upload
     │   ├── routers/
+    │   │   ├── projects.py          # Reorder endpoint (v2.0.2)
     │   │   └── generate.py          # POST /generate endpoint
     │   ├── services/
     │   │   ├── supabase_client.py   # Supabase Client
     │   │   ├── epub_generator.py    # ebooklib (v1.6.1 clean headings)
-    │   │   └── pdf_generator.py     # WeasyPrint (lazy import, v1.6.1)
+    │   │   └── pdf_generator.py     # WeasyPrint (v2.0.1 stable page breaks)
     │   ├── models/
-    │   │   └── schemas.py           # Pydantic models
+    │   │   └── schemas.py           # Pydantic models (w/ sort_order)
+    │   ├── utils/
+    │   │   └── html_converter.py    # Google Docs converter (v2.0.3)
+    │   ├── migrations/
+    │   │   └── 002_add_sort_order.sql  # Database migration (v2.0.2)
     │   └── presets/                 # CSS files
     │       ├── classic.css          # margin: 0 (v1.5.2)
     │       ├── modern.css
@@ -440,15 +515,19 @@ GET	/health	Health check	✅
 GET	/projects/{project_id}	Pobierz projekt	✅
 GET	/projects/{project_id}/chapters	Pobierz rozdziały	✅
 POST	/generate	Generuj EPUB/PDF → Supabase Storage	✅
-⏳ Co Jest TODO
-v1.0 - Deploy (następny priorytet)
-⏳ Deploy frontend (Vercel)
+✅ Deploy Complete (v1.8)
+Production Deployment (Sesja 13-14)
+✅ Deploy frontend (Vercel)
 
-⏳ Deploy backend (Railway/Render)
+✅ Deploy backend (Railway + Docker)
 
-⏳ Domain + SSL
+✅ HTTPS + SSL (auto przez Vercel/Railway)
 
-⏳ Environment variables w produkcji
+✅ Environment variables w produkcji
+
+✅ PDF generation w produkcji (WeasyPrint + system libs)
+
+⏳ Co Jest TODO (Post-MVP)
 
 Optional Polish (Pre-Deploy)
 ⏳ Export progress indicator (~15min)
@@ -512,7 +591,13 @@ Margins Deep Dive v1.5 (Sesja 11): ~2h 10min
 
 Paginated Preview + Dividers v1.6-v1.7.2 (Sesja 12): ~4h 30min
 
-Total dev time: ~21h (excluding deployment)
+Production Deploy (Sesja 13): ~3h
+
+Docker + Custom Domains (Sesje 14-15): ~8h
+
+Page Breaks + Reordering + Google Docs (Sesja 16): ~3h
+
+Total dev time: ~36.5h (from zero to v2.0 production) 🚀
 
 🎯 Definition of Done - MVP
 ✅ User może się zarejestrować i zalogować
@@ -529,23 +614,96 @@ Total dev time: ~21h (excluding deployment)
 
 ✅ User może zobaczyć live paginated preview
 
-✅ User może wygenerować EPUB + PDF
+✅ User może przeciągnąć rozdziały (drag & drop reordering) - v2.0.2
+
+✅ User może uploadować Google Docs HTML (auto-preserve formatting) - v2.0.3
+
+✅ User może wygenerować EPUB + PDF (stable page breaks) - v2.0.1
 
 ✅ User może pobrać wygenerowane pliki
 
-⏳ Aplikacja jest deployed (Vercel + Railway)
+✅ Aplikacja jest deployed (Vercel + Railway)
 
-Progress: 9/10 = 90% MVP (tylko deploy został!)
+Progress: 11/11 = 🎉 100% v2.0 COMPLETE!
 
 📊 Feature Completeness
 Category	Features Implemented	Completion
-Core Editing	Rich text, Auto-save, Focus Mode	100%
+Core Editing	Rich text, Auto-save, Focus Mode, Reordering	100%
 Typography	14 controls, Live preview, Presets	100%
 Media	Cover, Images, SVG Dividers	100%
 Preview	Paginated, Responsive, Real-time	100%
-Export	EPUB, PDF, Clean output	100%
-UX Polish	Light theme, Shortcuts, Responsive	100%
-Deployment	Frontend, Backend, Domain	0%
-Overall: 86% Complete (6/7 categories production-ready)
+Export	EPUB, PDF, Stable page breaks	100%
+Import	Google Docs HTML converter (auto-format)	100%
+UX Polish	Light theme, Shortcuts, Drag & drop	100%
+Deployment	Vercel + Railway (Docker + PDF)	100%
+Overall: 🎉 100% Complete - v2.0 PRODUCTION READY!
 
 Ten plik jest źródłem prawdy o stanie projektu. Aktualizuj go po każdej sesji.
+
+🚀 Production Status (v1.9)
+Deploy Complete - All Systems Operational with Custom Domains
+
+✅ Frontend Vercel – LIVE
+  - Primary URL: https://app.tiolibri.com (custom domain)
+  - Fallback: https://tiolibri.vercel.app
+  - React 19 + Vite + Tailwind 4
+  - Auto-deploy z git push
+  - SSL: Let's Encrypt (auto)
+
+✅ Backend Railway – LIVE (Docker + WeasyPrint)
+  - Primary URL: https://api.tiolibri.com (custom domain)
+  - Fallback: https://tiolibri-production.up.railway.app
+  - Dockerfile: python:3.11-bookworm + system libs
+  - System dependencies: Cairo, Pango, GObject, GdkPixbuf
+  - Polish fonts: fonts-liberation, fonts-dejavu-core
+  - Dynamic port binding: ${PORT:-8000}
+  - SSL: Let's Encrypt (auto)
+
+✅ Custom Domains (Sesja 15)
+  - DNS Provider: OVH
+  - Frontend: app.tiolibri.com → Vercel (CNAME)
+  - Backend: api.tiolibri.com → Railway (CNAME)
+  - SSL Certificates: Auto-generated (Let's Encrypt)
+  - CORS: Updated for app.tiolibri.com
+  - Status: LIVE w produkcji
+
+✅ Integracja Supabase – LIVE
+  - Production project (EU region)
+  - Environment variables configured
+  - RLS policies active
+  - Storage buckets: uploads, assets, book-exports
+
+✅ Eksport E-booków – WORKING
+  - EPUB: ebooklib ✅
+  - PDF: WeasyPrint + Polish fonts (ąęćłńóśźż) ✅
+  - Public URLs: Supabase Storage ✅
+  - Typography: All 14 parameters applied ✅
+  - Images: Embedded in EPUB + PDF ✅
+  - Cover: Embedded in EPUB + PDF ✅
+  - Dividers: SVG preserved ✅
+
+✅ UX Polish (Sesja 15)
+  - Dynamic page titles (Login/Signup/Dashboard/Editor)
+  - Browser tab shows context-aware titles
+  - Editor shows project name in title
+
+Progress: 10/10 = 🎉 100% MVP COMPLETE!
+
+Docker Files (Sesja 14):
+- tiolibri-api/Dockerfile - Production image with WeasyPrint
+- tiolibri-api/.dockerignore - Optimize build context
+- railway.toml - Railway build configuration
+
+DNS Configuration (Sesja 15):
+- CNAME: app.tiolibri.com → cname.vercel-dns.com
+- CNAME: api.tiolibri.com → tiolibri-production.up.railway.app
+- TTL: Auto (OVH default)
+- Propagation: 5-30 minutes
+
+Next Steps (Optional Polish):
+- Export progress indicator (~15min)
+- Toast notifications (~15min)
+- Loading states (~15min)
+- Error handling messages (~20min)
+- Landing page na tiolibri.com (root domain)
+Total optional polish: ~1h

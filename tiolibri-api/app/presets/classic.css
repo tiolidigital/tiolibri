@@ -16,9 +16,10 @@ h1, h2, h3 {
     margin-top: 1.5em;
     margin-bottom: 0.5em;
     text-align: left; /* Headings always left-aligned */
-    page-break-after: avoid;
-    orphans: 2;
-    widows: 2;
+    page-break-after: avoid; /* Don't break after heading */
+    page-break-inside: avoid; /* Don't break inside heading */
+    orphans: 3;
+    widows: 3;
 }
 
 h1 {

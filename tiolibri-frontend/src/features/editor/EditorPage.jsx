@@ -61,7 +61,7 @@ export default function EditorPage() {
     deleteChapter,
     reorderChapters,
     getChapterContent,
-  } = useChapters(projectId)
+  } = useChapters(projectId, project?.language)
 
   const {
     settings: typographySettings,
@@ -245,12 +245,12 @@ export default function EditorPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
+          <Link to="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 bg-[#e3704a] rounded flex items-center justify-center text-white font-bold text-lg">
               📚
             </div>
             <span className="text-xl font-bold text-gray-900">TIOLIBRI</span>
-          </div>
+          </Link>
           <div className="text-sm text-gray-600">
             <span className="font-medium">PROJECT:</span> <span className="uppercase tracking-wide">{project.title}</span>
           </div>
@@ -501,6 +501,7 @@ export default function EditorPage() {
 
                 <GenerateBooks
                   projectId={projectId}
+                  projectTitle={project?.title}
                   stylePreset={stylePreset}
                   typographySettings={typographySettings}
                   coverImageUrl={coverUrl}
