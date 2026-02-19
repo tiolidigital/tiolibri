@@ -72,6 +72,26 @@ def load_css_preset(preset_name: str) -> str:
         return f.read()
 
 
+def extract_first_heading(html: str) -> Optional[str]:
+    """
+    Wyciąga tekst z pierwszego nagłówka H1 lub H2 w HTML.
+    Używane do pobierania prawdziwego tytułu rozdziału z treści.
+
+    Args:
+        html: HTML string z treścią rozdziału
+
+    Returns:
+        Tekst nagłówka lub None jeśli brak
+    """
+    match = re.search(r'<h[12][^>]*>(.*?)</h[12]>', html, re.IGNORECASE | re.DOTALL)
+    if match:
+        # Usuń tagi HTML z tekstu nagłówka (np. <strong>, <em>)
+        heading_html = match.group(1)
+        clean = re.sub(r'<[^>]+>', '', heading_html).strip()
+        return clean if clean else None
+    return None
+
+
 def extract_image_urls(html: str) -> List[str]:
     """Extract all image URLs from HTML."""
     img_pattern = r'<img[^>]+src="([^"]+)"'
@@ -108,6 +128,35 @@ def download_image(url: str) -> Tuple[Optional[bytes], Optional[str]]:
         return None, None
 
 
+def extract_headings(html: str, max_depth: int = 2) -> List[Dict]:
+    """
+    Wyciąga listę nagłówków (H1/H2/H3) z HTML z zachowaniem hierarchii.
+
+    Args:
+        html: HTML string z treścią rozdziału
+        max_depth: Maksymalna głębokość nagłówków (1/2/3)
+
+    Returns:
+        Lista dicts: [{level: 1, text: "Tytuł", anchor: "anchor-id"}, ...]
+    """
+    tags = '|'.join(f'h{i}' for i in range(1, max_depth + 1))
+    pattern = rf'<({tags})([^>]*)>(.*?)</\1>'
+    matches = re.findall(pattern, html, re.IGNORECASE | re.DOTALL)
+
+    headings = []
+    for tag, attrs, content in matches:
+        level = int(tag[1])
+        text = re.sub(r'<[^>]+>', '', content).strip()
+        if not text:
+            continue
+        # Sprawdź czy nagłówek ma id
+        id_match = re.search(r'id=["\']([^"\']+)["\']', attrs)
+        anchor = id_match.group(1) if id_match else None
+        headings.append({'level': level, 'text': text, 'anchor': anchor})
+
+    return headings
+
+
 def generate_epub(
     project: Dict,
     chapters: List[Dict],
@@ -121,7 +170,9 @@ def generate_epub(
     margin_left: float = 1.5,
     margin_right: float = 1.5,
     chapter_spacing: float = 2.0,
-    cover_image_url: Optional[str] = None
+    cover_image_url: Optional[str] = None,
+    toc_enabled: bool = False,
+    toc_depth: int = 2
 ) -> str:
     """
     Generuje EPUB z projektu i rozdziałów.
@@ -214,8 +265,8 @@ def generate_epub(
             cover_page.content = f'''
             <html xmlns="http://www.w3.org/1999/xhtml">
             <head><title>Cover</title></head>
-            <body style="text-align: center; margin: 0; padding: 0;">
-                <img src="images/cover.{image_ext}" alt="Cover" style="max-width: 100%; height: auto;" />
+            <body style="margin: 0; padding: 0;">
+                <img src="images/cover.{image_ext}" alt="Cover" style="width: 100%; height: 100vh; object-fit: cover; object-position: center; display: block;" />
             </body>
             </html>
             '''
@@ -288,8 +339,9 @@ def generate_epub(
     
     # Chapters
     epub_chapters = []
+    chapters_processed = []  # Równoległa lista rozdziałów do epub_chapters (dla TOC)
     spine_items = [title_page]
-    
+
     if cover_item:
         spine_items.insert(0, cover_page)
     
@@ -306,16 +358,19 @@ def generate_epub(
         for img_url, local_path in image_map.items():
             content = content.replace(f'src="{img_url}"', f'src="{local_path}"')
         
+        # Pobierz prawdziwy tytuł z pierwszego H1/H2 w treści
+        chapter_heading = extract_first_heading(content) or chapter.get("title", f"Chapter {idx}")
+
         chapter_item = epub.EpubHtml(
-            title=chapter.get("title", f"Chapter {idx}"),
+            title=chapter_heading,
             file_name=f'chapter_{idx}.xhtml',
             lang=project.get("language", "pl")
         )
-        
+
         chapter_item.content = f'''
         <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
-            <title>{chapter.get("title", f"Chapter {idx}")}</title>
+            <title>{chapter_heading}</title>
             <link rel="stylesheet" href="style/nav.css" type="text/css" />
         </head>
         <body>
@@ -330,14 +385,45 @@ def generate_epub(
         book.add_item(chapter_item)
         
         epub_chapters.append(chapter_item)
+        chapters_processed.append(chapter)
         spine_items.append(chapter_item)
     
     if not epub_chapters:
         raise ValueError("No valid chapters with content found")
     
     # TOC (Table of Contents)
-    book.toc = tuple(epub_chapters)
-    
+    if toc_enabled and toc_depth > 1:
+        # Buduj hierarchiczny TOC z nagłówkami wewnątrz rozdziałów
+        toc_entries = []
+        for idx, chapter_item in enumerate(epub_chapters):
+            chapter = chapters_processed[idx] if idx < len(chapters_processed) else None
+            if not chapter:
+                toc_entries.append(chapter_item)
+                continue
+
+            content = chapter.get("content") or chapter.get("processed_html", "")
+            sub_headings = extract_headings(content, max_depth=toc_depth)
+
+            # Pomijamy pierwszego nagłówka (H1 = tytuł rozdziału - już w chapter_item.title)
+            sub_entries = [
+                epub.Link(
+                    f'{chapter_item.file_name}#{h["anchor"]}' if h["anchor"] else chapter_item.file_name,
+                    h["text"],
+                    f'sub_{idx}_{i}'
+                )
+                for i, h in enumerate(sub_headings)
+                if h["level"] > 1
+            ]
+
+            if sub_entries:
+                toc_entries.append((epub.Section(chapter_item.title), [chapter_item] + sub_entries))
+            else:
+                toc_entries.append(chapter_item)
+
+        book.toc = tuple(toc_entries)
+    else:
+        book.toc = tuple(epub_chapters)
+
     # Spine (reading order)
     book.spine = spine_items
     

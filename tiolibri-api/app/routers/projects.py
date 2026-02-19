@@ -3,6 +3,7 @@ from app.services.supabase_client import supabase
 from app.models.schemas import Project
 from typing import List
 from pydantic import BaseModel
+import uuid
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -43,6 +44,91 @@ async def get_project_chapters(project_id: str):
 
         return {"chapters": response.data, "count": len(response.data)}
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{project_id}/duplicate")
+async def duplicate_project(project_id: str):
+    """
+    Duplikuje projekt wraz ze wszystkimi rozdziałami.
+
+    Flow:
+    1. Pobierz oryginalny projekt
+    2. Stwórz nowy projekt z dopiskiem "(kopia)" do tytułu
+    3. Skopiuj wszystkie rozdziały
+
+    Returns:
+        Nowy projekt (dict)
+
+    Raises:
+        HTTPException 404: Project not found
+        HTTPException 500: Database error
+    """
+    try:
+        # 1. Pobierz oryginalny projekt
+        project_response = supabase.table("projects") \
+            .select("*") \
+            .eq("id", project_id) \
+            .execute()
+
+        if not project_response.data:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+        original = project_response.data[0]
+
+        # 2. Stwórz nowy projekt
+        new_id = str(uuid.uuid4())
+        new_project_data = {
+            "id": new_id,
+            "user_id": original["user_id"],
+            "title": f"{original['title']} (kopia)",
+            "author": original.get("author"),
+            "language": original.get("language", "pl"),
+            "status": "draft",
+            "style_preset": original.get("style_preset", "classic"),
+            "typography_settings": original.get("typography_settings"),
+            "cover_image_url": original.get("cover_image_url"),
+        }
+
+        new_project_response = supabase.table("projects") \
+            .insert(new_project_data) \
+            .select() \
+            .single() \
+            .execute()
+
+        if not new_project_response.data:
+            raise HTTPException(status_code=500, detail="Failed to create duplicate project")
+
+        new_project = new_project_response.data
+
+        # 3. Pobierz rozdziały oryginału
+        chapters_response = supabase.table("chapters") \
+            .select("*") \
+            .eq("project_id", project_id) \
+            .order("sort_order") \
+            .execute()
+
+        # 4. Skopiuj rozdziały do nowego projektu
+        if chapters_response.data:
+            new_chapters = []
+            for ch in chapters_response.data:
+                new_chapters.append({
+                    "project_id": new_id,
+                    "title": ch["title"],
+                    "sort_order": ch["sort_order"],
+                    "content": ch.get("content"),
+                    "processed_html": ch.get("processed_html"),
+                    "original_filename": ch.get("original_filename"),
+                    "source_file_path": ch.get("source_file_path"),
+                })
+
+            supabase.table("chapters").insert(new_chapters).execute()
+
+        return new_project
+
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

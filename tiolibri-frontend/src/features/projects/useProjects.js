@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 export function useProjects() {
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
@@ -76,6 +78,17 @@ export function useProjects() {
     setProjects(prev => prev.filter(p => p.id !== id))
   }
 
+  const duplicateProject = async (id) => {
+    const res = await fetch(`${API_URL}/projects/${id}/duplicate`, { method: 'POST' })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.detail || 'Duplication failed')
+    }
+    const newProject = await res.json()
+    setProjects(prev => [newProject, ...prev])
+    return newProject
+  }
+
   useEffect(() => {
     fetchProjects()
   }, [fetchProjects])
@@ -88,6 +101,7 @@ export function useProjects() {
     createProject,
     updateProject,
     deleteProject,
+    duplicateProject,
   }
 }
 

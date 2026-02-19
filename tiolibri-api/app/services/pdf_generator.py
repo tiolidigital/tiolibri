@@ -156,19 +156,22 @@ img:not(.cover-page img) {
 }
 
 .cover-page {
+    page: cover-page;
     page-break-after: always;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
 }
 
 .cover-page img {
-    max-width: 100%;
-    max-height: 100vh;
-    width: auto;
-    height: auto;
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    margin: 0;
+    padding: 0;
 }
 
 .title-page {
@@ -190,6 +193,75 @@ img:not(.cover-page img) {
 """
 
 
+def extract_first_heading(html: str) -> Optional[str]:
+    """Wyciąga tekst z pierwszego nagłówka H1 lub H2 w HTML."""
+    match = re.search(r'<h[12][^>]*>(.*?)</h[12]>', html, re.IGNORECASE | re.DOTALL)
+    if match:
+        clean = re.sub(r'<[^>]+>', '', match.group(1)).strip()
+        return clean if clean else None
+    return None
+
+
+def build_pdf_toc_html(chapters: List[Dict], title: str = "Spis treści") -> str:
+    """
+    Generuje HTML strony spisu treści dla PDF.
+
+    Args:
+        chapters: Lista rozdziałów z treścią
+        title: Tytuł sekcji TOC
+
+    Returns:
+        HTML string strony TOC
+    """
+    items_html = []
+    for chapter in chapters:
+        content = chapter.get("content") or chapter.get("processed_html", "")
+        if not content or not content.strip():
+            continue
+        heading = extract_first_heading(content) or chapter.get("title", "")
+        if heading:
+            items_html.append(f'<li class="toc-item">{heading}</li>')
+
+    if not items_html:
+        return ""
+
+    return f'''
+    <div class="toc-page">
+        <h2 class="toc-title">{title}</h2>
+        <ul class="toc-list">
+            {"".join(items_html)}
+        </ul>
+    </div>
+    '''
+
+
+TOC_CSS = """
+.toc-page {
+    page-break-after: always;
+    padding-top: 2em;
+}
+
+.toc-title {
+    font-size: 18pt;
+    margin-bottom: 1.5em;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 0.5em;
+}
+
+.toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.toc-item {
+    font-size: 11pt;
+    padding: 0.4em 0;
+    border-bottom: 1px dotted #ddd;
+}
+"""
+
+
 def generate_pdf(
     project: Dict,
     chapters: List[Dict],
@@ -203,7 +275,9 @@ def generate_pdf(
     margin_left: float = 1.5,
     margin_right: float = 1.5,
     chapter_spacing: float = 2.0,
-    cover_image_url: Optional[str] = None
+    cover_image_url: Optional[str] = None,
+    toc_enabled: bool = False,
+    toc_depth: int = 2
 ) -> str:
     """
     Generuje PDF z projektu i rozdziałów używając WeasyPrint.
@@ -252,14 +326,23 @@ def generate_pdf(
         margin-bottom: {margin_bottom}cm;
         margin-left: {margin_left}cm;
         margin-right: {margin_right}cm;
-        
+
         @bottom-center {{
             content: counter(page);
             font-size: 9pt;
             color: #666;
         }}
     }}
-    
+
+    @page cover-page {{
+        size: A5 portrait;
+        margin: 0;
+
+        @bottom-center {{
+            content: none;
+        }}
+    }}
+
     @page:first {{
         @bottom-center {{
             content: none;
@@ -279,6 +362,7 @@ def generate_pdf(
         '<style>',
         BASE_CSS,
         css_final,
+        TOC_CSS if toc_enabled else '',
         '</style>',
         '</head>',
         '<body>',
@@ -299,7 +383,13 @@ def generate_pdf(
     if project.get("author"):
         html_parts.append(f'<p class="author">{project["author"]}</p>')
     html_parts.append('</div>')
-    
+
+    # TOC page (po stronie tytułowej, przed rozdziałami)
+    if toc_enabled:
+        toc_html = build_pdf_toc_html(chapters, title="Spis treści")
+        if toc_html:
+            html_parts.append(toc_html)
+
     # Chapters
     html_parts.append('<div class="book-content">')
 

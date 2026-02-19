@@ -25,6 +25,16 @@ class GenerateRequest(BaseModel):
     # Cover image
     cover_image_url: Optional[str] = None
 
+    # Table of Contents
+    toc_enabled: bool = False
+    toc_depth: int = 2  # 1=H1 only, 2=H1+H2, 3=H1+H2+H3
+
+    @validator('toc_depth')
+    def validate_toc_depth(cls, v):
+        if v not in [1, 2, 3]:
+            raise ValueError('toc_depth must be 1, 2, or 3')
+        return v
+
     @validator('text_align')
     def validate_text_align(cls, v):
         if v not in ['left', 'justify']:

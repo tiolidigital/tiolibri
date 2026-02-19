@@ -7,7 +7,9 @@ export default function TypographyControls({ value, onChange }) {
     marginBottom: 2,
     marginLeft: 1.5,
     marginRight: 1.5,
-    chapterSpacing: 2
+    chapterSpacing: 2,
+    tocEnabled: false,
+    tocDepth: 2
   }
 
   const handleChange = (key, newValue) => {
@@ -175,6 +177,48 @@ export default function TypographyControls({ value, onChange }) {
           <span>Compact (0.5em)</span>
           <span>Spacious (4em)</span>
         </div>
+      </div>
+
+      {/* Table of Contents */}
+      <div className="space-y-3 pt-2 border-t border-gray-100">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-medium text-gray-600">Table of Contents</label>
+          <button
+            type="button"
+            onClick={() => handleChange('tocEnabled', !settings.tocEnabled)}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+              settings.tocEnabled ? 'bg-[#e3704a]' : 'bg-gray-200'
+            }`}
+          >
+            <span
+              className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                settings.tocEnabled ? 'translate-x-4' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+
+        {settings.tocEnabled && (
+          <div>
+            <label className="block text-xs text-gray-500 mb-2">Heading depth</label>
+            <div className="flex gap-2">
+              {[1, 2, 3].map((depth) => (
+                <button
+                  key={depth}
+                  type="button"
+                  onClick={() => handleChange('tocDepth', depth)}
+                  className={`flex-1 px-2 py-1.5 text-xs rounded-lg border transition-colors ${
+                    settings.tocDepth === depth
+                      ? 'bg-gray-200 text-gray-900 border-gray-300'
+                      : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  {depth === 1 ? 'H1' : depth === 2 ? 'H1–H2' : 'H1–H3'}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

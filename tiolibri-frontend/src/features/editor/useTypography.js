@@ -10,7 +10,9 @@ const DEFAULT_SETTINGS = {
   marginBottom: 2,
   marginLeft: 1.5,
   marginRight: 1.5,
-  chapterSpacing: 2
+  chapterSpacing: 2,
+  tocEnabled: false,
+  tocDepth: 2
 }
 
 export function useTypography(projectId) {

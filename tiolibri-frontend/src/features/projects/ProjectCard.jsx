@@ -5,9 +5,10 @@ import Badge from '../../components/ui/Badge'
 import Button from '../../components/ui/Button'
 import { timeAgo } from '../../lib/utils'
 
-export default function ProjectCard({ project, onDelete }) {
+export default function ProjectCard({ project, onDelete, onDuplicate }) {
   const [showConfirm, setShowConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [duplicating, setDuplicating] = useState(false)
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -17,6 +18,17 @@ export default function ProjectCard({ project, onDelete }) {
       console.error('Failed to delete project:', err)
       setDeleting(false)
       setShowConfirm(false)
+    }
+  }
+
+  const handleDuplicate = async () => {
+    setDuplicating(true)
+    try {
+      await onDuplicate(project.id)
+    } catch (err) {
+      console.error('Failed to duplicate project:', err)
+    } finally {
+      setDuplicating(false)
     }
   }
 
@@ -66,6 +78,14 @@ export default function ProjectCard({ project, onDelete }) {
                 Open
               </Button>
             </Link>
+            <Button
+              variant="ghost"
+              onClick={handleDuplicate}
+              disabled={duplicating}
+              title="Duplikuj projekt"
+            >
+              {duplicating ? '...' : 'Duplikuj'}
+            </Button>
             <Button
               variant="ghost"
               onClick={() => setShowConfirm(true)}

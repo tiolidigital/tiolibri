@@ -60,6 +60,8 @@ export default function GenerateBooks({ projectId, projectTitle = 'book', styleP
           margin_right: typographySettings.marginRight || 1.5,
           chapter_spacing: typographySettings.chapterSpacing || 2,
           cover_image_url: coverImageUrl,
+          toc_enabled: typographySettings.tocEnabled || false,
+          toc_depth: typographySettings.tocDepth || 2,
         }),
       })
 

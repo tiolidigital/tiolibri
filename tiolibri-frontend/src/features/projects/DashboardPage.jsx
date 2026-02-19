@@ -8,7 +8,7 @@ import NewProjectModal from './NewProjectModal'
 
 export default function DashboardPage() {
   const { user, signOut } = useAuth()
-  const { projects, loading, error, createProject, deleteProject } = useProjects()
+  const { projects, loading, error, createProject, deleteProject, duplicateProject } = useProjects()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
@@ -74,6 +74,7 @@ export default function DashboardPage() {
                 key={project.id}
                 project={project}
                 onDelete={deleteProject}
+                onDuplicate={duplicateProject}
               />
             ))}
           </div>

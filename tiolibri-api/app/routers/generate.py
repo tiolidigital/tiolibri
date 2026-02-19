@@ -116,7 +116,9 @@ async def generate_ebook(request: GenerateRequest):
                     request.margin_left,
                     request.margin_right,
                     request.chapter_spacing,
-                    request.cover_image_url
+                    request.cover_image_url,
+                    request.toc_enabled,
+                    request.toc_depth
                 )
                 epub_url = upload_to_supabase(epub_path, "epub", request.project_id)
                 files["epub"] = epub_url
@@ -144,7 +146,9 @@ async def generate_ebook(request: GenerateRequest):
                     request.margin_left,
                     request.margin_right,
                     request.chapter_spacing,
-                    request.cover_image_url
+                    request.cover_image_url,
+                    request.toc_enabled,
+                    request.toc_depth
                 )
                 pdf_url = upload_to_supabase(pdf_path, "pdf", request.project_id)
                 files["pdf"] = pdf_url
