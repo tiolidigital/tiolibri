@@ -285,6 +285,7 @@ export default function EditorPage() {
                   onSelect={setSelectedChapterId}
                   onDelete={deleteChapter}
                   onReorder={reorderChapters}
+                  onRename={(id, title) => updateChapter(id, { title })}
                 />
               </div>
 

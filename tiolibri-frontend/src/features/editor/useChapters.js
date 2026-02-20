@@ -118,7 +118,7 @@ export function useChapters(projectId, projectLanguage = 'pl') {
       }))
 
       // Call backend API to update sort_order
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8002'
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
       const response = await fetch(`${apiUrl}/projects/${projectId}/chapters/reorder`, {
         method: 'POST',
         headers: {

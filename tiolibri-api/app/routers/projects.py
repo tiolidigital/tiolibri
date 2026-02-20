@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Header
 from app.services.supabase_client import supabase
 from app.models.schemas import Project
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 import uuid
 

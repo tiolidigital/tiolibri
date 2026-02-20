@@ -202,13 +202,71 @@ def extract_first_heading(html: str) -> Optional[str]:
     return None
 
 
-def build_pdf_toc_html(chapters: List[Dict], title: str = "Spis treści") -> str:
+def extract_headings(html: str, max_depth: int = 2) -> List[Dict]:
+    """
+    Wyciąga listę nagłówków (H1/H2/H3) z HTML z zachowaniem hierarchii.
+
+    Args:
+        html: HTML string z treścią rozdziału
+        max_depth: Maksymalna głębokość nagłówków (1/2/3)
+
+    Returns:
+        Lista dicts: [{level: 1, text: "Tytuł", anchor: "anchor-id"}, ...]
+    """
+    tags = '|'.join(f'h{i}' for i in range(1, max_depth + 1))
+    pattern = rf'<({tags})([^>]*)>(.*?)</\1>'
+    matches = re.findall(pattern, html, re.IGNORECASE | re.DOTALL)
+
+    headings = []
+    for tag, attrs, content in matches:
+        level = int(tag[1])
+        text = re.sub(r'<[^>]+>', '', content).strip()
+        if not text:
+            continue
+        id_match = re.search(r'id=["\']([^"\']+)["\']', attrs)
+        anchor = id_match.group(1) if id_match else None
+        headings.append({'level': level, 'text': text, 'anchor': anchor})
+
+    return headings
+
+
+def inject_heading_ids(html: str, chapter_idx: int = 0) -> str:
+    """
+    Dodaje atrybut id="" do nagłówków H1/H2/H3 które go nie mają.
+    Umożliwia wewnętrzne linki w PDF (TOC → rozdział).
+
+    Używa prefiksu chapter_idx żeby IDs były unikalne w całym dokumencie.
+
+    Args:
+        html: HTML string z treścią rozdziału
+        chapter_idx: Indeks rozdziału (do generowania unikalnych IDs)
+
+    Returns:
+        HTML z dodanymi id na nagłówkach
+    """
+    counter = [0]
+
+    def add_id(match):
+        tag = match.group(1)
+        attrs = match.group(2)
+        content = match.group(3)
+        if 'id=' not in attrs.lower():
+            counter[0] += 1
+            heading_id = f'ch{chapter_idx}-h{counter[0]}'
+            return f'<{tag}{attrs} id="{heading_id}">{content}</{tag}>'
+        return match.group(0)
+
+    return re.sub(r'<(h[123])([^>]*)>(.*?)</\1>', add_id, html, flags=re.IGNORECASE | re.DOTALL)
+
+
+def build_pdf_toc_html(chapters: List[Dict], title: str = "Spis treści", toc_depth: int = 1) -> str:
     """
     Generuje HTML strony spisu treści dla PDF.
 
     Args:
-        chapters: Lista rozdziałów z treścią
+        chapters: Lista rozdziałów z treścią (muszą mieć id na nagłówkach)
         title: Tytuł sekcji TOC
+        toc_depth: Głębokość nagłówków (1=tylko H1, 2=H1+H2, 3=H1+H2+H3)
 
     Returns:
         HTML string strony TOC
@@ -218,9 +276,15 @@ def build_pdf_toc_html(chapters: List[Dict], title: str = "Spis treści") -> str
         content = chapter.get("content") or chapter.get("processed_html", "")
         if not content or not content.strip():
             continue
-        heading = extract_first_heading(content) or chapter.get("title", "")
-        if heading:
-            items_html.append(f'<li class="toc-item">{heading}</li>')
+
+        headings = extract_headings(content, max_depth=toc_depth)
+        for h in headings:
+            level_class = f'toc-item toc-h{h["level"]}'
+            if h['anchor']:
+                link = f'<a href="#{h["anchor"]}">{h["text"]}</a>'
+            else:
+                link = h['text']
+            items_html.append(f'<li class="{level_class}">{link}</li>')
 
     if not items_html:
         return ""
@@ -255,9 +319,33 @@ TOC_CSS = """
 }
 
 .toc-item {
-    font-size: 11pt;
-    padding: 0.4em 0;
+    padding: 0.3em 0;
     border-bottom: 1px dotted #ddd;
+}
+
+.toc-item a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.toc-h1 {
+    font-size: 11pt;
+    font-weight: bold;
+    padding-left: 0;
+}
+
+.toc-h2 {
+    font-size: 10pt;
+    font-weight: normal;
+    padding-left: 1.5em;
+    color: #444;
+}
+
+.toc-h3 {
+    font-size: 9pt;
+    font-weight: normal;
+    padding-left: 3em;
+    color: #666;
 }
 """
 
@@ -384,40 +472,60 @@ def generate_pdf(
         html_parts.append(f'<p class="author">{project["author"]}</p>')
     html_parts.append('</div>')
 
+    # Pre-process chapters: orphans, heading IDs, images
+    # Robimy to przed budowaniem TOC żeby IDs w TOC i w treści były spójne
+    processed_contents = []
+    chapter_render_idx = 0
+    for chapter in chapters:
+        raw = chapter.get("content") or chapter.get("processed_html", "")
+        if not raw or not raw.strip():
+            processed_contents.append(None)
+            continue
+
+        c = fix_polish_orphans(raw)
+
+        # Inject heading IDs z unikalnym prefiksem per rozdział
+        if toc_enabled:
+            c = inject_heading_ids(c, chapter_idx=chapter_render_idx)
+
+        # Convert image URLs to base64 data URIs
+        for img_url in extract_image_urls(c):
+            if img_url.startswith('http'):
+                data_uri = download_and_encode_image(img_url)
+                if data_uri:
+                    c = c.replace(f'src="{img_url}"', f'src="{data_uri}"')
+
+        processed_contents.append(c)
+        chapter_render_idx += 1
+
     # TOC page (po stronie tytułowej, przed rozdziałami)
+    # Budujemy z pre-przetworzonych treści żeby linki (#ch0-h1 itp.) były poprawne.
+    # Nadpisujemy 'content' i 'processed_html' bo build_pdf_toc_html preferuje 'content'.
     if toc_enabled:
-        toc_html = build_pdf_toc_html(chapters, title="Spis treści")
+        chapters_for_toc = []
+        for chapter, proc_content in zip(chapters, processed_contents):
+            if proc_content:
+                chapters_for_toc.append({**chapter, 'content': proc_content, 'processed_html': proc_content})
+        toc_html = build_pdf_toc_html(chapters_for_toc, title="Spis treści", toc_depth=toc_depth)
         if toc_html:
             html_parts.append(toc_html)
 
     # Chapters
     html_parts.append('<div class="book-content">')
 
-    for i, chapter in enumerate(chapters):
-        content = chapter.get("content") or chapter.get("processed_html", "")
-
-        if not content or not content.strip():
+    render_idx = 0
+    for i, (chapter, content) in enumerate(zip(chapters, processed_contents)):
+        if content is None:
             continue
-
-        # 🆕 FIX POLISH ORPHANS - dodaj &nbsp; po spójnikach
-        content = fix_polish_orphans(content)
-
-        # Convert image URLs to base64 data URIs
-        img_urls = extract_image_urls(content)
-        for img_url in img_urls:
-            if img_url.startswith('http'):
-                data_uri = download_and_encode_image(img_url)
-                if data_uri:
-                    # Replace URL with data URI
-                    content = content.replace(f'src="{img_url}"', f'src="{data_uri}"')
 
         # 🆕 STABLE PAGE BREAKS - wrap chapter in div with conditional page-break-before
         # First chapter: no page-break-before
         # All subsequent chapters: page-break-before: always
-        if i == 0:
+        if render_idx == 0:
             html_parts.append(f'<div class="chapter">{content}</div>')
         else:
             html_parts.append(f'<div class="chapter" style="page-break-before: always;">{content}</div>')
+        render_idx += 1
 
     html_parts.append('</div>')
     html_parts.append('</body>')

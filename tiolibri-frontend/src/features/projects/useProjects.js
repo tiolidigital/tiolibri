@@ -79,11 +79,23 @@ export function useProjects() {
   }
 
   const duplicateProject = async (id) => {
-    const res = await fetch(`${API_URL}/projects/${id}/duplicate`, { method: 'POST' })
+    // Pass auth token so backend knows the user identity
+    const { data: { session } } = await supabase.auth.getSession()
+    const headers = { 'Content-Type': 'application/json' }
+    if (session?.access_token) {
+      headers['Authorization'] = `Bearer ${session.access_token}`
+    }
+
+    const res = await fetch(`${API_URL}/projects/${id}/duplicate`, {
+      method: 'POST',
+      headers,
+    })
+
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
-      throw new Error(err.detail || 'Duplication failed')
+      throw new Error(err.detail || `Duplication failed (${res.status})`)
     }
+
     const newProject = await res.json()
     setProjects(prev => [newProject, ...prev])
     return newProject
