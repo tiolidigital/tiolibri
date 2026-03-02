@@ -118,9 +118,7 @@ async def duplicate_project(project_id: str):
                     "project_id": new_id,
                     "title": ch["title"],
                     "sort_order": ch["sort_order"],
-                    "content": ch.get("content"),
                     "processed_html": ch.get("processed_html"),
-                    "original_filename": ch.get("original_filename"),
                     "source_file_path": ch.get("source_file_path"),
                 })
 
