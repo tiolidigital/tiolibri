@@ -91,16 +91,17 @@ async def duplicate_project(project_id: str):
             "cover_image_url": original.get("cover_image_url"),
         }
 
+        supabase.table("projects").insert(new_project_data).execute()
+
         new_project_response = supabase.table("projects") \
-            .insert(new_project_data) \
-            .select() \
-            .single() \
+            .select("*") \
+            .eq("id", new_id) \
             .execute()
 
         if not new_project_response.data:
             raise HTTPException(status_code=500, detail="Failed to create duplicate project")
 
-        new_project = new_project_response.data
+        new_project = new_project_response.data[0]
 
         # 3. Pobierz rozdziały oryginału
         chapters_response = supabase.table("chapters") \
