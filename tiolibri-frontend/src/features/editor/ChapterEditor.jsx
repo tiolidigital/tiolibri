@@ -3,6 +3,7 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import { Divider } from './extensions/Divider'
+import { SearchAndReplace } from './extensions/SearchAndReplace'
 import EditorToolbar from './EditorToolbar'
 import { getPreset } from '../../lib/presets'
 import './editor.css'
@@ -13,13 +14,17 @@ export default function ChapterEditor({
   onSave,
   onContentChange,
   projectId,
-  focusMode,
-  onFocusModeToggle,
+  showInspector,
+  onInspectorToggle,
   showPreview,
   onPreviewToggle,
   typographySettings,
   stylePreset,
+  currentUserId,
+  editorRef,
 }) {
+  // Chapter is read-only when locked by a different user
+  const lockedByOther = chapter?.locked_by && chapter.locked_by !== currentUserId
   const [saving, setSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState(null)
 
@@ -48,8 +53,10 @@ export default function ChapterEditor({
         },
       }),
       Divider,
+      SearchAndReplace,
     ],
     content: content || '',
+    editable: !lockedByOther,
     editorProps: {
       attributes: {
         class: 'tiptap-editor prose max-w-none focus:outline-none min-h-[500px]',
@@ -57,14 +64,40 @@ export default function ChapterEditor({
     },
   })
 
-  // Load content only when chapter changes — never on every `content` update,
-  // otherwise setContent() resets the cursor mid-typing.
+  // Expose editor instance to parent so EditorPage can drive Find & Replace.
   useEffect(() => {
-    if (editor && chapter?.id) {
+    if (editorRef) editorRef.current = editor
+  }, [editor, editorRef])
+
+  // Load content when chapter changes, and again once async content arrives
+  // (parent's loadContent sets `content` after mount). Ref-tracking prevents
+  // re-running on every keystroke — `content` updates via onContentChange while
+  // typing, and calling setContent again would reset the cursor.
+  //
+  // Rule: setContent once per chapter with the first non-empty content we see.
+  // If the chapter genuinely has no content, we still setContent('') on mount.
+  const loadedKeyRef = useRef(null)
+  useEffect(() => {
+    if (!editor || !chapter?.id) return
+    const key = chapter.id
+    const hasContent = !!content
+    if (loadedKeyRef.current !== key) {
       editor.commands.setContent(content || '', false)
+      loadedKeyRef.current = hasContent ? key : `${key}:empty`
+      return
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editor, chapter?.id])
+    if (loadedKeyRef.current === `${key}:empty` && hasContent) {
+      editor.commands.setContent(content, false)
+      loadedKeyRef.current = key
+    }
+  }, [editor, chapter?.id, content])
+
+  // Sync editable flag when lock state changes after mount.
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(!lockedByOther)
+    }
+  }, [editor, lockedByOther])
 
   // Live update for preview
   useEffect(() => {
@@ -125,6 +158,25 @@ export default function ChapterEditor({
 
   return (
     <div className="flex flex-col h-full bg-gray-100">
+      {/* Lock banner */}
+      {lockedByOther && (
+        <div className="flex items-center gap-2 px-6 py-2 bg-amber-50 border-b border-amber-200 text-amber-800 text-sm">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className="shrink-0"
+          >
+            <rect x="2.5" y="6" width="9" height="6.5" rx="1" />
+            <path d="M4.5 6V4a2.5 2.5 0 015 0v2" />
+          </svg>
+          Rozdział jest zablokowany przez innego użytkownika — tryb tylko do odczytu.
+        </div>
+      )}
+
       {/* Toolbar - Floating above paper */}
       <div className="sticky top-0 z-10 px-8 pt-6 pb-2 bg-gradient-to-b from-gray-100 to-transparent">
         <div className="max-w-4xl mx-auto bg-white border border-gray-200 rounded-lg shadow-sm">
@@ -132,8 +184,8 @@ export default function ChapterEditor({
             <EditorToolbar
               editor={editor}
               projectId={projectId}
-              focusMode={focusMode}
-              onFocusModeToggle={onFocusModeToggle}
+              showInspector={showInspector}
+              onInspectorToggle={onInspectorToggle}
               showPreview={showPreview}
               onPreviewToggle={onPreviewToggle}
             />

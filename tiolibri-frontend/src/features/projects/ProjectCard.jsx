@@ -4,9 +4,11 @@ import Card from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
 import Button from '../../components/ui/Button'
 import { timeAgo } from '../../lib/utils'
+import { authedFetch } from '../../lib/authedFetch'
 
 // 3-dot kebab menu
-function KebabMenu({ onDuplicate, onDelete, duplicating }) {
+function KebabMenu({ onDuplicate, onDelete, onExport, duplicating, exporting }) {
+  // onDelete === null means this is a shared (non-owned) project — hide the delete option.
   const [open, setOpen] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteInput, setDeleteInput] = useState('')
@@ -51,6 +53,11 @@ function KebabMenu({ onDuplicate, onDelete, duplicating }) {
     onDuplicate()
   }
 
+  const handleExportClick = () => {
+    setOpen(false)
+    onExport()
+  }
+
   return (
     <div ref={menuRef} className="relative">
       <button
@@ -86,17 +93,32 @@ function KebabMenu({ onDuplicate, onDelete, duplicating }) {
                 </svg>
                 {duplicating ? 'Duplikuję...' : 'Duplikuj projekt'}
               </button>
-              <div className="border-t border-gray-100 my-1" />
               <button
-                onClick={handleDeleteClick}
-                className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                onClick={handleExportClick}
+                disabled={exporting}
+                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50"
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M2 4h10M5 4V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5V4M5.5 7v4M8.5 7v4" />
-                  <rect x="2.5" y="4" width="9" height="8" rx="1" />
+                  <path d="M7 2v7M4 6l3 3 3-3" />
+                  <path d="M2 10v1a1 1 0 001 1h8a1 1 0 001-1v-1" />
                 </svg>
-                Usuń projekt
+                {exporting ? 'Eksportuję...' : 'Eksportuj backup (.tiolibri)'}
               </button>
+              {onDelete && (
+                <>
+                  <div className="border-t border-gray-100 my-1" />
+                  <button
+                    onClick={handleDeleteClick}
+                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M2 4h10M5 4V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5V4M5.5 7v4M8.5 7v4" />
+                      <rect x="2.5" y="4" width="9" height="8" rx="1" />
+                    </svg>
+                    Usuń projekt
+                  </button>
+                </>
+              )}
             </>
           ) : (
             <div className="px-3 py-2">
@@ -143,9 +165,10 @@ function KebabMenu({ onDuplicate, onDelete, duplicating }) {
   )
 }
 
-export default function ProjectCard({ project, onDelete, onDuplicate }) {
+export default function ProjectCard({ project, onDelete, onDuplicate, sharedByEmail }) {
   const [deleting, setDeleting] = useState(false)
   const [duplicating, setDuplicating] = useState(false)
+  const [exporting, setExporting] = useState(false)
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -168,6 +191,29 @@ export default function ProjectCard({ project, onDelete, onDuplicate }) {
     }
   }
 
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      const blob = await authedFetch(`/projects/${project.id}/export`, {
+        method: 'POST',
+        responseType: 'blob',
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      const safeName = (project.title || 'project').replace(/[^a-zA-Z0-9 \-_]/g, '_')
+      a.href = url
+      a.download = `${safeName}.tiolibri`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Failed to export project:', err)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <Card className="flex flex-col">
       <div className="flex-1">
@@ -182,9 +228,15 @@ export default function ProjectCard({ project, onDelete, onDuplicate }) {
           <p className="text-sm text-gray-600 mb-2">by {project.author}</p>
         )}
 
-        <p className="text-xs text-gray-400">
-          Updated {timeAgo(project.updated_at)}
-        </p>
+        {sharedByEmail !== undefined ? (
+          <p className="text-xs text-[#e3704a] font-medium mt-1">
+            {sharedByEmail ? `Udostępnione przez ${sharedByEmail}` : 'Udostępnione dla ciebie'}
+          </p>
+        ) : (
+          <p className="text-xs text-gray-400">
+            Updated {timeAgo(project.updated_at)}
+          </p>
+        )}
       </div>
 
       <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
@@ -196,8 +248,10 @@ export default function ProjectCard({ project, onDelete, onDuplicate }) {
 
         <KebabMenu
           onDuplicate={handleDuplicate}
-          onDelete={handleDelete}
+          onDelete={onDelete ? handleDelete : null}
+          onExport={handleExport}
           duplicating={duplicating}
+          exporting={exporting}
         />
       </div>
     </Card>

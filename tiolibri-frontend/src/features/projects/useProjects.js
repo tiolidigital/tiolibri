@@ -4,6 +4,7 @@ import { authedFetch } from '../../lib/authedFetch'
 
 export function useProjects() {
   const [projects, setProjects] = useState([])
+  const [sharedProjects, setSharedProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -12,13 +13,21 @@ export function useProjects() {
     setError(null)
 
     try {
-      const { data, error: fetchError } = await supabase
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // Own projects (filter by user_id to exclude shared projects that RLS now exposes)
+      const { data: ownData, error: ownError } = await supabase
         .from('projects')
         .select('*')
+        .eq('user_id', user?.id)
         .order('updated_at', { ascending: false })
 
-      if (fetchError) throw fetchError
-      setProjects(data || [])
+      if (ownError) throw ownError
+      setProjects(ownData || [])
+
+      // Shared projects (enriched with owner email via backend)
+      const sharedData = await authedFetch('/projects/shared')
+      setSharedProjects(sharedData.projects || [])
     } catch (err) {
       setError(err.message)
     } finally {
@@ -83,12 +92,25 @@ export function useProjects() {
     return newProject
   }
 
+  const importProject = async (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const newProject = await authedFetch('/projects/import', {
+      method: 'POST',
+      body: formData,
+      skipContentType: true,
+    })
+    setProjects(prev => [newProject, ...prev])
+    return newProject
+  }
+
   useEffect(() => {
     fetchProjects()
   }, [fetchProjects])
 
   return {
     projects,
+    sharedProjects,
     loading,
     error,
     fetchProjects,
@@ -96,6 +118,7 @@ export function useProjects() {
     updateProject,
     deleteProject,
     duplicateProject,
+    importProject,
   }
 }
 

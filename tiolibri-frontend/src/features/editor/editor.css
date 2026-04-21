@@ -435,3 +435,15 @@
   outline-offset: 4px;
   border-radius: 4px;
 }
+
+/* Search & Replace highlights */
+.search-match {
+  background-color: #fef08a; /* yellow-200 */
+  border-radius: 2px;
+}
+
+.search-match-current {
+  background-color: #fb923c; /* orange-400 */
+  color: #fff;
+  border-radius: 2px;
+}

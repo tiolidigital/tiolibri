@@ -3,6 +3,9 @@ import { supabase } from '../../lib/supabase'
 import { authedFetch } from '../../lib/authedFetch'
 import { convertGoogleDocsHtml, isGoogleDocsHtml } from '../../lib/htmlConverter'
 
+// Fields that go through the backend (to trigger version snapshots).
+const BACKEND_FIELDS = ['processed_html']
+
 export function useChapters(projectId, projectLanguage = 'pl') {
   const [chapters, setChapters] = useState([])
   const [loading, setLoading] = useState(true)
@@ -19,6 +22,7 @@ export function useChapters(projectId, projectLanguage = 'pl') {
         .from('chapters')
         .select('*')
         .eq('project_id', projectId)
+        .is('deleted_at', null)
         .order('sort_order', { ascending: true })
 
       if (fetchError) throw fetchError
@@ -71,6 +75,19 @@ export function useChapters(projectId, projectLanguage = 'pl') {
   }
 
   const updateChapter = async (id, updates) => {
+    const hasBackendField = Object.keys(updates).some(k => BACKEND_FIELDS.includes(k))
+
+    if (hasBackendField) {
+      // Route through the backend so version snapshots are written.
+      const data = await authedFetch(`/chapters/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      })
+      setChapters(prev => prev.map(ch => ch.id === id ? data : ch))
+      return data
+    }
+
+    // Metadata-only updates (title, sort_order, status…) go direct to Supabase.
     const { data, error } = await supabase
       .from('chapters')
       .update({ ...updates, updated_at: new Date().toISOString() })
@@ -84,27 +101,50 @@ export function useChapters(projectId, projectLanguage = 'pl') {
     return data
   }
 
-  const deleteChapter = async (id) => {
-    // Find chapter to get file path
-    const chapter = chapters.find(ch => ch.id === id)
-
-    // Delete from database first
-    const { error: deleteError } = await supabase
-      .from('chapters')
-      .delete()
-      .eq('id', id)
-
-    if (deleteError) throw deleteError
-
-    // Delete from storage if file exists
-    if (chapter?.source_file_path) {
-      await supabase.storage
-        .from('uploads')
-        .remove([chapter.source_file_path])
-    }
-
-    // Remove from local state
+  // Soft-delete: sends chapter to Trash, does not remove from DB.
+  const softDeleteChapter = async (id) => {
+    await authedFetch(`/chapters/${id}`, { method: 'DELETE' })
     setChapters(prev => prev.filter(ch => ch.id !== id))
+  }
+
+  // Legacy hard-delete kept for backwards compat (not exposed in UI).
+  const deleteChapter = softDeleteChapter
+
+  // Restore a soft-deleted chapter from Trash back into the chapter list.
+  const restoreChapter = async (id) => {
+    const result = await authedFetch(`/chapters/${id}/restore`, { method: 'POST' })
+    // Re-fetch so sort_order is correct and the chapter appears in the right place.
+    await fetchChapters()
+    return result.chapter
+  }
+
+  // Hard-delete a chapter that is already in Trash.
+  const permanentDeleteChapter = async (id) => {
+    await authedFetch(`/chapters/${id}/permanent`, { method: 'DELETE' })
+  }
+
+  // Fetch soft-deleted chapters for the Trash UI.
+  const fetchTrash = useCallback(async () => {
+    if (!projectId) return []
+    const result = await authedFetch(`/chapters/trash?project_id=${projectId}`)
+    return result.chapters || []
+  }, [projectId])
+
+  // Update chapter status (draft | review | done) via backend.
+  const updateChapterStatus = async (id, status) => {
+    const data = await authedFetch(`/chapters/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    })
+    setChapters(prev => prev.map(ch => ch.id === id ? data : ch))
+    return data
+  }
+
+  // Toggle chapter lock via backend.
+  const toggleChapterLock = async (id) => {
+    const data = await authedFetch(`/chapters/${id}/lock`, { method: 'POST' })
+    setChapters(prev => prev.map(ch => ch.id === id ? data : ch))
+    return data
   }
 
   const reorderChapters = async (reorderedChapters) => {
@@ -134,7 +174,7 @@ export function useChapters(projectId, projectLanguage = 'pl') {
     }
   }
 
-  const getChapterContent = async (chapterId) => {
+  const getChapterContent = useCallback(async (chapterId, { signal } = {}) => {
     const chapter = chapters.find((ch) => ch.id === chapterId)
     if (!chapter?.source_file_path) return null
 
@@ -143,18 +183,17 @@ export function useChapters(projectId, projectLanguage = 'pl') {
       .download(chapter.source_file_path)
 
     if (error) throw error
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
 
     let html = await data.text()
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
 
-    // Convert Google Docs HTML to semantic HTML if needed
     if (isGoogleDocsHtml(html)) {
-      console.log('🔄 Converting Google Docs HTML to semantic HTML...')
       html = convertGoogleDocsHtml(html, projectLanguage)
-      console.log('✅ Conversion complete')
     }
 
     return html
-  }
+  }, [chapters, projectLanguage])
 
   useEffect(() => {
     fetchChapters()
@@ -168,6 +207,12 @@ export function useChapters(projectId, projectLanguage = 'pl') {
     uploadChapter,
     updateChapter,
     deleteChapter,
+    softDeleteChapter,
+    restoreChapter,
+    permanentDeleteChapter,
+    fetchTrash,
+    updateChapterStatus,
+    toggleChapterLock,
     reorderChapters,
     getChapterContent,
   }

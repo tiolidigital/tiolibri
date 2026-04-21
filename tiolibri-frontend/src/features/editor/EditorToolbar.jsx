@@ -115,7 +115,7 @@ function DividerButton({ editor }) {
   );
 }
 
-export default function EditorToolbar({ editor, projectId, focusMode, onFocusModeToggle, showPreview, onPreviewToggle }) {
+export default function EditorToolbar({ editor, projectId, showInspector, onInspectorToggle, showPreview, onPreviewToggle }) {
   const [isUploading, setIsUploading] = useState(false)
 
   if (!editor) return null
@@ -317,8 +317,8 @@ export default function EditorToolbar({ editor, projectId, focusMode, onFocusMod
 
       <Divider />
 
-      {/* Preview Toggle - hidden when Focus Mode is active */}
-      {onPreviewToggle && !focusMode && (
+      {/* Preview Toggle */}
+      {onPreviewToggle && (
         <button
           onClick={onPreviewToggle}
           className="ml-auto p-2 text-gray-600 hover:text-gray-900 transition-colors"
@@ -337,14 +337,18 @@ export default function EditorToolbar({ editor, projectId, focusMode, onFocusMod
         </button>
       )}
 
-      {/* Focus Mode */}
-      {onFocusModeToggle && (
+      {/* Inspector Toggle */}
+      {onInspectorToggle && (
         <button
-          onClick={onFocusModeToggle}
-          className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 font-medium"
-          title="Toggle Focus Mode"
+          onClick={onInspectorToggle}
+          className={`p-2 rounded transition-colors ${showInspector ? 'text-[#e3704a] bg-orange-50' : 'text-gray-400 hover:text-gray-700'}`}
+          title={showInspector ? "Ukryj inspektor" : "Pokaż inspektor"}
         >
-          Focus
+          {/* PanelRight icon */}
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={1.5} />
+            <line x1="15" y1="3" x2="15" y2="21" strokeWidth={1.5} />
+          </svg>
         </button>
       )}
     </div>

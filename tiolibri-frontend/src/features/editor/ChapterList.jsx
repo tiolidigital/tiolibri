@@ -16,8 +16,21 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
+// Status dot: gray=draft, yellow=review, green=done
+const STATUS_DOT = {
+  draft: 'bg-gray-300',
+  review: 'bg-yellow-400',
+  done: 'bg-green-500',
+}
+
+const STATUS_LABELS = {
+  draft: 'Szkic',
+  review: 'Do recenzji',
+  done: 'Gotowy',
+}
+
 // Context menu component
-function ContextMenu({ x, y, onRename, onDelete, onClose }) {
+function ContextMenu({ x, y, chapter, isOwner, onRename, onMoveToTrash, onSetStatus, onToggleLock, onClose }) {
   const menuRef = useRef(null)
 
   useEffect(() => {
@@ -30,12 +43,16 @@ function ContextMenu({ x, y, onRename, onDelete, onClose }) {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [onClose])
 
+  const isLocked = !!chapter.locked_by
+  const currentStatus = chapter.status || 'draft'
+
   return (
     <div
       ref={menuRef}
       style={{ top: y, left: x }}
-      className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[140px]"
+      className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[180px]"
     >
+      {/* Rename */}
       <button
         onClick={() => { onRename(); onClose() }}
         className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
@@ -45,18 +62,89 @@ function ContextMenu({ x, y, onRename, onDelete, onClose }) {
         </svg>
         Zmień nazwę
       </button>
+
+      {/* Status sub-section */}
+      <div className="border-t border-gray-100 my-1" />
+      <div className="px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wide">Status</div>
+      {(['draft', 'review', 'done']).map((s) => (
+        <button
+          key={s}
+          onClick={() => { onSetStatus(s); onClose() }}
+          className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 ${
+            currentStatus === s ? 'text-[#e3704a] bg-[#FFF7F5]' : 'text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          <span className={`w-2 h-2 rounded-full inline-block ${STATUS_DOT[s]}`} />
+          {STATUS_LABELS[s]}
+          {currentStatus === s && (
+            <svg className="ml-auto w-3 h-3" fill="currentColor" viewBox="0 0 12 12">
+              <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            </svg>
+          )}
+        </button>
+      ))}
+
+      {/* Lock — only shown for owner */}
+      {isOwner && (
+        <>
+          <div className="border-t border-gray-100 my-1" />
+          <button
+            onClick={() => { onToggleLock(); onClose() }}
+            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+          >
+            {isLocked ? (
+              <>
+                <LockOpenIcon />
+                Odblokuj rozdział
+              </>
+            ) : (
+              <>
+                <LockIcon />
+                Zablokuj rozdział
+              </>
+            )}
+          </button>
+        </>
+      )}
+
+      {/* Move to Trash */}
       <div className="border-t border-gray-100 my-1" />
       <button
-        onClick={() => { onDelete(); onClose() }}
+        onClick={() => { onMoveToTrash(); onClose() }}
         className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
       >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M2 4h10M5 4V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5V4M5.5 7v4M8.5 7v4" />
-          <rect x="2.5" y="4" width="9" height="8" rx="1" />
-        </svg>
-        Usuń rozdział
+        <TrashIcon />
+        Przenieś do kosza
       </button>
     </div>
+  )
+}
+
+// Small icon components to keep JSX clean
+function LockIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="2.5" y="6" width="9" height="6.5" rx="1" />
+      <path d="M4.5 6V4a2.5 2.5 0 015 0v2" />
+    </svg>
+  )
+}
+
+function LockOpenIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="2.5" y="6" width="9" height="6.5" rx="1" />
+      <path d="M4.5 6V4a2.5 2.5 0 015 0" />
+    </svg>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M2 4h10M5 4V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5V4M5.5 7v4M8.5 7v4" />
+      <rect x="2.5" y="4" width="9" height="8" rx="1" />
+    </svg>
   )
 }
 
@@ -65,11 +153,12 @@ function SortableChapterItem({
   chapter,
   index,
   selectedId,
+  isOwner,
+  currentUserId,
   onSelect,
-  confirmDelete,
-  setConfirmDelete,
   onDelete,
-  deleting,
+  onSetStatus,
+  onToggleLock,
   getWordCount,
   editingId,
   editingTitle,
@@ -82,6 +171,9 @@ function SortableChapterItem({
 
   const inputRef = useRef(null)
   const isEditing = editingId === chapter.id
+  const isLocked = !!chapter.locked_by
+  const lockedByOther = isLocked && chapter.locked_by !== currentUserId
+  const status = chapter.status || 'draft'
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -95,19 +187,6 @@ function SortableChapterItem({
       inputRef.current.select()
     }
   }, [isEditing])
-
-  const handleDelete = async () => {
-    try {
-      await onDelete(chapter.id)
-      if (selectedId === chapter.id) {
-        onSelect(null)
-      }
-    } catch (err) {
-      console.error('Failed to delete chapter:', err)
-    } finally {
-      setConfirmDelete(null)
-    }
-  }
 
   const handleRenameKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -149,6 +228,7 @@ function SortableChapterItem({
           </svg>
         </button>
 
+        {/* Chapter number */}
         <span
           className={`font-semibold text-sm mt-0.5 min-w-[1.5rem] shrink-0 ${
             selectedId === chapter.id ? 'text-[#e3704a]' : 'text-gray-400'
@@ -170,52 +250,46 @@ function SortableChapterItem({
             />
           ) : (
             <>
-              <div className="font-medium text-sm text-gray-900 truncate mb-1">
+              <div className="font-medium text-sm text-gray-900 truncate mb-1 flex items-center gap-1.5">
+                {/* Status dot */}
+                <span
+                  className={`w-2 h-2 rounded-full shrink-0 ${STATUS_DOT[status]}`}
+                  title={STATUS_LABELS[status]}
+                />
                 {chapter.title || 'Untitled Chapter'}
+                {/* Lock icon */}
+                {isLocked && (
+                  <span
+                    title={lockedByOther ? 'Zablokowany przez innego użytkownika' : 'Zablokowany przez ciebie'}
+                    className={`ml-0.5 shrink-0 ${lockedByOther ? 'text-amber-500' : 'text-gray-400'}`}
+                  >
+                    <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <rect x="2.5" y="6" width="9" height="6.5" rx="1" />
+                      <path d="M4.5 6V4a2.5 2.5 0 015 0v2" />
+                    </svg>
+                  </span>
+                )}
               </div>
               <div className="text-xs text-gray-500">
-                {getWordCount(chapter)}k words
+                {getWordCount(chapter)}k słów
                 {selectedId === chapter.id && ' • Active'}
               </div>
             </>
           )}
         </div>
 
+        {/* Delete button (hover, non-edit mode) */}
         {!isEditing && (
-          confirmDelete === chapter.id ? (
-            <div className="flex gap-1 shrink-0">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleDelete()
-                }}
-                disabled={deleting}
-                className="text-xs text-red-600 hover:text-red-700 px-2 py-1 rounded bg-red-50"
-              >
-                {deleting ? '...' : 'Yes'}
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setConfirmDelete(null)
-                }}
-                disabled={deleting}
-                className="text-xs text-gray-600 hover:text-gray-700 px-2 py-1 rounded bg-gray-100"
-              >
-                No
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setConfirmDelete(chapter.id)
-              }}
-              className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 transition-opacity mt-1 shrink-0"
-            >
-              ✕
-            </button>
-          )
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete(chapter.id)
+            }}
+            title="Przenieś do kosza"
+            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 transition-opacity mt-1 shrink-0"
+          >
+            ✕
+          </button>
         )}
       </div>
     </div>
@@ -226,14 +300,15 @@ export default function ChapterList({
   chapters,
   loading,
   selectedId,
+  isOwner,
+  currentUserId,
   onSelect,
   onDelete,
   onReorder,
   onRename,
+  onSetStatus,
+  onToggleLock,
 }) {
-  const [confirmDelete, setConfirmDelete] = useState(null)
-  const [deleting, setDeleting] = useState(false)
-
   // Rename state
   const [editingId, setEditingId] = useState(null)
   const [editingTitle, setEditingTitle] = useState('')
@@ -330,6 +405,8 @@ export default function ChapterList({
     )
   }
 
+  const contextChapter = chapters.find((c) => c.id === contextMenu?.chapterId)
+
   return (
     <>
       <DndContext
@@ -348,11 +425,12 @@ export default function ChapterList({
                 chapter={chapter}
                 index={index}
                 selectedId={selectedId}
+                isOwner={isOwner}
+                currentUserId={currentUserId}
                 onSelect={onSelect}
-                confirmDelete={confirmDelete}
-                setConfirmDelete={setConfirmDelete}
                 onDelete={onDelete}
-                deleting={deleting}
+                onSetStatus={(status) => onSetStatus?.(chapter.id, status)}
+                onToggleLock={() => onToggleLock?.(chapter.id)}
                 getWordCount={getWordCount}
                 editingId={editingId}
                 editingTitle={editingTitle}
@@ -365,12 +443,16 @@ export default function ChapterList({
         </SortableContext>
       </DndContext>
 
-      {contextMenu && (
+      {contextMenu && contextChapter && (
         <ContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
+          chapter={contextChapter}
+          isOwner={isOwner}
           onRename={() => startRename(contextMenu.chapterId)}
-          onDelete={() => setConfirmDelete(contextMenu.chapterId)}
+          onMoveToTrash={() => onDelete?.(contextMenu.chapterId)}
+          onSetStatus={(status) => onSetStatus?.(contextMenu.chapterId, status)}
+          onToggleLock={() => onToggleLock?.(contextMenu.chapterId)}
           onClose={() => setContextMenu(null)}
         />
       )}

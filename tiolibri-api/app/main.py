@@ -2,14 +2,9 @@ from dotenv import load_dotenv
 load_dotenv()
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
-import os
-
-# Załaduj zmienne środowiskowe
-load_dotenv()
 
 # Import routerów
-from app.routers import projects, generate
+from app.routers import projects, generate, chapters, snapshots, export_import
 
 # Inicjalizacja FastAPI
 app = FastAPI(
@@ -35,7 +30,12 @@ app.add_middleware(
 )
 
 # Podłącz routery
+# export_import and snapshots before projects: their literal paths (/import,
+# /snapshots, /export) must not be shadowed by projects' /{project_id} param.
+app.include_router(export_import.router)
+app.include_router(snapshots.router)
 app.include_router(projects.router)
+app.include_router(chapters.router)
 app.include_router(generate.router)
 
 # Hello World endpoint

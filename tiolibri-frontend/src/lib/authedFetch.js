@@ -5,11 +5,12 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 /**
  * Authenticated fetch wrapper. Automatically attaches the Supabase JWT.
  *
- * Pass `options.skipContentType = true` for multipart requests so the browser
- * can set the correct Content-Type boundary itself.
+ * Options:
+ *   skipContentType  — omit Content-Type header (for multipart uploads)
+ *   responseType     — 'json' (default) | 'blob' | 'response' (raw Response)
  */
 export async function authedFetch(path, options = {}) {
-  const { skipContentType, headers: extraHeaders, ...fetchOptions } = options
+  const { skipContentType, responseType = 'json', headers: extraHeaders, ...fetchOptions } = options
 
   const {
     data: { session },
@@ -29,8 +30,10 @@ export async function authedFetch(path, options = {}) {
     throw new Error(err.detail || err.message || `HTTP ${res.status}`)
   }
 
-  // 204 No Content (and any other empty response) → return null
-  // instead of letting res.json() throw on empty body.
+  if (responseType === 'blob') return res.blob()
+  if (responseType === 'response') return res
+
+  // 204 No Content → null
   if (res.status === 204) return null
   const contentType = res.headers.get('content-type') || ''
   if (!contentType.includes('application/json')) return null
