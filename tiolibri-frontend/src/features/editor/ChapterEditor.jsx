@@ -7,7 +7,19 @@ import EditorToolbar from './EditorToolbar'
 import { getPreset } from '../../lib/presets'
 import './editor.css'
 
-export default function ChapterEditor({ chapter, content, onSave, onContentChange, projectId, focusMode, onFocusModeToggle, showPreview, onPreviewToggle, typographySettings, stylePreset }) {
+export default function ChapterEditor({
+  chapter,
+  content,
+  onSave,
+  onContentChange,
+  projectId,
+  focusMode,
+  onFocusModeToggle,
+  showPreview,
+  onPreviewToggle,
+  typographySettings,
+  stylePreset,
+}) {
   const [saving, setSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState(null)
 
@@ -116,7 +128,7 @@ export default function ChapterEditor({ chapter, content, onSave, onContentChang
       {/* Toolbar - Floating above paper */}
       <div className="sticky top-0 z-10 px-8 pt-6 pb-2 bg-gradient-to-b from-gray-100 to-transparent">
         <div className="max-w-4xl mx-auto bg-white border border-gray-200 rounded-lg shadow-sm">
-          <div className="px-4 py-2">
+          <div className="px-4 py-2 flex items-center justify-between gap-4">
             <EditorToolbar
               editor={editor}
               projectId={projectId}
@@ -125,6 +137,7 @@ export default function ChapterEditor({ chapter, content, onSave, onContentChang
               showPreview={showPreview}
               onPreviewToggle={onPreviewToggle}
             />
+            <SaveIndicator saving={saving} lastSaved={lastSaved} />
           </div>
         </div>
       </div>
@@ -153,8 +166,44 @@ export default function ChapterEditor({ chapter, content, onSave, onContentChang
   )
 }
 
+function SaveIndicator({ saving, lastSaved }) {
+  if (saving) {
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap">
+        <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          />
+        </svg>
+        <span>Zapisywanie…</span>
+      </div>
+    )
+  }
+  if (lastSaved) {
+    return (
+      <div
+        className="text-xs text-gray-400 whitespace-nowrap"
+        title={lastSaved.toLocaleString('pl-PL')}
+      >
+        Zapisano {formatTime(lastSaved)}
+      </div>
+    )
+  }
+  return null
+}
+
 function formatTime(date) {
-  return date.toLocaleTimeString('en-US', {
+  return date.toLocaleTimeString('pl-PL', {
     hour: '2-digit',
     minute: '2-digit',
   })
