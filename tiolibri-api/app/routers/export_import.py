@@ -1,0 +1,251 @@
+"""
+Export / import endpoints for .tiolibri ZIP backup files.
+
+POST /projects/{id}/export   — build ZIP, return as streaming download
+POST /projects/import        — accept multipart ZIP, create new project, return new project row
+"""
+
+import io
+import json
+import uuid
+import zipfile
+from datetime import datetime, timezone
+from urllib.parse import quote
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi.responses import StreamingResponse
+from app.services.supabase_client import supabase
+from app.services.activity import log_activity
+from app.dependencies import verify_supabase_jwt
+
+router = APIRouter(prefix="/projects", tags=["export-import"])
+
+_FORMAT_VERSION = 1
+_MAX_IMPORT_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB
+_MAX_UNCOMPRESSED_ENTRY_BYTES = 200 * 1024 * 1024  # zip-bomb guard per file
+_MAX_ZIP_ENTRIES = 100  # sanity cap on namelist size
+_MAX_CHAPTERS_PER_IMPORT = 2000
+
+
+# ---------------------------------------------------------------------------
+# POST /projects/{project_id}/export
+# ---------------------------------------------------------------------------
+
+@router.post("/{project_id}/export")
+async def export_project(
+    project_id: str,
+    user: dict = Depends(verify_supabase_jwt),
+):
+    _assert_project_access(project_id, user["id"])
+
+    project_resp = supabase.table("projects") \
+        .select("*") \
+        .eq("id", project_id) \
+        .execute()
+
+    if not project_resp.data:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    project = project_resp.data[0]
+
+    chapters_resp = supabase.table("chapters") \
+        .select("id, title, sort_order, processed_html, status, created_at") \
+        .eq("project_id", project_id) \
+        .is_("deleted_at", "null") \
+        .order("sort_order") \
+        .execute()
+
+    chapters = chapters_resp.data or []
+
+    # Build in-memory ZIP
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        # manifest.json
+        manifest = {
+            "version": _FORMAT_VERSION,
+            "exported_at": datetime.now(timezone.utc).isoformat(),
+            "project_id": project_id,
+            "exporter_email": user.get("email", ""),
+        }
+        zf.writestr("manifest.json", json.dumps(manifest, ensure_ascii=False, indent=2))
+
+        # project.json — curated subset (no internal IDs leaked unnecessarily)
+        project_export = {
+            "title": project.get("title"),
+            "author": project.get("author"),
+            "language": project.get("language"),
+            "style_preset": project.get("style_preset"),
+            "typography_settings": project.get("typography_settings"),
+            "cover_image_url": project.get("cover_image_url"),
+            "status": project.get("status"),
+        }
+        zf.writestr("project.json", json.dumps(project_export, ensure_ascii=False, indent=2))
+
+        # chapters.json
+        zf.writestr("chapters.json", json.dumps(chapters, ensure_ascii=False, indent=2))
+
+        # README.txt
+        readme = (
+            f"TIOLIBRI Project Backup\n"
+            f"=======================\n"
+            f"Project: {project.get('title', 'Untitled')}\n"
+            f"Exported: {manifest['exported_at']}\n"
+            f"Format version: {_FORMAT_VERSION}\n\n"
+            f"This file is a portable backup of your TIOLIBRI project.\n"
+            f"Import it at app.tiolibri.com to restore as a new project.\n"
+        )
+        zf.writestr("README.txt", readme)
+
+    buf.seek(0)
+    # Build a safe ASCII filename for the legacy `filename=` param; separately
+    # expose the full UTF-8 title via `filename*=` (RFC 5987) for modern clients.
+    raw_title = project.get("title") or "project"
+    ascii_title = "".join(c if c.isascii() and (c.isalnum() or c in " -_") else "_" for c in raw_title).strip("_") or "project"
+    ascii_filename = f"{ascii_title}.tiolibri"
+    utf8_filename = quote(f"{raw_title}.tiolibri", safe="")
+
+    log_activity(
+        project_id=project_id,
+        user_id=user["id"],
+        action_type="project.export",
+        details={"filename": ascii_filename},
+    )
+
+    return StreamingResponse(
+        buf,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="{ascii_filename}"; filename*=UTF-8\'\'{utf8_filename}'
+            ),
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# POST /projects/import
+# ---------------------------------------------------------------------------
+
+@router.post("/import")
+async def import_project(
+    file: UploadFile = File(...),
+    user: dict = Depends(verify_supabase_jwt),
+):
+    # Size guard
+    content = await file.read(_MAX_IMPORT_SIZE_BYTES + 1)
+    if len(content) > _MAX_IMPORT_SIZE_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File too large. Maximum size is {_MAX_IMPORT_SIZE_BYTES // (1024 * 1024)} MB.",
+        )
+
+    try:
+        buf = io.BytesIO(content)
+        with zipfile.ZipFile(buf, "r") as zf:
+            names = zf.namelist()
+            if len(names) > _MAX_ZIP_ENTRIES:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Invalid .tiolibri file: too many entries",
+                )
+            for required in ("manifest.json", "project.json", "chapters.json"):
+                if required not in names:
+                    raise HTTPException(
+                        status_code=422,
+                        detail=f"Invalid .tiolibri file: missing {required}",
+                    )
+                if zf.getinfo(required).file_size > _MAX_UNCOMPRESSED_ENTRY_BYTES:
+                    raise HTTPException(
+                        status_code=422,
+                        detail=f"Invalid .tiolibri file: {required} exceeds size limit",
+                    )
+
+            manifest = json.loads(zf.read("manifest.json"))
+            if manifest.get("version") != _FORMAT_VERSION:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Unsupported format version: {manifest.get('version')}. Expected {_FORMAT_VERSION}.",
+                )
+
+            project_data = json.loads(zf.read("project.json"))
+            chapters_data = json.loads(zf.read("chapters.json"))
+
+        if not isinstance(chapters_data, list):
+            raise HTTPException(status_code=422, detail="Invalid .tiolibri file: chapters.json must be a list")
+        if len(chapters_data) > _MAX_CHAPTERS_PER_IMPORT:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Too many chapters in import (max {_MAX_CHAPTERS_PER_IMPORT})",
+            )
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Could not parse .tiolibri file: {exc}")
+
+    # Create new project owned by importing user
+    new_project_id = str(uuid.uuid4())
+    original_title = project_data.get("title") or "Untitled"
+    new_project_row = {
+        "id": new_project_id,
+        "user_id": user["id"],
+        "title": f"{original_title} (import)",
+        "author": project_data.get("author"),
+        "language": project_data.get("language", "pl"),
+        "status": "draft",
+        "style_preset": project_data.get("style_preset", "classic"),
+        "typography_settings": project_data.get("typography_settings"),
+        "cover_image_url": project_data.get("cover_image_url"),
+    }
+
+    proj_resp = supabase.table("projects").insert(new_project_row).execute()
+    if not proj_resp.data:
+        raise HTTPException(status_code=500, detail="Failed to create imported project")
+
+    new_project = proj_resp.data[0]
+
+    # Insert chapters with new IDs
+    if chapters_data:
+        new_chapters = []
+        for ch in chapters_data:
+            new_chapters.append({
+                "project_id": new_project_id,
+                "title": ch.get("title"),
+                "sort_order": ch.get("sort_order", 0),
+                "processed_html": ch.get("processed_html"),
+                "status": ch.get("status", "draft"),
+            })
+        supabase.table("chapters").insert(new_chapters).execute()
+
+    log_activity(
+        project_id=new_project_id,
+        user_id=user["id"],
+        action_type="project.import_from_tiolibri",
+        details={
+            "original_title": original_title,
+            "chapter_count": len(chapters_data),
+            "format_version": manifest.get("version"),
+        },
+    )
+
+    return new_project
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _assert_project_access(project_id: str, user_id: str) -> None:
+    owner_resp = supabase.table("projects") \
+        .select("id") \
+        .eq("id", project_id) \
+        .eq("user_id", user_id) \
+        .execute()
+    if not owner_resp.data:
+        share_resp = supabase.table("project_shares") \
+            .select("id") \
+            .eq("project_id", project_id) \
+            .eq("shared_with_user_id", user_id) \
+            .execute()
+        if not share_resp.data:
+            raise HTTPException(status_code=403, detail="Access denied")
