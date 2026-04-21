@@ -143,8 +143,11 @@ export default function EditorPage() {
     }
   }, [project])
 
-  // Load chapter content when selected
+  // Load chapter content when selected. The `cancelled` flag prevents a stale
+  // async result (from a previously selected chapter) from overwriting the new one.
   useEffect(() => {
+    let cancelled = false
+
     async function loadContent() {
       if (!selectedChapterId) {
         setChapterContent('')
@@ -152,27 +155,32 @@ export default function EditorPage() {
         return
       }
 
-      // First check if there's processed_html
       const chapter = chapters.find(ch => ch.id === selectedChapterId)
       if (chapter?.processed_html) {
-        setChapterContent(chapter.processed_html)
-        setLiveContent(chapter.processed_html)
+        if (!cancelled) {
+          setChapterContent(chapter.processed_html)
+          setLiveContent(chapter.processed_html)
+        }
         return
       }
 
-      // Otherwise load from storage
       try {
         const content = await getChapterContent(selectedChapterId)
-        setChapterContent(content || '')
-        setLiveContent(content || '')
+        if (!cancelled) {
+          setChapterContent(content || '')
+          setLiveContent(content || '')
+        }
       } catch (err) {
-        console.error('Failed to load chapter:', err)
-        setChapterContent('')
-        setLiveContent('')
+        if (!cancelled) {
+          console.error('Failed to load chapter:', err)
+          setChapterContent('')
+          setLiveContent('')
+        }
       }
     }
 
     loadContent()
+    return () => { cancelled = true }
   }, [selectedChapterId, chapters, getChapterContent])
 
   const handleUpdateProject = async (field, value) => {

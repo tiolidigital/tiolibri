@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import Button from '../../components/ui/Button'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+import { authedFetch } from '../../lib/authedFetch'
 
 export default function GenerateBooks({ projectId, projectTitle = 'book', stylePreset = 'classic', typographySettings = {}, coverImageUrl = null }) {
   const [urls, setUrls] = useState(null)
@@ -44,9 +43,8 @@ export default function GenerateBooks({ projectId, projectTitle = 'book', styleP
     setError(null)
 
     try {
-      const res = await fetch(`${API_URL}/generate`, {
+      const data = await authedFetch('/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           project_id: projectId,
           formats: ['epub', 'pdf'],
@@ -64,13 +62,6 @@ export default function GenerateBooks({ projectId, projectTitle = 'book', styleP
           toc_depth: typographySettings.tocDepth || 2,
         }),
       })
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}))
-        throw new Error(errorData.detail || 'Generation failed')
-      }
-
-      const data = await res.json()
       setUrls(data.files)
     } catch (err) {
       setError(err.message || 'Błąd podczas generowania. Spróbuj ponownie.')

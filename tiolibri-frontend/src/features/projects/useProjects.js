@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+import { authedFetch } from '../../lib/authedFetch'
 
 export function useProjects() {
   const [projects, setProjects] = useState([])
@@ -79,24 +78,7 @@ export function useProjects() {
   }
 
   const duplicateProject = async (id) => {
-    // Pass auth token so backend knows the user identity
-    const { data: { session } } = await supabase.auth.getSession()
-    const headers = { 'Content-Type': 'application/json' }
-    if (session?.access_token) {
-      headers['Authorization'] = `Bearer ${session.access_token}`
-    }
-
-    const res = await fetch(`${API_URL}/projects/${id}/duplicate`, {
-      method: 'POST',
-      headers,
-    })
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.detail || `Duplication failed (${res.status})`)
-    }
-
-    const newProject = await res.json()
+    const newProject = await authedFetch(`/projects/${id}/duplicate`, { method: 'POST' })
     setProjects(prev => [newProject, ...prev])
     return newProject
   }

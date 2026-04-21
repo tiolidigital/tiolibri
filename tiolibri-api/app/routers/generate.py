@@ -3,12 +3,13 @@ Generate Router
 Endpoint do generowania EPUB/PDF z projektu.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.services.supabase_client import supabase
 from app.services.epub_generator import generate_epub
 from app.services.pdf_generator import generate_pdf
 from app.models.schemas import GenerateRequest, GenerateResponse
 from app.storage import upload_to_supabase
+from app.dependencies import verify_supabase_jwt
 import time
 import os
 import tempfile
@@ -18,7 +19,7 @@ router = APIRouter(prefix="/generate", tags=["generate"])
 
 
 @router.post("", response_model=GenerateResponse)
-async def generate_ebook(request: GenerateRequest):
+async def generate_ebook(request: GenerateRequest, _user: dict = Depends(verify_supabase_jwt)):
     """
     Główny endpoint - generuje EPUB/PDF z projektu.
 

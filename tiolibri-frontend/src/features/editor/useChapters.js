@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
+import { authedFetch } from '../../lib/authedFetch'
 import { convertGoogleDocsHtml, isGoogleDocsHtml } from '../../lib/htmlConverter'
 
 export function useChapters(projectId, projectLanguage = 'pl') {
@@ -117,23 +118,11 @@ export function useChapters(projectId, projectLanguage = 'pl') {
         sort_order: index + 1, // Start from 1
       }))
 
-      // Call backend API to update sort_order
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/projects/${projectId}/chapters/reorder`, {
+      const result = await authedFetch(`/projects/${projectId}/chapters/reorder`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ order }),
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to reorder chapters')
-      }
-
-      const result = await response.json()
-
-      // Update local state with server response to ensure consistency
       if (result.chapters) {
         setChapters(result.chapters)
       }

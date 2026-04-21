@@ -1,33 +1,13 @@
-const API_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import { authedFetch } from './authedFetch'
 
 async function request(endpoint, options = {}) {
-  const url = `${API_URL}${endpoint}`;
-
-  const config = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  };
-
-  const response = await fetch(url, config);
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `HTTP error! status: ${response.status}`);
-  }
-
-  return response.json();
+  return authedFetch(endpoint, options)
 }
 
 export const api = {
   get: (endpoint) => request(endpoint, { method: 'GET' }),
-  post: (endpoint, data) =>
-    request(endpoint, { method: 'POST', body: JSON.stringify(data) }),
-  put: (endpoint, data) =>
-    request(endpoint, { method: 'PUT', body: JSON.stringify(data) }),
+  post: (endpoint, data) => request(endpoint, { method: 'POST', body: JSON.stringify(data) }),
+  put: (endpoint, data) => request(endpoint, { method: 'PUT', body: JSON.stringify(data) }),
   delete: (endpoint) => request(endpoint, { method: 'DELETE' }),
 
   // Project endpoints
@@ -43,24 +23,22 @@ export const api = {
   chapters: {
     list: (projectId) => api.get(`/projects/${projectId}/chapters`),
     upload: (projectId, file) => {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      return fetch(`${API_URL}/projects/${projectId}/chapters`, {
+      const formData = new FormData()
+      formData.append('file', file)
+      return authedFetch(`/projects/${projectId}/chapters`, {
         method: 'POST',
+        skipContentType: true,
         body: formData,
-      }).then((res) => res.json());
+      })
     },
-    reorder: (projectId, order) =>
-      api.put(`/projects/${projectId}/chapters/reorder`, { order }),
+    reorder: (projectId, order) => api.post(`/projects/${projectId}/chapters/reorder`, { order }),
   },
 
   // Generate endpoints
   generate: {
-    epub: (projectId, options) =>
-      api.post(`/projects/${projectId}/generate/epub`, options),
+    epub: (projectId, options) => api.post(`/projects/${projectId}/generate/epub`, options),
     preview: (projectId) => api.get(`/projects/${projectId}/preview`),
   },
-};
+}
 
-export default api;
+export default api
