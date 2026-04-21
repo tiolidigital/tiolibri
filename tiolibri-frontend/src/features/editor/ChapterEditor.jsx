@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
@@ -45,15 +45,14 @@ export default function ChapterEditor({ chapter, content, onSave, onContentChang
     },
   })
 
-  // Update content when chapter changes
+  // Load content only when chapter changes — never on every `content` update,
+  // otherwise setContent() resets the cursor mid-typing.
   useEffect(() => {
-    if (editor && content !== undefined) {
-      const currentContent = editor.getHTML()
-      if (currentContent !== content) {
-        editor.commands.setContent(content || '')
-      }
+    if (editor && chapter?.id) {
+      editor.commands.setContent(content || '', false)
     }
-  }, [editor, content, chapter?.id])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, chapter?.id])
 
   // Live update for preview
   useEffect(() => {
@@ -71,13 +70,16 @@ export default function ChapterEditor({ chapter, content, onSave, onContentChang
     }
   }, [editor, onContentChange])
 
-  // Auto-save with debounce
+  // Auto-save with debounce — a single shared timer, reset on each keystroke.
+  const saveTimeoutRef = useRef(null)
   useEffect(() => {
     if (!editor || !onSave) return
 
     const handleUpdate = () => {
-      // Debounced save
-      const timeoutId = setTimeout(async () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+      saveTimeoutRef.current = setTimeout(async () => {
         const html = editor.getHTML()
         setSaving(true)
         try {
@@ -89,14 +91,15 @@ export default function ChapterEditor({ chapter, content, onSave, onContentChang
           setSaving(false)
         }
       }, 2000)
-
-      return () => clearTimeout(timeoutId)
     }
 
     editor.on('update', handleUpdate)
 
     return () => {
       editor.off('update', handleUpdate)
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
     }
   }, [editor, onSave])
 
