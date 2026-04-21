@@ -1,6 +1,6 @@
 TIOLIBRI - Current State
-Ostatnia aktualizacja: 2026-02-05 (Sesja 16)
-Status: 🎉 v2.0 MVP COMPLETE - Production + Chapter Reordering + Google Docs Converter
+Ostatnia aktualizacja: 2026-02-08 (Sesja 17)
+Status: 🎉 v2.1 COMPLETE - Polish Typography + Smart Downloads + Page Break Improvements
 
 🎉 MVP Status
 ✅ Co DZIAŁA (100%):
@@ -218,6 +218,54 @@ Console logs: 🔄 Converting... / ✅ Conversion complete
 
 Works with nested formatting (bold+italic)
 
+Polish Typography (v2.1.1) - polskie zasady typograficzne ✅
+
+Polish quotation marks: "text" → „text" (only for language='pl')
+
+Non-breaking spaces (twardę spacje) dla pojedynczych liter
+
+Chroni przed sierotkami: "witamina D" → "witamina&nbsp;D"
+
+Obsługiwane litery: a, i, o, u, w, z, A, I, O, U, W, Z, D, K, V, X
+
+Krótkie słowa: we, na, za, od, do, po, ze, ku, dr, prof, tj, np, tzn, itd, itp
+
+Language-aware: działa tylko dla projectLanguage='pl'
+
+Unicode &nbsp; (\u00A0) niezależny od formatowania CSS
+
+Smart Downloads (v2.1.2) - wymuszony download zamiast otwarcia w tabie ✅
+
+Blob-based download mechanism (fetch → blob → createObjectURL)
+
+Intelligent filenames z tytułu projektu (sanitized)
+
+"Moja Książka" → moja-ksiazka.pdf/epub
+
+Buttons zamiast <a> tags (onClick handler)
+
+Fallback: open in new tab jeśli download fails
+
+Clean URL management (revokeObjectURL after download)
+
+Logo Navigation (v2.1.3) - powrót do dashboardu z edytora ✅
+
+Logo wrapped in <Link to="/dashboard">
+
+Hover effect (opacity-80 transition)
+
+Consistent with UX patterns
+
+Page Break Improvements (v2.1.4) - lepsza kontrola łamania stron ✅
+
+Headings: page-break-inside: avoid (nie łam wewnątrz nagłówka)
+
+Headings: orphans/widows increased from 2 to 3
+
+Stronger protection against orphaned headings
+
+All CSS presets updated (classic, modern, minimal)
+
 SVG Dividers (v1.7) - dekoracyjne separatory tekstu ✅
 
 Custom TipTap extension (Divider.js)
@@ -352,6 +400,12 @@ Frontend
 
 ✅ Google Docs HTML converter (htmlConverter.js - v2.0.3)
 
+✅ Polish typography rules (convertToPolishQuotes, addPolishNonBreakingSpaces - v2.1.1)
+
+✅ Smart download system (blob-based, project-title filenames - v2.1.2)
+
+✅ Logo navigation to dashboard (v2.1.3)
+
 ✅ Deploy (Vercel - PRODUCTION)
 
 Backend
@@ -404,6 +458,8 @@ Backend
 ✅ Clean chapter headings - no filename artifacts (v1.6.1)
 
 ✅ Stable page breaks - chapter wrapper divs (v2.0.1)
+
+✅ Enhanced page breaks - headings protection (v2.1.4)
 
 ✅ Deploy (Railway + Docker - PRODUCTION)
 
@@ -597,7 +653,9 @@ Docker + Custom Domains (Sesje 14-15): ~8h
 
 Page Breaks + Reordering + Google Docs (Sesja 16): ~3h
 
-Total dev time: ~36.5h (from zero to v2.0 production) 🚀
+Polish Typography + Smart Downloads + UX Polish (Sesja 17): ~2h
+
+Total dev time: ~38.5h (from zero to v2.1 production) 🚀
 
 🎯 Definition of Done - MVP
 ✅ User może się zarejestrować i zalogować
@@ -624,7 +682,7 @@ Total dev time: ~36.5h (from zero to v2.0 production) 🚀
 
 ✅ Aplikacja jest deployed (Vercel + Railway)
 
-Progress: 11/11 = 🎉 100% v2.0 COMPLETE!
+Progress: 11/11 = 🎉 100% v2.1 COMPLETE!
 
 📊 Feature Completeness
 Category	Features Implemented	Completion
@@ -636,7 +694,8 @@ Export	EPUB, PDF, Stable page breaks	100%
 Import	Google Docs HTML converter (auto-format)	100%
 UX Polish	Light theme, Shortcuts, Drag & drop	100%
 Deployment	Vercel + Railway (Docker + PDF)	100%
-Overall: 🎉 100% Complete - v2.0 PRODUCTION READY!
+Polish Typography\tQuotes, Non-breaking spaces, Language-aware\t100%
+Overall: 🎉 100% Complete - v2.1 PRODUCTION READY!
 
 Ten plik jest źródłem prawdy o stanie projektu. Aktualizuj go po każdej sesji.
 
