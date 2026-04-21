@@ -13,6 +13,7 @@ export default function ChapterEditor({
   content,
   onSave,
   onContentChange,
+  onSaveStateChange,
   projectId,
   showInspector,
   onInspectorToggle,
@@ -27,6 +28,16 @@ export default function ChapterEditor({
   const lockedByOther = chapter?.locked_by && chapter.locked_by !== currentUserId
   const [saving, setSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState(null)
+  const [saveError, setSaveError] = useState(null)
+
+  // Mirror save state to the parent so the header badge shows real status.
+  const onSaveStateChangeRef = useRef(onSaveStateChange)
+  useEffect(() => {
+    onSaveStateChangeRef.current = onSaveStateChange
+  }, [onSaveStateChange])
+  useEffect(() => {
+    onSaveStateChangeRef.current?.({ saving, lastSaved, saveError })
+  }, [saving, lastSaved, saveError])
 
   // Apply typography settings with defaults
   const settings = typographySettings || {
@@ -99,13 +110,20 @@ export default function ChapterEditor({
     }
   }, [editor, lockedByOther])
 
-  // Live update for preview
+  // Live update for preview. Ref indirection keeps this effect from
+  // re-subscribing on every parent render.
+  const onContentChangeRef = useRef(onContentChange)
   useEffect(() => {
-    if (!editor || !onContentChange) return
+    onContentChangeRef.current = onContentChange
+  }, [onContentChange])
+
+  useEffect(() => {
+    if (!editor) return
 
     const handleUpdate = () => {
-      const html = editor.getHTML()
-      onContentChange(html)
+      const cb = onContentChangeRef.current
+      if (!cb) return
+      cb(editor.getHTML())
     }
 
     editor.on('update', handleUpdate)
@@ -113,28 +131,48 @@ export default function ChapterEditor({
     return () => {
       editor.off('update', handleUpdate)
     }
-  }, [editor, onContentChange])
+  }, [editor])
 
   // Auto-save with debounce — a single shared timer, reset on each keystroke.
+  // onSave is held in a ref so this effect does NOT re-subscribe when the
+  // parent passes a new callback reference on every render. Re-subscribing
+  // would fire the cleanup below and clearTimeout the pending save, so a
+  // parent that re-renders faster than the debounce (e.g. lifting liveContent
+  // for a live preview) would cancel autosave forever.
   const saveTimeoutRef = useRef(null)
+  const onSaveRef = useRef(onSave)
   useEffect(() => {
-    if (!editor || !onSave) return
+    onSaveRef.current = onSave
+  }, [onSave])
+
+  useEffect(() => {
+    if (!editor) return
+
+    const runSave = async () => {
+      const save = onSaveRef.current
+      if (!save) return
+      const html = editor.getHTML()
+      setSaving(true)
+      setSaveError(null)
+      try {
+        await save(html)
+        setLastSaved(new Date())
+        setSaveError(null)
+      } catch (err) {
+        console.error('[autosave] save failed:', err)
+        setSaveError(err?.message || 'Save failed')
+      } finally {
+        setSaving(false)
+      }
+    }
 
     const handleUpdate = () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
       }
-      saveTimeoutRef.current = setTimeout(async () => {
-        const html = editor.getHTML()
-        setSaving(true)
-        try {
-          await onSave(html)
-          setLastSaved(new Date())
-        } catch (err) {
-          console.error('Failed to save:', err)
-        } finally {
-          setSaving(false)
-        }
+      saveTimeoutRef.current = setTimeout(() => {
+        saveTimeoutRef.current = null
+        runSave()
       }, 2000)
     }
 
@@ -142,11 +180,16 @@ export default function ChapterEditor({
 
     return () => {
       editor.off('update', handleUpdate)
+      // Chapter is changing (or component is unmounting). Flush the pending
+      // save instead of cancelling it — otherwise switching chapters within
+      // the 2s debounce window silently discards unsaved edits.
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
+        saveTimeoutRef.current = null
+        runSave()
       }
     }
-  }, [editor, onSave])
+  }, [editor, chapter?.id])
 
   if (!editor) {
     return (

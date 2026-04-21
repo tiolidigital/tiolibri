@@ -48,6 +48,9 @@ export default function EditorPage() {
 
   const [showInspector, setShowInspector] = useState(false)
 
+  // Real autosave state surfaced by ChapterEditor for the header badge.
+  const [saveState, setSaveState] = useState({ saving: false, lastSaved: null, saveError: null })
+
   // Find & Replace panel state
   const [findReplaceOpen, setFindReplaceOpen] = useState(false)
   const [findReplaceShowReplace, setFindReplaceShowReplace] = useState(false)
@@ -193,14 +196,6 @@ export default function EditorPage() {
     const loadForId = selectedChapterId
 
     async function loadContent() {
-      const chapter = chapters.find((ch) => ch.id === loadForId)
-      if (chapter?.processed_html) {
-        if (controller.signal.aborted) return
-        setChapterContent(chapter.processed_html)
-        setLiveContent(chapter.processed_html)
-        return
-      }
-
       try {
         const content = await getChapterContent(loadForId, { signal: controller.signal })
         if (controller.signal.aborted) return
@@ -237,7 +232,6 @@ export default function EditorPage() {
   const handleSaveChapter = useCallback(
     async (html) => {
       if (!selectedChapterId) return
-
       await updateChapter(selectedChapterId, { processed_html: html })
     },
     [selectedChapterId, updateChapter]
@@ -344,10 +338,11 @@ export default function EditorPage() {
             <span className="font-medium">PROJECT:</span>{' '}
             <span className="uppercase tracking-wide">{project.title}</span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-3 py-1 rounded-full">
-            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-            Saved
-          </div>
+          <HeaderSaveBadge
+            saving={saveState.saving}
+            lastSaved={saveState.lastSaved}
+            saveError={saveState.saveError}
+          />
         </div>
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold">
@@ -381,6 +376,7 @@ export default function EditorPage() {
                     // sees empty content, not the previous chapter's HTML.
                     setChapterContent('')
                     setLiveContent('')
+                    setSaveState({ saving: false, lastSaved: null, saveError: null })
                     setSelectedChapterId(id)
                   }}
                   onDelete={handleSoftDelete}
@@ -447,6 +443,7 @@ export default function EditorPage() {
                   content={chapterContent}
                   onSave={handleSaveChapter}
                   onContentChange={setLiveContent}
+                  onSaveStateChange={setSaveState}
                   projectId={projectId}
                   showInspector={showInspector}
                   onInspectorToggle={handleInspectorToggle}
@@ -692,4 +689,38 @@ export default function EditorPage() {
       )}
     </div>
   )
+}
+
+function HeaderSaveBadge({ saving, lastSaved, saveError }) {
+  if (saving) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+        <span className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
+        Zapisywanie…
+      </div>
+    )
+  }
+  if (saveError) {
+    return (
+      <div
+        className="flex items-center gap-2 text-xs text-red-700 bg-red-50 px-3 py-1 rounded-full"
+        title={saveError}
+      >
+        <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+        Nie udało się zapisać
+      </div>
+    )
+  }
+  if (lastSaved) {
+    return (
+      <div
+        className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-3 py-1 rounded-full"
+        title={lastSaved.toLocaleString('pl-PL')}
+      >
+        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+        Zapisano
+      </div>
+    )
+  }
+  return null
 }

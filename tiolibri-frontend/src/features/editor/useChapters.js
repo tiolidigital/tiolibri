@@ -74,7 +74,7 @@ export function useChapters(projectId, projectLanguage = 'pl') {
     return data
   }
 
-  const updateChapter = async (id, updates) => {
+  const updateChapter = useCallback(async (id, updates) => {
     const hasBackendField = Object.keys(updates).some(k => BACKEND_FIELDS.includes(k))
 
     if (hasBackendField) {
@@ -99,7 +99,7 @@ export function useChapters(projectId, projectLanguage = 'pl') {
 
     setChapters(prev => prev.map(ch => ch.id === id ? data : ch))
     return data
-  }
+  }, [])
 
   // Soft-delete: sends chapter to Trash, does not remove from DB.
   const softDeleteChapter = async (id) => {
@@ -176,11 +176,28 @@ export function useChapters(projectId, projectLanguage = 'pl') {
 
   const getChapterContent = useCallback(async (chapterId, { signal } = {}) => {
     const chapter = chapters.find((ch) => ch.id === chapterId)
-    if (!chapter?.source_file_path) return null
+    if (!chapter) return null
+
+    // Always fetch fresh from DB to get the latest saved processed_html.
+    const { data: fresh, error: fetchError } = await supabase
+      .from('chapters')
+      .select('processed_html, source_file_path')
+      .eq('id', chapterId)
+      .single()
+
+    if (fetchError) throw fetchError
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
+
+    // If the chapter has been edited and saved, use the processed HTML from DB.
+    if (fresh?.processed_html) return fresh.processed_html
+
+    // Fall back to the original uploaded file (first-time load, never edited).
+    const filePath = fresh?.source_file_path || chapter.source_file_path
+    if (!filePath) return null
 
     const { data, error } = await supabase.storage
       .from('uploads')
-      .download(chapter.source_file_path)
+      .download(filePath)
 
     if (error) throw error
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')

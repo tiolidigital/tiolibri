@@ -49,7 +49,7 @@ async def update_chapter(
     updates["updated_at"] = datetime.now(timezone.utc).isoformat()
 
     updated_resp = supabase.table("chapters").update(updates) \
-        .eq("id", chapter_id).select().execute()
+        .eq("id", chapter_id).execute()
 
     if not updated_resp.data:
         raise HTTPException(status_code=500, detail="Failed to update chapter")
@@ -98,7 +98,7 @@ async def soft_delete_chapter(
         "deleted_at": now,
         "deleted_by": user["id"],
         "updated_at": now,
-    }).eq("id", chapter_id).select().execute()
+    }).eq("id", chapter_id).execute()
 
     if not resp.data:
         raise HTTPException(status_code=500, detail="Failed to delete chapter")
@@ -143,7 +143,7 @@ async def restore_chapter(
         "deleted_at": None,
         "deleted_by": None,
         "updated_at": datetime.now(timezone.utc).isoformat(),
-    }).eq("id", chapter_id).select().execute()
+    }).eq("id", chapter_id).execute()
 
     if not resp.data:
         raise HTTPException(status_code=500, detail="Failed to restore chapter")
@@ -234,7 +234,7 @@ async def update_chapter_status(
     resp = supabase.table("chapters").update({
         "status": body.status,
         "updated_at": datetime.now(timezone.utc).isoformat(),
-    }).eq("id", chapter_id).select().execute()
+    }).eq("id", chapter_id).execute()
 
     if not resp.data:
         raise HTTPException(status_code=500, detail="Failed to update status")
@@ -285,7 +285,7 @@ async def toggle_lock(
         }
 
     updates["updated_at"] = datetime.now(timezone.utc).isoformat()
-    resp = supabase.table("chapters").update(updates).eq("id", chapter_id).select().execute()
+    resp = supabase.table("chapters").update(updates).eq("id", chapter_id).execute()
 
     if not resp.data:
         raise HTTPException(status_code=500, detail="Failed to update lock")
@@ -398,7 +398,7 @@ async def restore_version(
     restored_resp = supabase.table("chapters").update({
         "processed_html": target_version["content"],
         "updated_at": datetime.now(timezone.utc).isoformat(),
-    }).eq("id", chapter_id).select().execute()
+    }).eq("id", chapter_id).execute()
 
     if not restored_resp.data:
         raise HTTPException(status_code=500, detail="Failed to restore version")
