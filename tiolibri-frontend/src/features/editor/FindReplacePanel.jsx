@@ -60,9 +60,10 @@ function applyPolishQuotes(html) {
 
   const walk = (node) => {
     if (node.nodeType === Node.TEXT_NODE) {
-      const replaced = node.textContent.replace(/["“„]([^"”]*?)["”]/g, (_, inner) => {
-        pairCount++
-        return `„${inner}”`
+      const replaced = node.textContent.replace(/(["“„])([^"”]*?)(["”])/g, (match, _open, inner) => {
+        const normalized = `„${inner}”`
+        if (match !== normalized) pairCount++
+        return normalized
       })
       if (replaced !== node.textContent) node.textContent = replaced
     } else {
@@ -269,7 +270,7 @@ export default function FindReplacePanel({
         return
       }
       setConfirmState({
-        message: `Zamienić ${count} par cudzysłowów na polskie „…"?`,
+        message: `Zamienić ${count} par cudzysłowów na polskie „…”?`,
         onConfirm: () => {
           editor.commands.setContent(newHtml, false)
           setConfirmState(null)
