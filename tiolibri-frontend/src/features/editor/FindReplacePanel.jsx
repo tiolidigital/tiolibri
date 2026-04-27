@@ -60,7 +60,7 @@ function applyPolishQuotes(html) {
 
   const walk = (node) => {
     if (node.nodeType === Node.TEXT_NODE) {
-      const replaced = node.textContent.replace(/"([^"]*?)"/g, (_, inner) => {
+      const replaced = node.textContent.replace(/["“„]([^"”]*?)["”]/g, (_, inner) => {
         pairCount++
         return `„${inner}”`
       })
@@ -289,7 +289,7 @@ export default function FindReplacePanel({
         return
       }
       setConfirmState({
-        message: `Zamienić ${total} par cudzysłowów na polskie „…"? (${chapters.length} rozdziałów)`,
+        message: `Zamienić ${total} par cudzysłowów na polskie „…”? (${chapters.length} rozdziałów)`,
         onConfirm: async () => {
           setConfirmState(null)
           setBookProgress({ current: 0, total: replacements.length })

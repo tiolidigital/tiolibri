@@ -8,9 +8,9 @@
 /**
  * Convert American quotation marks to Polish typographic quotes.
  *
- * Replaces "text" with „text" (Polish quotation style).
+ * Replaces "text" with „text” (Polish quotation style).
  * - Opening quote: „ (U+201E - double low-9 quotation mark)
- * - Closing quote: " (U+201D - right double quotation mark)
+ * - Closing quote: ” (U+201D - right double quotation mark)
  *
  * @param {string} text - Text with American quotes
  * @returns {string} Text with Polish quotes
@@ -18,12 +18,12 @@
 function convertToPolishQuotes(text) {
   let result = text
 
-  // Convert double quotes: "text" → „text"
-  // Opening quote: " preceded by space, start of string, tag boundary, or dash
-  result = result.replace(/(\s|^|>|—|–)"/g, '$1„')
+  // Convert double quotes: "text" or “text” → „text”
+  // Opening quote: quote preceded by space, start of string, tag boundary, or dash
+  result = result.replace(/(\s|^|>|—|–)["“]/g, '$1„')
 
-  // Closing quote: " followed by space, end of string, tag boundary, or punctuation
-  result = result.replace(/"(\s|$|<|,|\.|!|\?|;|:|—|–)/g, '"$1')
+  // Closing quote: quote followed by space, end of string, tag boundary, or punctuation
+  result = result.replace(/["”](\s|$|<|,|\.|!|\?|;|:|—|–)/g, '”$1')
 
   return result
 }
