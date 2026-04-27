@@ -718,7 +718,7 @@ function HeaderSaveBadge({ saving, lastSaved, saveError }) {
         title={lastSaved.toLocaleString('pl-PL')}
       >
         <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-        Zapisano
+        Zapisano {lastSaved.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
       </div>
     )
   }

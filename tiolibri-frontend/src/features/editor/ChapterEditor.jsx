@@ -232,7 +232,6 @@ export default function ChapterEditor({
               showPreview={showPreview}
               onPreviewToggle={onPreviewToggle}
             />
-            <SaveIndicator saving={saving} lastSaved={lastSaved} />
           </div>
         </div>
       </div>
