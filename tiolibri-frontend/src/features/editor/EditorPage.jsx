@@ -21,10 +21,11 @@ import TrashSection from './TrashSection'
 import CollaborationSection from './CollaborationSection'
 import ProjectSnapshots from './ProjectSnapshots'
 import FindReplacePanel from './FindReplacePanel'
+import UserMenu from '../../components/ui/UserMenu'
 
 export default function EditorPage() {
   const { projectId } = useParams()
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -293,12 +294,6 @@ export default function EditorPage() {
     setShowInspector((prev) => !prev)
   }, [])
 
-  // Get user initials
-  const getUserInitials = () => {
-    if (!user?.email) return 'U'
-    return user.email.charAt(0).toUpperCase()
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -345,9 +340,7 @@ export default function EditorPage() {
           />
         </div>
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold">
-            {getUserInitials()}
-          </div>
+          <UserMenu user={user} onSignOut={signOut} />
         </div>
       </header>
 

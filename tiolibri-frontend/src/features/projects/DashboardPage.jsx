@@ -5,6 +5,7 @@ import Button from '../../components/ui/Button'
 import Card from '../../components/ui/Card'
 import ProjectCard from './ProjectCard'
 import NewProjectModal from './NewProjectModal'
+import UserMenu from '../../components/ui/UserMenu'
 
 export default function DashboardPage() {
   const { user, signOut } = useAuth()
@@ -47,12 +48,7 @@ export default function DashboardPage() {
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-xl font-bold text-gray-900">TIOLIBRI</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">{user?.email}</span>
-            <Button variant="ghost" onClick={handleSignOut}>
-              Sign out
-            </Button>
-          </div>
+          <UserMenu user={user} onSignOut={handleSignOut} />
         </div>
       </header>
 
