@@ -89,9 +89,8 @@ async def soft_delete_chapter(
 ):
     chapter = _assert_chapter_access(chapter_id, user["id"])
 
-    locked_by = chapter.get("locked_by")
-    if locked_by and locked_by != user["id"]:
-        raise HTTPException(status_code=403, detail="Chapter is locked by another user")
+    if chapter.get("locked_by"):
+        raise HTTPException(status_code=403, detail="Chapter is locked and cannot be deleted")
 
     now = datetime.now(timezone.utc).isoformat()
     resp = supabase.table("chapters").update({

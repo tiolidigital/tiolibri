@@ -110,8 +110,12 @@ function ContextMenu({ x, y, chapter, isOwner, onRename, onMoveToTrash, onSetSta
       {/* Move to Trash */}
       <div className="border-t border-gray-100 my-1" />
       <button
-        onClick={() => { onMoveToTrash(); onClose() }}
-        className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+        onClick={() => { if (!isLocked) { onMoveToTrash(); onClose() } }}
+        disabled={isLocked}
+        title={isLocked ? 'Odblokuj rozdział, żeby go usunąć' : undefined}
+        className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 ${
+          isLocked ? 'text-gray-300 cursor-not-allowed' : 'text-red-600 hover:bg-red-50'
+        }`}
       >
         <TrashIcon />
         Przenieś do kosza
@@ -283,10 +287,13 @@ function SortableChapterItem({
           <button
             onClick={(e) => {
               e.stopPropagation()
-              onDelete(chapter.id)
+              if (!isLocked) onDelete(chapter.id)
             }}
-            title="Przenieś do kosza"
-            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 transition-opacity mt-1 shrink-0"
+            title={isLocked ? 'Odblokuj rozdział, żeby go usunąć' : 'Przenieś do kosza'}
+            disabled={isLocked}
+            className={`opacity-0 group-hover:opacity-100 transition-opacity mt-1 shrink-0 ${
+              isLocked ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-red-600'
+            }`}
           >
             ✕
           </button>

@@ -24,8 +24,9 @@ export default function ChapterEditor({
   currentUserId,
   editorRef,
 }) {
-  // Chapter is read-only when locked by a different user
-  const lockedByOther = chapter?.locked_by && chapter.locked_by !== currentUserId
+  // Chapter is read-only when locked (by anyone, including the current user)
+  const isLocked = !!chapter?.locked_by
+  const lockedByOther = isLocked && chapter.locked_by !== currentUserId
   const [saving, setSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState(null)
   const [saveError, setSaveError] = useState(null)
@@ -67,7 +68,7 @@ export default function ChapterEditor({
       SearchAndReplace,
     ],
     content: content || '',
-    editable: !lockedByOther,
+    editable: !isLocked,
     editorProps: {
       attributes: {
         class: 'tiptap-editor prose max-w-none focus:outline-none min-h-[500px]',
@@ -106,9 +107,9 @@ export default function ChapterEditor({
   // Sync editable flag when lock state changes after mount.
   useEffect(() => {
     if (editor) {
-      editor.setEditable(!lockedByOther)
+      editor.setEditable(!isLocked)
     }
-  }, [editor, lockedByOther])
+  }, [editor, isLocked])
 
   // Live update for preview. Ref indirection keeps this effect from
   // re-subscribing on every parent render.
@@ -202,7 +203,7 @@ export default function ChapterEditor({
   return (
     <div className="flex flex-col h-full bg-gray-100">
       {/* Lock banner */}
-      {lockedByOther && (
+      {isLocked && (
         <div className="flex items-center gap-2 px-6 py-2 bg-amber-50 border-b border-amber-200 text-amber-800 text-sm">
           <svg
             width="14"
@@ -216,7 +217,9 @@ export default function ChapterEditor({
             <rect x="2.5" y="6" width="9" height="6.5" rx="1" />
             <path d="M4.5 6V4a2.5 2.5 0 015 0v2" />
           </svg>
-          Rozdział jest zablokowany przez innego użytkownika — tryb tylko do odczytu.
+          {lockedByOther
+            ? 'Rozdział jest zablokowany przez innego użytkownika — tryb tylko do odczytu.'
+            : 'Rozdział jest zablokowany przez ciebie — odblokuj go, żeby edytować.'}
         </div>
       )}
 
