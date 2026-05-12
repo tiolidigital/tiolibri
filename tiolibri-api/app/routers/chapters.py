@@ -284,9 +284,11 @@ async def toggle_lock(
         }
 
     updates["updated_at"] = datetime.now(timezone.utc).isoformat()
-    resp = supabase.table("chapters").update(updates).eq("id", chapter_id).execute()
+    supabase.table("chapters").update(updates).eq("id", chapter_id).execute()
 
-    if not resp.data:
+    # Fetch fresh row so the response always contains the full chapter (including locked_by).
+    fresh = supabase.table("chapters").select("*").eq("id", chapter_id).execute()
+    if not fresh.data:
         raise HTTPException(status_code=500, detail="Failed to update lock")
 
     action = "chapter.unlock" if locked_by else "chapter.lock"
@@ -298,7 +300,7 @@ async def toggle_lock(
         details={"title": chapter.get("title")},
     )
 
-    return resp.data[0]
+    return fresh.data[0]
 
 
 # ---------------------------------------------------------------------------
