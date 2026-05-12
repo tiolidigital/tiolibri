@@ -4,6 +4,21 @@ import { Decoration, DecorationSet } from '@tiptap/pm/view'
 
 export const searchAndReplaceKey = new PluginKey('searchAndReplace')
 
+// replaceFormat: 'none' | 'italic' | 'bold' | 'boldItalic' | 'plain'
+// Returns { marks, plain } where plain=true means strip all marks after insert
+function buildReplaceSpec(schema, replaceFormat) {
+  if (!replaceFormat || replaceFormat === 'none') return { marks: null, plain: false }
+  if (replaceFormat === 'plain') return { marks: null, plain: true }
+  const marks = []
+  if (replaceFormat === 'italic' || replaceFormat === 'boldItalic') {
+    if (schema.marks.em) marks.push(schema.marks.em.create())
+  }
+  if (replaceFormat === 'bold' || replaceFormat === 'boldItalic') {
+    if (schema.marks.strong) marks.push(schema.marks.strong.create())
+  }
+  return { marks: marks.length > 0 ? marks : null, plain: false }
+}
+
 function buildSearchRegex(term, matchCase, wholeWord, useRegex) {
   if (!term) return null
   try {
@@ -87,6 +102,7 @@ export const SearchAndReplace = Extension.create({
     return {
       searchTerm: '',
       replaceTerm: '',
+      replaceFormat: 'none',
       matchCase: false,
       wholeWord: false,
       useRegex: false,
@@ -162,6 +178,12 @@ export const SearchAndReplace = Extension.create({
           scrollToMatch(editor)
           return true
         },
+      setReplaceFormat:
+        (val) =>
+        ({ editor }) => {
+          editor.storage.searchAndReplace.replaceFormat = val
+          return true
+        },
       replaceOne:
         () =>
         ({ editor, tr, dispatch }) => {
@@ -170,9 +192,23 @@ export const SearchAndReplace = Extension.create({
           const match = s.matches[s.currentIndex]
           if (!match) return false
           if (dispatch) {
-            tr.insertText(s.replaceTerm, match.from, match.to)
+            const schema = editor.schema
+            const { marks, plain } = buildReplaceSpec(schema, s.replaceFormat)
+            const replacement = s.replaceTerm || ''
+            if (plain) {
+              // Insert as plain text; strip marks from the inserted range afterward.
+              tr.insertText(replacement, match.from, match.to)
+              const to = match.from + replacement.length
+              Object.values(schema.marks).forEach((markType) => {
+                tr.removeMark(match.from, to, markType)
+              })
+            } else if (marks) {
+              const node = schema.text(replacement, marks)
+              tr.replaceWith(match.from, match.to, node)
+            } else {
+              tr.insertText(replacement, match.from, match.to)
+            }
             dispatch(tr)
-            // Recompute after the transaction has been applied.
             setTimeout(() => {
               recomputeMatches(editor)
               scrollToMatch(editor)
@@ -186,9 +222,25 @@ export const SearchAndReplace = Extension.create({
           const s = editor.storage.searchAndReplace
           if (s.matches.length === 0) return false
           if (dispatch) {
+            const schema = editor.schema
+            const { marks, plain } = buildReplaceSpec(schema, s.replaceFormat)
+            const replacement = s.replaceTerm || ''
             // Replace from end to start so earlier positions don't shift.
             const sorted = [...s.matches].sort((a, b) => b.from - a.from)
-            sorted.forEach((match) => tr.insertText(s.replaceTerm, match.from, match.to))
+            sorted.forEach((match) => {
+              if (plain) {
+                tr.insertText(replacement, match.from, match.to)
+                const to = match.from + replacement.length
+                Object.values(schema.marks).forEach((markType) => {
+                  tr.removeMark(match.from, to, markType)
+                })
+              } else if (marks) {
+                const node = schema.text(replacement, marks)
+                tr.replaceWith(match.from, match.to, node)
+              } else {
+                tr.insertText(replacement, match.from, match.to)
+              }
+            })
             dispatch(tr)
             setTimeout(() => recomputeMatches(editor), 0)
           }

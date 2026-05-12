@@ -94,18 +94,69 @@ function countMatchesInHtml(html, find, useRegex, matchCase, wholeWord) {
   return (text.match(re) || []).length
 }
 
+const FORMAT_TAG = { italic: 'em', bold: 'strong', boldItalic: 'strong', plain: null, none: null }
+const FORMAT_WRAP = { boldItalic: 'em' }
+
 // Apply regex replace to an HTML string (replaces in text nodes only via DOM)
-function applyReplaceInHtml(html, find, replace, useRegex, matchCase, wholeWord) {
+function applyReplaceInHtml(html, find, replace, useRegex, matchCase, wholeWord, replaceFormat = 'none') {
   const parser = new DOMParser()
   const doc = parser.parseFromString(html, 'text/html')
   const re = buildHtmlSearchRegex(find, useRegex, matchCase, wholeWord)
   if (!re) return html
 
+  const wrapWithFormat = (text) => {
+    if (!replaceFormat || replaceFormat === 'none') return doc.createTextNode(text)
+    if (replaceFormat === 'plain') return doc.createTextNode(text)
+    const outer = FORMAT_TAG[replaceFormat] ? doc.createElement(FORMAT_TAG[replaceFormat]) : null
+    const inner = FORMAT_WRAP[replaceFormat] ? doc.createElement(FORMAT_WRAP[replaceFormat]) : null
+    const textNode = doc.createTextNode(text)
+    if (outer && inner) {
+      inner.appendChild(textNode)
+      outer.appendChild(inner)
+      return outer
+    }
+    if (outer) {
+      outer.appendChild(textNode)
+      return outer
+    }
+    return textNode
+  }
+
   const walk = (node) => {
     if (node.nodeType === Node.TEXT_NODE) {
-      node.textContent = node.textContent.replace(re, replace)
+      if (replaceFormat === 'none') {
+        node.textContent = node.textContent.replace(re, replace)
+      } else {
+        // Need to split text node and wrap matches
+        const text = node.textContent
+        const parts = []
+        let lastIndex = 0
+        re.lastIndex = 0
+        let m
+        while ((m = re.exec(text)) !== null) {
+          if (m.index > lastIndex) parts.push(doc.createTextNode(text.slice(lastIndex, m.index)))
+          const replacement = replace.replace(/\$(\d+)/g, (_, g) => m[parseInt(g)] ?? '')
+          parts.push(wrapWithFormat(replacement))
+          lastIndex = m.index + m[0].length
+          if (m[0].length === 0) re.lastIndex++
+        }
+        if (lastIndex < text.length) parts.push(doc.createTextNode(text.slice(lastIndex)))
+        if (parts.length > 0 && parts.length !== 1) {
+          const frag = doc.createDocumentFragment()
+          parts.forEach((p) => frag.appendChild(p))
+          node.parentNode?.replaceChild(frag, node)
+          return
+        }
+        if (parts.length === 1 && parts[0].nodeType !== Node.TEXT_NODE) {
+          node.parentNode?.replaceChild(parts[0], node)
+          return
+        }
+        node.textContent = text.replace(re, replace)
+      }
     } else {
-      node.childNodes.forEach(walk)
+      // Walk children in reverse so we can safely replace nodes
+      const children = [...node.childNodes]
+      children.forEach(walk)
     }
   }
   walk(doc.body)
@@ -127,6 +178,7 @@ export default function FindReplacePanel({
   const [matchCase, setMatchCase] = useState(false)
   const [wholeWord, setWholeWord] = useState(false)
   const [useRegex, setUseRegex] = useState(false)
+  const [replaceFormat, setReplaceFormat] = useState('none')
   const [bookProgress, setBookProgress] = useState(null) // { current, total } or null
   const [confirmState, setConfirmState] = useState(null) // { message, onConfirm }
   const searchInputRef = useRef(null)
@@ -170,6 +222,11 @@ export default function FindReplacePanel({
     if (!editor) return
     editor.commands.setReplaceTerm(replaceTerm)
   }, [editor, replaceTerm])
+
+  useEffect(() => {
+    if (!editor) return
+    editor.commands.setReplaceFormat(replaceFormat)
+  }, [editor, replaceFormat])
 
   const storage = editor?.storage?.searchAndReplace
   const matchCount = storage?.matches?.length ?? 0
@@ -226,7 +283,8 @@ export default function FindReplacePanel({
         replaceTerm,
         useRegex,
         matchCase,
-        wholeWord
+        wholeWord,
+        replaceFormat
       )
       if (newHtml !== ch.processed_html) {
         await onSaveChapter(ch.id, newHtml)
@@ -242,6 +300,7 @@ export default function FindReplacePanel({
     chapters,
     searchTerm,
     replaceTerm,
+    replaceFormat,
     useRegex,
     matchCase,
     wholeWord,
@@ -533,30 +592,55 @@ export default function FindReplacePanel({
 
         {/* Row 2: Replace (conditional) */}
         {showReplace && (
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={replaceTerm}
-              onChange={(e) => setReplaceTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Escape' && onClose()}
-              placeholder="Zamień na…"
-              className="flex-1 text-sm px-2.5 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#e3704a] focus:border-[#e3704a]"
-              aria-label="Zamień na"
-            />
-            <button
-              onClick={handleReplaceOne}
-              disabled={matchCount === 0}
-              className="px-2.5 py-1.5 text-xs text-gray-700 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-40 whitespace-nowrap"
-            >
-              Zamień
-            </button>
-            <button
-              onClick={handleReplaceAll}
-              disabled={matchCount === 0 && scope === 'chapter'}
-              className="px-2.5 py-1.5 text-xs bg-[#e3704a] text-white rounded hover:bg-[#c9613d] disabled:opacity-40 whitespace-nowrap"
-            >
-              Zamień wszystko
-            </button>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={replaceTerm}
+                onChange={(e) => setReplaceTerm(e.target.value)}
+                onKeyDown={(e) => e.key === 'Escape' && onClose()}
+                placeholder="Zamień na…"
+                className="flex-1 text-sm px-2.5 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#e3704a] focus:border-[#e3704a]"
+                aria-label="Zamień na"
+              />
+              <button
+                onClick={handleReplaceOne}
+                disabled={matchCount === 0}
+                className="px-2.5 py-1.5 text-xs text-gray-700 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-40 whitespace-nowrap"
+              >
+                Zamień
+              </button>
+              <button
+                onClick={handleReplaceAll}
+                disabled={matchCount === 0 && scope === 'chapter'}
+                className="px-2.5 py-1.5 text-xs bg-[#e3704a] text-white rounded hover:bg-[#c9613d] disabled:opacity-40 whitespace-nowrap"
+              >
+                Zamień wszystko
+              </button>
+            </div>
+            {/* Format of replaced text */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-xs text-gray-400 shrink-0">Format zamiany:</span>
+              {[
+                { value: 'none', label: 'Bez zmian' },
+                { value: 'italic', label: 'Kursywa' },
+                { value: 'bold', label: 'Pogrubienie' },
+                { value: 'boldItalic', label: 'Pogrubiona kursywa' },
+                { value: 'plain', label: 'Zwykły tekst' },
+              ].map((opt) => (
+                <label key={opt.value} className="flex items-center gap-1 text-xs text-gray-600 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="replaceFormat"
+                    value={opt.value}
+                    checked={replaceFormat === opt.value}
+                    onChange={() => setReplaceFormat(opt.value)}
+                    className="accent-[#e3704a] w-3 h-3"
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
           </div>
         )}
 
