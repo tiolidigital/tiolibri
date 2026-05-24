@@ -11,8 +11,8 @@ const QUICK_FIXES = [
   },
   {
     label: '- → –',
-    title: 'Zamień dywiz między liczbami na półpauze (–)',
-    find: '(\\d+)\\s*-\\s*(\\d+)',
+    title: 'Zamień dywiz między liczbami na półpauze (–) — pomija nazwy jak KB-3-1, MCF-7',
+    find: '(?<![A-Za-z\\-])(\\d+)\\s*-\\s*(\\d+)(?![A-Za-z])',
     replace: '$1–$2',
     useRegex: true,
     confirm: (n) => `Zamienić ${n} zakresów liczbowych z dywizem na półpauze (–)?`,
