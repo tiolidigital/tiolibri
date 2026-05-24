@@ -232,13 +232,27 @@ function SortableChapterItem({
           </svg>
         </button>
 
-        {/* Chapter number */}
-        <span
-          className={`font-semibold text-sm mt-0.5 min-w-[1.5rem] shrink-0 ${
-            selectedId === chapter.id ? 'text-[#e3704a]' : 'text-gray-400'
-          }`}
-        >
-          {String(index + 1).padStart(2, '0')}
+        {/* Chapter number + lock indicator */}
+        <div className="flex flex-col items-center shrink-0 mt-0.5 min-w-[1.5rem]">
+          <span
+            className={`font-semibold text-sm ${
+              selectedId === chapter.id ? 'text-[#e3704a]' : 'text-gray-400'
+            }`}
+          >
+            {String(index + 1).padStart(2, '0')}
+          </span>
+          {isLocked && (
+            <span
+              title={lockedByOther ? 'Zablokowany przez innego użytkownika' : 'Zablokowany przez ciebie'}
+              className={`mt-0.5 ${lockedByOther ? 'text-amber-500' : 'text-gray-400'}`}
+            >
+              <svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <rect x="2.5" y="6" width="9" height="6.5" rx="1" />
+                <path d="M4.5 6V4a2.5 2.5 0 015 0v2" />
+              </svg>
+            </span>
+          )}
+        </div>
         </span>
 
         <div className="flex-1 min-w-0">
@@ -261,18 +275,6 @@ function SortableChapterItem({
                   title={STATUS_LABELS[status]}
                 />
                 {chapter.title || 'Untitled Chapter'}
-                {/* Lock icon */}
-                {isLocked && (
-                  <span
-                    title={lockedByOther ? 'Zablokowany przez innego użytkownika' : 'Zablokowany przez ciebie'}
-                    className={`ml-0.5 shrink-0 ${lockedByOther ? 'text-amber-500' : 'text-gray-400'}`}
-                  >
-                    <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8">
-                      <rect x="2.5" y="6" width="9" height="6.5" rx="1" />
-                      <path d="M4.5 6V4a2.5 2.5 0 015 0v2" />
-                    </svg>
-                  </span>
-                )}
               </div>
               <div className="text-xs text-gray-500">
                 {getWordCount(chapter)}k słów
