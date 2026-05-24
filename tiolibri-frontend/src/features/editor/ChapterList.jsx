@@ -253,7 +253,6 @@ function SortableChapterItem({
             </span>
           )}
         </div>
-        </span>
 
         <div className="flex-1 min-w-0">
           {isEditing ? (
