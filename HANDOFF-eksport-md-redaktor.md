@@ -1,7 +1,8 @@
 **Temat:** eksport rozdziałów z TIOLIBRI do Markdown dla odsztuczniacza z FABRYKA-redaktor — bo Piotrek chce przepuścić gotowe książki przez Redaktora zamiast poprawiać AI-izmy ręcznie w edytorze
 
-Wątek był ROBOTĄ: `/spec-handoff md-export`. Prompt R3 **wygenerowany i doręczony Codexowi**
-(Codex CLI, w tle). Spec w **v0.4.1**, STATE na `R3-codex-pending`.
+Wątek był ROBOTĄ: `/spec-handoff md-export`. Prompt R3 doręczony Codexowi przez CLI,
+**review R3 odebrane — werdykt NITS, czyli GREEN.** Spec w **v0.4.1** (+ self-fix footera
+przez Codexa), STATE na `R3-codex-pending`.
 
 > ⚠️ **Kanon ustaleń: `docs/ODPOWIEDZ-most-tiolibri-redaktor.md`** — nadrzędny wobec speca
 > i wobec `docs/BRIEF-most-tiolibri-redaktor.md`. Nie projektuj z głowy, sprawdź tam.
@@ -14,23 +15,23 @@ Wątek był ROBOTĄ: `/spec-handoff md-export`. Prompt R3 **wygenerowany i dorę
 
 ## NASTĘPNY KROK
 
-**Sprawdź, czy Codex skończył, potem odpal `/spec-apply-review md-export`.**
+**Odpal `/spec-apply-review md-export`.**
 
-Review leci w tle od ~17:5x. Odbiór:
-```
-test -s docs/specs/md-export/_review/R3-codex.md
-rg -c '^\**Werdykt:\**\s*(APPROVE|NITS-EXT|NITS|REQUEST_CHANGES)\**\s*$' docs/specs/md-export/_review/R3-codex.md
-```
-- Plik jest, werdykt parsuje się (1 dopasowanie) → `/spec-apply-review md-export`.
-- Pliku brak, ale `_review/.R3-codex-last-msg.md` niesie pełne review z linią werdyktu →
-  zapisz je jako `R3-codex.md` i dopiero wtedy apply-review.
-- Codex milczy > kilka minut → **sprawdź limit konta ZANIM uznasz, że pracuje**:
-  `used_percent` w najnowszym `~/.codex/sessions/**/rollout-*.jsonl`. Pierwsze konto miało
-  reset **2026-08-08 08:47**. Log przebiegu: `_review/.R3-codex-run.log`.
+Review odebrane i zwalidowane: `_review/R3-codex.md` istnieje, linia werdyktu parsuje się
+(1 dopasowanie), **`**Werdykt:** NITS`**. To jest GREEN — spec **nie idzie** do ESCALATED,
+runda R3 zamyka stronę SPEC. Po apply-review następny ruch to strona IMPL (szew 1b→1).
 
-**To jest OSTATNIA runda.** `convergence-ext: R2` zapisane w STATE — kolejnego przedłużenia
-nie ma. R3 musi wyjść GREEN (APPROVE / NITS / NITS-EXT), inaczej spec idzie do **ESCALATED**
-i wchodzi brief dla Fable.
+**Co Codex zrobił sam (do zwalidowania przez apply-review, nie na słowo):** self-fix footera
+speca — **11 zmienionych linii** wobec `_review/.base-R3.md`, wyłącznie sekcja „Dla Piotrka"
+i komenda w bloku „Kopiuj dalej" (`/spec-handoff` → `/spec-apply-review`). Zero zmian
+kontraktu, mieści się w kopercie NITS (≤20 LOC). **Spec jest niezacommitowany** — apply-review
+domknie go commitem.
+
+**Codex odtworzył oba moje pomiary niezależnie**, na własnych fixture'ach, i doszedł do tych
+samych liczb: `segmentuj()` + algorytm `blocks` `PASS=11 FAIL=0 EXIT=0`, TestClient sygnatury
+`PASS=6 FAIL=0 EXIT=0`, bramki strukturalne FACT i C/M/E `EXIT=0`. Czyli **nie zakwestionował
+ani cofnięcia formy poprawki #2 z R2, ani korekty kolejności gałęzi** — to były dwie rzeczy,
+o które prompt pytał wprost.
 
 ## Co zrobione w tym wątku
 
