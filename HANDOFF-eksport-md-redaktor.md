@@ -27,14 +27,14 @@ Wątek był ROBOTĄ: handoff speca `md-export` do review Codexa. Review wrócił
      `get_text()` na węźle separatora zwraca tekst z wnętrza SVG, który poleciałby do prozy
      jako chunk do redakcji;
    - sizing 490 → ~495 LOC (koszt powyższych).
-4. **R1 review Codexa** (`_review/R1-codex.md`, commit `d1b4f1e`) — **REQUEST_CHANGES**,
+4. **R1 review Codexa** (`_review/R1-codex.md`, commit `da332c0`) — **REQUEST_CHANGES**,
    11/11 kategorii, 8 blokerów + 5 major.
 
 ## Stan: pliki, commity
 
 - `3e8a909` — kanon mostu (BRIEF, ODPOWIEDZ, HANDOFF) + spec md-export
 - `739409b` — preflight R1 + dwie korekty konwertera + spec-config.json
-- `d1b4f1e` — R1 review Codexa
+- `da332c0` — R1 review Codexa
 - `docs/specs/md-export/STATE.md` → `spec: R1-codex-pending` / `impl: not-started`.
   **Bump należy do `/spec-apply-review`, nie ruszać ręcznie.**
 - `_review/.base-R1.md` — baseline pomiaru LOC dla self-fixu. Nie kasować.
