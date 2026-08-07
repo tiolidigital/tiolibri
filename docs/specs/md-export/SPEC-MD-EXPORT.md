@@ -1,6 +1,6 @@
 # MD-EXPORT — eksport rozdziałów TIOLIBRI do Markdowna dla Redaktora
 
-**Wersja:** 0.3.1
+**Wersja:** 0.4
 **Mode:** light
 **Risk:** STANDARD   ← MAX_ROUNDS = 2. Uzasadnienie w §Bramki.
 **Data ostatniej zmiany:** 2026-08-07
@@ -13,15 +13,23 @@
 |---|---|---|
 | `tiolibri-api/app/services/md_exporter.py` | NOWY | ~300 |
 | `tiolibri-api/app/routers/export_import.py` | zmiana | ~85 |
-| `tiolibri-api/test_md_exporter.py` | NOWY | ~150 |
+| `tiolibri-api/test_md_exporter.py` | NOWY | ~165 |
 | `tiolibri-frontend/src/features/editor/EditorPage.jsx` | zmiana | ~30 |
 | `tiolibri-frontend/src/features/editor/activityLabels.js` | zmiana | ~2 |
-| **razem** | **5 plików** | **~567 LOC** |
+| **razem** | **5 plików** | **~582 LOC** |
 
 Limit osi: **500 LOC / 90 min / 5 plików**. Pliki PASS (5/5), czas PASS (~90 min), LOC FAIL
-o ~67. Testy są **wliczone do tej samej sumy** (master §4.5, LESSONS#17) — nie ma zapisu
+o ~82. Testy są **wliczone do tej samej sumy** (master §4.5, LESSONS#17) — nie ma zapisu
 „~300 LOC + testy osobno". Domen: jedna (eksport treści). Migracji: zero. Decyzji
 architektonicznych: jedna (serializator własny zamiast biblioteki, §Co odrzucone).
+
+**Dyspensa urosła w R2: ~67 → ~82 LOC.** Powód jest jeden i nazwany: bloker #5 R2 wymusił
+fixture'y `blocks` (8 przypadków parametryzowanych, ~+15 LOC w pliku testowym), bez których
+bramka G1 z zerową tolerancją nie ma czego bronić. **Nowa liczba przypadków testowych jest
+zapisana wprost** (LESSONS#17 pkt 5 — wzrost macierzy nie może być cichym rozciągnięciem):
+8 fixture'ów `blocks` ponad zakres z R1. Osie plików i czasu bez zmian. Sprawdzenie czterech
+wejść body z kroku 2 planu jest **ręczne właśnie po to**, żeby nie otwierać szóstego pliku
+i nie zamienić osi plików w FAIL — uzasadnienie przy samym kroku.
 
 Czego tu **nie ma**, bo zostało odcięte decyzją właściciela w R1: modal z wyborem rozdziałów
 oraz filtr „tylko zmienione od ostatniego eksportu". Oba idą do osobnego light speca, jeśli
@@ -84,7 +92,8 @@ na K-NAG jako backstop całości** (to była nieprawda w v0.2):
 
 - **K-NAG chroni wyłącznie strukturę nagłówków i wyłącznie przy `apply`** (ODPOWIEDZ A4:
   `k-nag.ts` reużywa `segmentuj()`, wyjątek leci w kroku 7 `cli/apply.ts`). Nie ochroni przed
-  utratą treści, złym unwrapem, przypadkowym chunkiem `kod`/`lista`/`tabela`, zepsutym obrazem
+  utratą treści, złym unwrapem, przypadkowym chunkiem `kod`/`tabela` ani rozjazdem licznika
+  `lista`, zepsutym obrazem
   ani rozjazdem liczby chunków. Przy eksporcie do `chunks.json` K-NAG w ogóle nie działa.
 - **Realny backstop jest u nas:** bramka z kroku 4 (§Plan wdrożenia) porównuje liczniki bloków
   wyemitowane przez konwerter z typami chunków w `chunks.json` — z zerową tolerancją, przed
@@ -221,6 +230,54 @@ def chapter_to_markdown(html: str, book_key: str, position: int) -> ChapterResul
   konwersja jest poza zakresem tego speca (patrz §Ograniczenia), więc w praktyce oba są zerami
   i każde niezerowe wystąpienie w `chunks.json` jest błędem.
 
+#### Jak liczymy `blocks` — algorytm, nie intuicja
+
+G1 porównuje te liczby **z zerową tolerancją**, więc reguła liczenia musi być zapisana, a nie
+odtwarzana przez implementatora ze zdrowego rozsądku (bloker #5 w R2). Wybór jest jeden i jest
+wymuszony przez zerową tolerancję:
+
+> **`blocks` liczy się z FINALNEGO Markdowna (`ChapterResult.md`), przez odtworzenie granic
+> bloków konsumenta — nie z drzewa HTML i nie z licznika wywołań emitera.**
+
+Powód: G1 porównuje `blocks` z rozkładem typów w `chunks.json`, który powstaje z `segmentuj()`
+puszczonego na naszym `.md`. Licząc po stronie HTML-a porównywalibyśmy dwa różne języki i zerowa
+tolerancja byłaby nieosiągalna z definicji. Liczenie po finalnym tekście czyni G1 tożsamością,
+którą implementacja musi utrzymać — i to jest dokładnie ta bramka, o którą chodzi.
+
+Algorytm (te same sześć regexów co §Kontrakt escapingu, `segmentuj.ts:12-17`, plus
+`INDENT_MIN = 2` z `:20` i lookahead z `:118-125`):
+
+1. Podziel `md` na linie. Linie puste (`RE_BLANK`) **między** blokami pomiń — konwerter wstawia
+   dokładnie jedną (krok 7 §Kolejność operacji), ale algorytm nie zakłada dokładnie jednej.
+2. Pierwsza niepusta linia decyduje o typie bloku:
+   - `RE_ATX` → **`naglowek`**; blok to **dokładnie ta jedna linia**.
+   - `RE_MARKER` → **`lista`**; blok ciągnie się przez kolejne linie będące markerem, wcięte
+     o ≥2 spacje, albo puste, po których lookahead wraca do markera/wcięcia ≥2.
+   - `RE_BQ` → **`blockquote`**; blok ciągnie się przez kolejne linie pasujące do `RE_BQ`.
+   - `RE_FENCE_OPEN` → `kod`; konwerter tego nie emituje (§Ograniczenia).
+   - linia zawiera `|` **i** następna pasuje do `RE_TABLE_SEP` → `tabela`; konwerter tego nie
+     emituje.
+   - w przeciwnym razie → **`akapit`**; blok ciągnie się do pustej linii albo do linii
+     otwierającej blok (`segmentuj.ts:142`).
+3. Każdy **domknięty** blok podbija swój licznik o 1.
+
+Konsekwencje, wypisane wprost, bo to na nich pękał v0.3.1:
+
+| Konstrukcja | Ile bloków | Który typ |
+|---|---|---|
+| `<ul>` z 5× `<li>` | **1** | `lista` (nie 5 — liczymy listę, nie pozycje) |
+| lista zagnieżdżona (2 poziomy, wcięcie 2 spacje) | **1** | `lista` (wcięcie ≥2 to kontynuacja, nie nowy blok) |
+| `<li>` z drugim akapitem wciętym o 2 spacje | **1** | `lista` (pusta linia przeskoczona lookaheadem) |
+| dwie listy rozdzielone akapitem | **2** + 1 | `lista`, `akapit`, `lista` |
+| `<blockquote>` na 4 linie | **1** | `blockquote` (ciąg `>` to jeden chunk) |
+| `![alt](_media/…)` w osobnym bloku | **1** | **`akapit`** — nie ma typu `obraz` w chunkerze |
+| `---` (divider albo `<hr>`) | **1** | **`akapit`** — `RE_TABLE_SEP` pasuje, ale reguła tabeli wymaga `\|` w linii poprzedniej, a tam jest pusta |
+| `<figcaption>` po obrazie | **1** | `akapit` |
+| `<h2>` | **1** | `naglowek` |
+
+`dividers` i `images` w manifeście są **listami metadanych**, nie licznikami bloków — divider
+i obraz są w `blocks` policzone jako `akapit` i tak mają być, bo tak je widzi konsument.
+
 #### Tabela reguł
 
 | Wejście | Wyjście | Uwaga |
@@ -355,10 +412,23 @@ zaniżony i bramka budżetu świeci zielono, nie mierząc niczego**.
 **0,0120% z blobem** i **0,0412% bez niego** (`ZWIAD-EWA-R8.md` §0, run-id `2026-08-07-38300c`
 vs `2026-08-07-630047`; mianownik to `lenNFC(inputMd)` całego pliku, `cli/run.ts:205`). v0.3
 pisała „~3×" za ODPOWIEDZIĄ — liczba jest teraz twarda i pochodzi z przebiegu na **rozdziale
-Ewy**. Zwiad dokłada drugi tryb awarii, którego ODPOWIEDZ nie znała: chunker nadaje blobowi
-`nietykalny=false`, więc przy pełnym przebiegu ten chunk poleciałby do modelu jako ~21k tokenów
-base64 — **Redaktor nie ma dziś żadnego strażnika na ładunek binarny**. Nasz eksport jest
-jedynym miejscem, w którym to się zatrzymuje.
+Ewy**.
+
+Zwiad dokłada drugi tryb awarii, którego ODPOWIEDZ nie znała. **Rozdziel tu dwie rzeczy —
+R2 Codexa słusznie wytknął, że v0.3.1 podawała je jednym tchem:**
+
+- **Zmierzone (przebieg `--tylko-w1`, run-id `2026-08-07-38300c`):** chunker nadaje blobowi
+  `nietykalny=false`, czyli klasyfikuje ~21k tokenów base64 jako chunk **edytowalny**.
+- **Inferencja z kontraktu, nie pomiar:** że przy pełnym przebiegu ten chunk **poleciałby do
+  modelu**. Zwiad był `--tylko-w1` — **zero wywołań W2**, więc zachowania W2 na blobie nikt nie
+  wykonał. Inferencja opiera się na kontrakcie Redaktora: W2 dostaje chunki edytowalne, a
+  `nietykalny=false` jest jedynym filtrem na tej ścieżce (ODPOWIEDZ §C). **Redaktor nie ma dziś
+  żadnego strażnika na ładunek binarny** — to również wniosek z kontraktu, nie z uruchomienia.
+
+Wniosek dla nas jest ten sam w obu wariantach i **dlatego inferencji nie domykamy przebiegiem
+W2**: eksport wycina blob bezwarunkowo, więc odpowiedź „czy W2 faktycznie by go zjadł" nie
+zmienia ani jednej linii kodu tej fazy. Nasz eksport jest jedynym miejscem, w którym to się
+zatrzymuje.
 
 **Uwaga na pochodzenie tej próbki:** zmierzony plik wyszedł **prosto z Google Docs, nie
 z TIOLIBRI**, więc mówi o materiale źródłowym, nie o naszym eksporcie. Wymóg przyjmujemy mimo
@@ -492,6 +562,27 @@ class ExportMdRequest(BaseModel):
     chapter_ids: Optional[list[UUID]] = None
 ```
 
+**Sygnatura route'u — to jest część kontraktu, nie szczegół implementacji** (bloker #4 w R2:
+sam model nie egzekwuje pierwszego wiersza tabeli niżej). W FastAPI parametr `request:
+ExportMdRequest` czyni **brak body błędem 422**, czyli dokładnie odwrotnie niż wymaga tabela.
+Obowiązuje:
+
+```python
+@router.post("/{project_id}/export-md")            # router ma prefiks /projects — jak :34
+async def export_md(
+    project_id: str,                               # `str`, nie `UUID` — jak export_project :36
+    request: Optional[ExportMdRequest] = None,     # Optional[...] — NIE `ExportMdRequest | None`
+    user: dict = Depends(verify_supabase_jwt),     # ta sama zależność co :37
+):
+    chapter_ids = request.chapter_ids if request is not None else None
+    # od tego miejsca `chapter_ids is None` == „lista niepodana" == wszystkie rozdziały
+```
+
+Dwie drogi do `None` (brak body i `chapter_ids: null`) **zbiegają się w jedną gałąź** — to jest
+zamierzone i to jest cały powód, dla którego `[]` musi być rozróżnialne. `Optional[...]` zamiast
+PEP 604 jest wymuszone przez venv Pythona 3.9.6 (patrz nagłówek §Sygnatura i własność limitów) —
+`ExportMdRequest | None` wywala `TypeError` **przy imporcie modułu**.
+
 | Wejście | Zachowanie |
 |---|---|
 | brak body **albo** `chapter_ids: null` | wszystkie nieusunięte rozdziały projektu |
@@ -584,9 +675,37 @@ focus trapu, nie przywraca focusu do przycisku wywołującego i nie ma `role="di
      malformed base64 → pominięty z `reason`, >10 MB → wyjątek;
    - `alt` z `]` i z newline, URL ze spacją → `<…>`;
    - **test regresyjny wprost: w wyjściowym `.md` nie może wystąpić ciąg `data:`.**
-2. **`POST /projects/{project_id}/export-md`** w `export_import.py` — model body, budowa ZIP-a
+   - **`blocks` — fixture per konsekwencja z §Jak liczymy `blocks`** (bez tego G1 z zerową
+     tolerancją nie ma czego bronić): lista wieloelementowa → `lista: 1`; lista zagnieżdżona
+     → `lista: 1`; `<li>` z drugim akapitem wciętym → `lista: 1`; ciąg blockquote na 4 linie
+     → `blockquote: 1`; obraz → `akapit`; `---` → `akapit`; `<figcaption>` → `akapit`;
+     dwie listy rozdzielone akapitem → `lista: 2, akapit: 1`. Każdy fixture asertuje **cały
+     słownik `blocks`**, nie pojedynczy klucz — inaczej przeciek do sąsiedniego typu przechodzi.
+2. **`POST /projects/{project_id}/export-md`** w `export_import.py` — **sygnatura route'u
+   z §Endpoint** (`request: Optional[ExportMdRequest] = None`), model body, budowa ZIP-a
    i manifestu, asercja unikalności nazw, limit 80 MB, 409 dla braku `processed_html`,
    `log_activity` + etykieta w `activityLabels.js`.
+
+   **Sprawdzenie odbiorcze czterech rozłącznych wejść body — obowiązkowe, ręczne, po jednym
+   na wiersz tabeli §Endpoint** (na żywym backendzie `:8000`, przed krokiem 3):
+
+   | # | Żądanie | Oczekiwane |
+   |---|---|---|
+   | a | `curl -X POST …/export-md -H "Authorization: Bearer …"` — **bez `-d`** | **200**, ZIP ze wszystkimi rozdziałami |
+   | b | `-d '{"chapter_ids": null}'` | **200**, jw. |
+   | c | `-d '{"chapter_ids": []}'` | **400** „wybrano zero rozdziałów" |
+   | d | `-d '{"chapter_ids": ["<uuid>"]}'` | **200**, ZIP z jednym rozdziałem |
+
+   **Wariant (a) jest jedynym, który wykrywa brak `Optional` w sygnaturze** — przy `request:
+   ExportMdRequest` wraca 422 zamiast 200, a warianty b–d przechodzą mimo to. Bez niego pierwszy
+   wiersz kontraktu nie ma egzekucji.
+
+   Dlaczego ręcznie, a nie `TestClient`: automatyzacja tego wymaga zamockowania klienta Supabase,
+   czyli **szóstego pliku testowego i nowego harnessu** — oś plików (5/5) zamieniłaby się w FAIL,
+   a dyspensa właściciela z R1 obejmowała LOC, nie liczbę plików. Reszta endpointu też nie ma
+   dziś testów automatycznych w tym specu; ten sprawdzian jest na tym samym poziomie rygoru,
+   nie niżej. Wynik czterech wywołań (kod HTTP per wiersz) idzie do `_impl/` razem z wynikiem
+   bramki z kroku 4.
 3. **Przycisk w `EditorPage.jsx`** ze stanami z §Frontend.
 4. **Bramka kontraktowa na żywym materiale** — patrz niżej.
 
@@ -597,15 +716,22 @@ Materiał: **jeden rozdział Ewy o osteoporozie, najgęstszy od liczb i dawek, n
 
 v0.2 kazała „przepuścić do etapu `chunks.json` i sprawdzić, że K-NAG nie protestuje". **To jest
 niewykonalne w tym punkcie:** K-NAG działa przy `apply`, po edycjach, w kroku 7 `cli/apply.ts`
-(ODPOWIEDZ A4) — na etapie `chunks.json` w ogóle się nie uruchamia. Zastąpione trzema
+(ODPOWIEDZ A4) — na etapie `chunks.json` w ogóle się nie uruchamia. Zastąpione **czterema**
 asercjami, wszystkimi uruchamialnymi na `chunks.json`:
 
 | # | Asercja | Tolerancja |
 |---|---|---|
-| G1 | Rozkład typów chunków **równy** `manifest.chapters[i].blocks` — dla każdego typu | **zero** |
-| G2 | Zero chunków typu `kod`, `lista` i `tabela` ponad te zadeklarowane w `blocks` (a te są zerami, bo `<pre>`/`<table>` są poza zakresem) | **zero** |
+| G1 | Rozkład typów chunków **równy** `manifest.chapters[i].blocks` — dla każdego typu, w tym `lista` | **zero** |
+| G2 | `blocks.kod == 0` **i** `blocks.tabela == 0` **i** w `chunks.json` zero chunków tych dwóch typów — bo `<pre>`/`<code>` blokowe i `<table>` są poza zakresem konwertera | **zero** |
 | G3 | Ciąg nagłówków w `chunks.json` (liczba → poziom → tekst, po normalizacji białych znaków i wielkości liter) **równy** ciągowi `<h1..h6>` w źródłowym HTML | **zero** |
 | G4 | Żaden chunk nie jest frontmatterem ani metadanymi (dowód, że manifest obok plików zadziałał — A3) | **zero** |
+
+**Dlaczego `lista` wypadła z G2** (sprzeczność wytknięta w R2): v0.3.1 pisała „zero chunków typu
+`kod`, `lista` i `tabela` ponad zadeklarowane w `blocks`", a zaraz potem „te są zerami" — dla
+realnego rozdziału z listą (przykład manifestu ma `"lista": 2`) dwaj implementatorzy bramki
+dostawali przeciwne werdykty na tym samym pliku. Rozdzielone: **`kod` i `tabela` są twardymi
+zerami** (G2), **`lista` jest zwykłym typem porównywanym z licznikiem** (G1). G2 nie ma już
+żadnego przecięcia z G1.
 
 G3 to **lokalna symulacja K-NAG**: K-NAG porównuje pozycyjnie liczbę nagłówków → poziom →
 tekst, klucz jest case-insensitive i normalizuje białe znaki (ODPOWIEDZ A4), i używa tego samego
@@ -616,18 +742,27 @@ Porzucone kryterium „liczba chunków odpowiada z grubsza liczbie akapitów": n
 tolerancji, ani mianownika (nagłówki, listy, obrazy i separatory też tworzą bloki). Zastąpione
 przez G1, które ma mianownik (`blocks` z konwertera) i zerową tolerancję.
 
-**Skala pracy operatora — literalnie obserwacja, nie prognoza:** rozdział **Bożeny** dał
-27 chunków, czyli blisko trzydzieści wywołań W2 przy `provider: plik` — tyleż cykli
-stop-wypełnij-wznów (ODPOWIEDZ ERRATA E1; wcześniejsze „14 wywołań" było liczbą edycji, nie
-wywołań).
+**Skala pracy operatora.** Rozdział **Bożeny** dał **27 chunków** — to jest obserwacja
+z przebiegu. „Blisko trzydzieści wywołań W2 przy `provider: plik`, tyleż cykli
+stop-wypełnij-wznów" to już **wyprowadzenie z liczby chunków edytowalnych**, nie odczyt
+z licznika wywołań: skrzynka tego rozdziału niesie 59 kluczy z **trzech** przebiegów
+(ODPOWIEDZ ERRATA E1; wcześniejsze „14 wywołań" było liczbą edycji, nie wywołań).
 
 **Dla Ewy liczba jest teraz znana i jest o rząd wielkości większa: 215 chunków** na rozdziale 8
 (`ZWIAD-EWA-R8.md` §1, `chunking: akapit`, materiał z Google Docs po podmianie bloba). To nie
 jest przedział oszacowany — to policzony przebieg, choć na pliku źródłowym, nie na naszym
-eksporcie. Konsekwencja dla operatora jest twarda: rozdział Ewy przy `provider: plik` to
-**setki cykli stop-wypełnij-wznów**, nie trzydzieści. Nie zmienia to zakresu tego speca (my
-tylko pakujemy pliki), ale przesądza, że **pętla po całej książce po stronie Redaktora nie ma
-sensu przed `PHASE-18`** — i to jest ta sama konkluzja, co w §Co odrzucone.
+eksporcie.
+
+**Co jest zmierzone, a co wywnioskowane** (R2 Codexa wytknął, że v0.3.1 zlepiała to w jedno
+zdanie): zmierzona jest **liczba chunków = 215**. Przełożenie tej liczby na **setki cykli
+stop-wypełnij-wznów** to **inferencja z kontraktu transportu plikowego**, nie pomiar — zwiad
+był `--tylko-w1`, więc ani liczby wywołań W2, ani czasu operatora nikt nie mierzył. Inferencja
+opiera się na tym, że przy `provider: plik` przebieg staje na KAŻDYM wywołaniu W2 (ODPOWIEDZ P1),
+a chunk edytowalny to jedno wywołanie — czyli rząd wielkości „setki", nie „trzydzieści".
+
+Nie zmienia to zakresu tego speca (my tylko pakujemy pliki) ani żadnej bramki — liczba służy
+wyłącznie ostrzeżeniu operatora. Przesądza natomiast, że **pętla po całej książce po stronie
+Redaktora nie ma sensu przed `PHASE-18`** — i to jest ta sama konkluzja, co w §Co odrzucone.
 
 ## Ograniczenia (świadomie poza zakresem)
 
