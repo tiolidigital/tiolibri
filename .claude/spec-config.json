@@ -1,0 +1,15 @@
+{
+  "specs_root": "docs/specs",
+  "memory_path": "MEMORY.md",
+  "codex_inbox_hint": "Monorepo: tiolibri-frontend/ (React 19 + Vite + Tailwind 4), tiolibri-api/ (FastAPI, venv w tiolibri-api/venv). Kanon spec-workflow NIE jest w tym repo — leży w /Users/piotrmichalski/Documents/SaaS_Factory2026/FABRYKA/docs/specs/spec-workflow/ (czytaj stamtąd po ścieżce bezwzględnej). CME-MANIFEST.md nie istnieje w żadnym z repo — audyt C/M/E nie jest blokerem (reguła 1), ale bramka strukturalna preflightu obowiązuje.",
+  "test_cmd": "cd tiolibri-api && source venv/bin/activate && pytest",
+  "build_cmd": "cd tiolibri-frontend && npm run build",
+  "stack_regression_checks": [
+    "Kolejność rejestracji routerów w main.py — export_import i snapshots PRZED projects, inaczej POST /projects/import zasłania route param /{project_id}",
+    "supabase-py w tym venv wywala się na .update().eq().select().execute() — nie dokładać .select()",
+    "TipTap: żadnego this.editor w arrow functions w addProseMirrorPlugins(); state.apply() leci na KAŻDEJ transakcji, w tym setContent()"
+  ],
+  "project_context": "TIOLIBRI — apka do składania e-booków (EPUB + PDF) z HTML-a eksportowanego z Google Docs. Treść rozdziałów żyje jako HTML w chapters.processed_html (Supabase). Frontend React 19 + Vite na Vercel, backend FastAPI + WeasyPrint + ebooklib na Railway. Dwie autorki w produkcji: Bożena Muszyńska (grzyby) i Ewa Stachowska (osteoporoza).",
+  "project_context_short": "TIOLIBRI — składanie e-booków EPUB/PDF z HTML-a z Google Docs (React + FastAPI + Supabase).",
+  "extra_impl_steps": []
+}
