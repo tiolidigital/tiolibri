@@ -1,89 +1,98 @@
 **Temat:** eksport rozdziałów z TIOLIBRI do Markdown dla odsztuczniacza z FABRYKA-redaktor — bo Piotrek chce przepuścić gotowe książki przez Redaktora zamiast poprawiać AI-izmy ręcznie w edytorze
 
-Wątek był ROBOTĄ: `/spec-apply-review md-export`. Review R2 przetworzone, spec w **v0.4**,
-STATE zbumpowany, **przedłużenie konwergencji przyznane — R3 jest twardym końcem budżetu.**
+Wątek był ROBOTĄ: `/spec-handoff md-export`. Prompt R3 **wygenerowany i doręczony Codexowi**
+(Codex CLI, w tle). Spec w **v0.4.1**, STATE na `R3-codex-pending`.
 
 > ⚠️ **Kanon ustaleń: `docs/ODPOWIEDZ-most-tiolibri-redaktor.md`** — nadrzędny wobec speca
 > i wobec `docs/BRIEF-most-tiolibri-redaktor.md`. Nie projektuj z głowy, sprawdź tam.
-> **Kanon konsumenta: `FABRYKA-redaktor/src/redaktor/chunker/segmentuj.ts`** (gałąź `redaktor`,
-> HEAD `d7087bd`). Escaping I NOWY ALGORYTM LICZENIA `blocks` są przepisane z tego pliku.
-> **Trzeci dokument, młodszy od ODPOWIEDZI:** `FABRYKA-redaktor/docs/redaktor/kalibracja/ZWIAD-EWA-R8.md`
-> (commit `5a4fd8e`) — źródło liczb `3,44×` i `215 chunków`.
+> **Kanon konsumenta: `FABRYKA-redaktor/src/redaktor/chunker/segmentuj.ts`** (gałąź `redaktor`).
+> HEAD gałęzi to teraz **`134f8e4`** — plik jest bajtowo identyczny w `4ebec8c`, `d7087bd`
+> i `134f8e4`, więc kotwice po numerach linii trzymają. **Ten wskaźnik zestarzał się już dwa
+> razy z rzędu** (R2 i R3) — sprawdzaj HEAD przed każdą rundą.
 
 ---
 
 ## NASTĘPNY KROK
 
-**Odpal `/spec-handoff md-export`** — wygeneruje prompt R3 dla Codexa (TARGET=3) i doręczy go
-przez Codex CLI. STATE stoi na `spec: R2-opus-pending`, czyli dokładnie w stanie, z którego
-handoff liczy N+1. **Nie bumpuj STATE ręcznie.**
+**Sprawdź, czy Codex skończył, potem odpal `/spec-apply-review md-export`.**
 
-**To jest OSTATNIA runda.** `convergence-ext: R2` jest już zapisane w STATE — kolejnego
-przedłużenia nie ma. R3 musi wyjść GREEN (APPROVE / NITS / NITS-EXT), inaczej spec idzie
-do ESCALATED i wchodzi brief dla Fable.
+Review leci w tle od ~17:5x. Odbiór:
+```
+test -s docs/specs/md-export/_review/R3-codex.md
+rg -c '^\**Werdykt:\**\s*(APPROVE|NITS-EXT|NITS|REQUEST_CHANGES)\**\s*$' docs/specs/md-export/_review/R3-codex.md
+```
+- Plik jest, werdykt parsuje się (1 dopasowanie) → `/spec-apply-review md-export`.
+- Pliku brak, ale `_review/.R3-codex-last-msg.md` niesie pełne review z linią werdyktu →
+  zapisz je jako `R3-codex.md` i dopiero wtedy apply-review.
+- Codex milczy > kilka minut → **sprawdź limit konta ZANIM uznasz, że pracuje**:
+  `used_percent` w najnowszym `~/.codex/sessions/**/rollout-*.jsonl`. Pierwsze konto miało
+  reset **2026-08-08 08:47**. Log przebiegu: `_review/.R3-codex-run.log`.
+
+**To jest OSTATNIA runda.** `convergence-ext: R2` zapisane w STATE — kolejnego przedłużenia
+nie ma. R3 musi wyjść GREEN (APPROVE / NITS / NITS-EXT), inaczej spec idzie do **ESCALATED**
+i wchodzi brief dla Fable.
 
 ## Co zrobione w tym wątku
 
-Codex w R2 dał **REQUEST_CHANGES: 3 BLOCKER + 2 MAJOR**, 11/11 kategorii sprawdzonych.
-Wszystkie przyjęte, żadna nie odrzucona. Plus jedna znaleziona sweepem, której Codex nie widział.
+Preflight R3 **uruchomił oba parsery speca**, zamiast je czytać — i to złapało jedną rzecz
+merytoryczną, której trzy poprzednie rundy nie widziały.
 
-**Klasy PRODUKT (te uzasadniają rundę R3, reguła L-C):**
-1. **G2 przeczyło samo sobie** — jednocześnie dopuszczało listy i nazywało je zerem, więc dwaj
-   implementatorzy bramki dostawali przeciwne werdykty na tym samym `chunks.json`. Rozdzielone:
-   G2 = `kod=0 ∧ tabela=0`, `lista` zostaje wyłącznie w G1.
-2. **Sygnatura endpointu nie egzekwowała własnej tabeli** — przy `request: ExportMdRequest`
-   FastAPI zwraca **422 na brak body**, czyli odwrotnie niż wiersz 1. Wpisane
-   `request: Optional[ExportMdRequest] = None`. Sygnatura **zwalidowana wobec produkcji**
-   (`export_import.py:34-38`): `verify_supabase_jwt`, `project_id: str`, prefiks `/projects` —
-   pierwsza wersja poprawki miała trzy zmyślone nazwy, `rg` je złapał (LESSONS#20).
-3. **`blocks` nie miało reguły liczenia**, a G1 porównuje je z zerową tolerancją. Nowy
-   podrozdział: liczymy **z finalnego Markdowna**, odtwarzając granice bloków konsumenta —
-   bo `chunks.json` powstaje z `segmentuj()` na naszym `.md`, więc licząc po HTML-u
-   porównywalibyśmy dwa różne języki. Tabela 9 konsekwencji (lista wieloelementowa = 1 blok,
-   obraz i `---` = `akapit`) + 8 fixture'ów.
+**Dowody uruchomieniowe (nowe w tej rundzie):**
+1. **Sygnatura endpointu na `TestClient`** — dwie aplikacje FastAPI: ta ze speca
+   (`Optional[ExportMdRequest] = None`) i kontrpróba bez `Optional`. **PASS=6 FAIL=0, EXIT=0.**
+   Brak body → 200 przy sygnaturze ze speca, **422** przy kontrpróbie, a warianty b–d
+   przechodzą identycznie w obu. Czyli twierdzenie speca „wariant (a) jest jedynym, który
+   wykrywa brak `Optional`" jest **zmierzone**, nie założone. To domyka blokera #4 z R2.
+2. **Algorytm `blocks` wobec PRAWDZIWEGO `segmentuj()`** — 11 fixture'ów przez prawdziwy
+   chunker (Node 24 `--experimental-strip-types`, import wprost z FABRYKA-redaktor, EXIT=0)
+   i przez implementację algorytmu ze speca w Pythonie. **Wszystkie 9 wierszy tabeli
+   konsekwencji potwierdzone** — pierwszy raz zmierzone, a nie wyprowadzone z lektury kodu.
 
-**Klasy APARATURA (audyt dowodu):**
-4. **Trzy rekordy C/M/E miały fałszywe `PASS`** — `C` obejmowało wnioski o W2, których przebieg
-   `--tylko-w1` nie wykonał. Zawężone; wnioski oznaczone jako inferencja z kontraktu, nie pomiar.
-   **Trzeci rekord (Bożena, „blisko trzydzieści wywołań W2") znalazł sweep, nie Codex** —
-   ta sama konstrukcja, ten sam defekt. Bez tego R3 miałby czwarty bloker tej samej klasy.
-5. **Rekord CONTRACTED nie miał pola `E`** (miał `mierzalne-od` zamiast, nie obok) — bramka
-   strukturalna niespełniona. Dopisane realne `E`: byte-diff `segmentuj.ts` + 78 przypadków
-   escapingu. `mierzalne-od` zostaje na nieuruchomioną resztę.
+**Korekta merytoryczna, którą to złapało:** v0.4 wypisywała gałęzie algorytmu w kolejności
+ATX → marker → BQ → fence → tabela. Konsument sprawdza je w kolejności fence → ATX →
+**tabela** → BQ → marker (`segmentuj.ts:55-146`), a wzorce **nie są rozłączne**: linia
+`> a | b` bezpośrednio nad `---` daje u konsumenta **jeden chunk `tabela`**, a w kolejności
+ze speca `blockquote` + `akapit` (to samo dla `- a | b`). W naszym wyjściu ta klasa jest
+nieosiągalna, ale przy **zerowej tolerancji G1** algorytm ma odtwarzać konsumenta, nie
+przybliżać. Kolejność jest teraz jawną częścią kontraktu z nazwanym przypadkiem rozjazdu.
 
-**Sizing urósł i jest to zapisane, nie przemilczane:** dyspensa ~67 → **~82 LOC** (fixture'y
-`blocks`), z jawną liczbą nowych przypadków (8). Osie plików (5/5) i czasu bez zmian. Dlatego
-sprawdzenie czterech wejść body jest **ręczne (curl), nie `TestClient`** — automatyzacja
-wymagałaby mocka Supabase, szóstego pliku i zamieniłaby oś plików w FAIL.
+**Trzy korekty stale-refów** (wszystkie ze sweepu `rg`, nie z lektury — LESSONS#3 pkt 1):
+- SHA kanonu konsumenta `d7087bd` → `134f8e4` (drugi raz z rzędu ten sam wskaźnik).
+- `~3×` → **`3,44×`** w §Co odrzucone — przeżyło korektę R2, która podniosła tę liczbę
+  w §`_media/`. Jeden dokument podawał dwie różne liczby dla tego samego pomiaru.
+- `~67 LOC` → **`~82 LOC`** w §Decyzje właściciela — §Sizing mówił `~82` po wzroście w R2.
 
-## Dlaczego R3 w ogóle przysługuje
+**Cofnięta forma poprawki #2 z R2.** Dopisane wtedy pole `E` do rekordu CONTRACTED łamie
+regułę 5 audytu C/M/E (rekord był MEASURED i CONTRACTED naraz) — bramka `cme_typ_both`
+zatrzymała handoff. Uruchomiona część `C` jest teraz niesiona przez **dwa osobne rekordy
+MEASURED**, więc fakt nie zginął, a rekord CONTRACTED ma samo `mierzalne-od`. **Codex jest
+o tym uprzedzony w promptcie i poproszony o sprawdzenie, czy to faktycznie domyka jego
+blokera #2, czy tylko przenosi go gdzie indziej.**
 
-Budżet: `N=2`, `rundy-rdzenia=0`, `reset-po-spike=0` → **`N_EFF=2` = MAX_ROUNDS** (Risk STANDARD).
-Czyli próg. Przedłużenie przyznane, bo wszystkie cztery warunki spełnione: `N_EFF = MAX_ROUNDS`
-dokładnie, brak wcześniejszego `convergence-ext`, `rundy-rdzenia=0`, `DELTA=177 > 0` — i **blokery
-wyraźnie maleją: R1 `8 BLOCKER + 5 MAJOR` → R2 `3 BLOCKER + 2 MAJOR`**, przy czym R1 obalał
-wykonalność rdzenia („algorytm HTML→MD nie jest implementowalny bez zgadywania"), a R2 tego rdzenia
-w ogóle nie tknął.
-
-**STOP-and-SPIKE sprawdzone i nie kwalifikuje się** — R2 nie wraca do rdzenia z R1. Rekurencja
-klasy C/M/E (R1 #11 → R2 #1/#2) jest realna, ale to aparatura dowodu, nie rdzeń projektowy;
-spike na realnych danych niczego by tam nie rozstrzygnął.
+Bramki L5 i C/M/E: **PASS** (18 faktów, 0 malformed, 0 BLOCKED, 4 CORRECTED wszystkie
+zmigrowane do speca; 8 rekordów CME, 0 invalid, 0 FAIL, 0 typ_both, 0 dup).
 
 ## Stan: pliki, commity
 
-- **`d7e20c7`** — spec v0.4 + response R2 + korekta preflightu + STATE bump (ten wątek)
-- `c9b2e0d` — HANDOFF po handoffie R2
-- `b502702` — spec v0.3.1 + preflight R2
-- `docs/specs/md-export/STATE.md` → **`spec: R2-opus-pending`** / `impl: not-started` /
+- **`6ef6164`** — spec v0.4.1 + preflight R3 + STATE bump (ten wątek)
+- `f0940c4` — HANDOFF po R2
+- `d7e20c7` — spec v0.4 + response R2
+- `docs/specs/md-export/STATE.md` → **`spec: R3-codex-pending`** / `impl: not-started` /
   `rundy-rdzenia: 0` / **`convergence-ext: R2`**
-- `_review/R2-opus-response.md` — decyzje per uwaga + klasyfikacja L-C + uzasadnienie przedłużenia
-- `_review/R2-opus-preflight.md` — §Audyt C/M/E pod znacznikiem **KOREKTA PO R2**
-- `_review/.base-R2.md` — baseline R2. **Nie kasować** (handoff R3 zrobi `.base-R3.md`).
+- `_review/R3-opus-preflight.md` — 18 faktów, §Parser self-test z tabelą 11 fixture'ów,
+  §Audyt C/M/E z 8 rekordami
+- `_review/.base-R3.md` — baseline R3. **Nie kasować** (mierzy LOC self-fixu Codexa).
+- `_review/.R3-prompt.md` — prompt doręczony Codexowi (gdyby trzeba było powtórzyć ręcznie)
+- `_review/.R3-codex-run.log` + `.R3-codex-last-msg.md` — przebieg Codexa
+
+Skrypty dowodowe leżą w scratchpadzie sesji (`scratchpad/t_signature.py`,
+`scratchpad/blocks/`) — **nie w repo**. Jeśli Codex zakwestionuje liczby, odtworzenie to
+kilka minut; opis metody jest w §Parser self-test preflightu.
 
 ## Wskaźniki do kanonów
 
-- Spec: `docs/specs/md-export/SPEC-MD-EXPORT.md` **v0.4**
-- Ta runda: `_review/R2-codex.md` + `R2-opus-response.md` + `R2-opus-preflight.md`
+- Spec: `docs/specs/md-export/SPEC-MD-EXPORT.md` **v0.4.1**
+- Ta runda: `_review/R3-opus-preflight.md` (+ `R3-codex.md`, gdy dojdzie)
 - Kanon spec-workflow: **w FABRYCE**,
   `/Users/piotrmichalski/Documents/SaaS_Factory2026/FABRYKA/docs/specs/spec-workflow/`
 - Kontrakt Redaktora: `/Users/piotrmichalski/Documents/SaaS_Factory2026/FABRYKA-redaktor/docs/redaktor/KONTRAKT.md`
@@ -96,6 +105,12 @@ spike na realnych danych niczego by tam nie rozstrzygnął.
   `~/.codex/sessions/**/rollout-*.jsonl`, zanim uznasz, że pracuje.
 - `codex` nie jest w PATH sandboxa — wołać `/opt/homebrew/bin/codex`.
 - Nie przepuszczać wyjścia `codex exec` przez `| tail` — buforuje do końca, nie widać postępu.
+- **Prawdziwy `segmentuj()` da się odpalić w sandboxie** — Node v24.12.0,
+  `node --experimental-strip-types`, import po ścieżce bezwzględnej z FABRYKA-redaktor.
+  Ostrzega o `MODULE_TYPELESS_PACKAGE_JSON`, ale działa. To najtańszy sposób rozstrzygnięcia
+  każdego sporu o to, jak konsument dzieli tekst.
+- **`tiolibri-api/venv` ma `httpx` 0.27.2**, więc `fastapi.testclient` działa bez instalacji —
+  ale `pytest` w nim nadal NIE ma (i zgodnie ze specem nie wchodzi do `requirements.txt`).
 - RETRO w FABRYCE (drain z R1) wciąż **niezacommitowane**, leży w
   `/Users/piotrmichalski/Documents/SaaS_Factory2026/FABRYKA/docs/specs/spec-workflow/RETRO.md`.
 
