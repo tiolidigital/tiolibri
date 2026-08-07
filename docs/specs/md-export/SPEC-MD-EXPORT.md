@@ -852,12 +852,9 @@ Dawne **O1** (`<br>` → `\n` czy spacja) **nie jest już otwarte** — rozstrzy
 
 ## Dla Piotrka — jedno zdanie
 
-Spec przepisany po R1: escaping wyprowadzony z prawdziwego chunkera zamiast z głowy, endpoint
-przestał gubić rozdziały i cicho eksportować całość przy pustym wyborze, krok weryfikacji
-zamieniony na cztery uruchamialne asercje, a zakres ścięty do tego, co wybrałeś — przycisk
-zamiast modala.
+Spec v0.4.1 domyka uwagi R2 i po zielonym review może przejść do implementacji eksportu całej książki.
 
-**Kopiuj dalej — w tym samym wątku:**
+**Kopiuj dalej:**
 ```
-/spec-handoff md-export
+/spec-apply-review md-export
 ```
