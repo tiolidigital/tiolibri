@@ -1,88 +1,89 @@
 **Temat:** eksport rozdziałów z TIOLIBRI do Markdown dla odsztuczniacza z FABRYKA-redaktor — bo Piotrek chce przepuścić gotowe książki przez Redaktora zamiast poprawiać AI-izmy ręcznie w edytorze
 
-Wątek był ROBOTĄ: `/spec-handoff md-export`. Preflight R2 domknięty, spec w v0.3.1,
-STATE zbumpowany, **prompt R2 doręczony Codexowi — review pisze się w tle**.
+Wątek był ROBOTĄ: `/spec-apply-review md-export`. Review R2 przetworzone, spec w **v0.4**,
+STATE zbumpowany, **przedłużenie konwergencji przyznane — R3 jest twardym końcem budżetu.**
 
 > ⚠️ **Kanon ustaleń: `docs/ODPOWIEDZ-most-tiolibri-redaktor.md`** — nadrzędny wobec speca
 > i wobec `docs/BRIEF-most-tiolibri-redaktor.md`. Nie projektuj z głowy, sprawdź tam.
 > **Kanon konsumenta: `FABRYKA-redaktor/src/redaktor/chunker/segmentuj.ts`** (gałąź `redaktor`,
-> HEAD `d7087bd`; plik bajtowo identyczny z cytowanym `4ebec8c`). Reguła escapingu jest
-> przepisana z jego sześciu regexów `:12-17`. Nie zmieniaj jej bez zajrzenia tam.
+> HEAD `d7087bd`). Escaping I NOWY ALGORYTM LICZENIA `blocks` są przepisane z tego pliku.
 > **Trzeci dokument, młodszy od ODPOWIEDZI:** `FABRYKA-redaktor/docs/redaktor/kalibracja/ZWIAD-EWA-R8.md`
-> (commit `5a4fd8e`) — źródło liczb `3,44×` i `215 chunków`. Wciągnięte do speca w tej rundzie.
+> (commit `5a4fd8e`) — źródło liczb `3,44×` i `215 chunków`.
 
 ---
 
 ## NASTĘPNY KROK
 
-**Sprawdź, czy `docs/specs/md-export/_review/R2-codex.md` już istnieje, i odpal `/spec-apply-review md-export`.**
+**Odpal `/spec-handoff md-export`** — wygeneruje prompt R3 dla Codexa (TARGET=3) i doręczy go
+przez Codex CLI. STATE stoi na `spec: R2-opus-pending`, czyli dokładnie w stanie, z którego
+handoff liczy N+1. **Nie bumpuj STATE ręcznie.**
 
-Codex został odpalony w tle (`nohup`, PID zapisany w logu) o 16:2x, model `gpt-5.6-sol`:
-
-```bash
-tail -5 docs/specs/md-export/_review/.R2-codex-run.log     # postęp
-test -s docs/specs/md-export/_review/R2-codex.md && echo GOTOWE
-rg -c '^\**Werdykt:\**\s*(APPROVE|NITS-EXT|NITS|REQUEST_CHANGES)\**\s*$' docs/specs/md-export/_review/R2-codex.md   # oczekiwane: 1
-```
-
-- Plik jest, werdykt parsowalny → `/spec-apply-review md-export`.
-- Pliku brak, ale `.R2-codex-last-msg.md` niesie pełne review → zapisz jego treść jako
-  `R2-codex.md` i odnotuj „odzyskane z last-message".
-- Codex padł / limit konta → prompt leży gotowy w `_review/.R2-prompt.md`, odpal ponownie:
-  `/opt/homebrew/bin/codex exec -s workspace-write -C "$PWD" -o _review/.R2-codex-last-msg.md - < docs/specs/md-export/_review/.R2-prompt.md`
-- Linii werdyktu 0 albo >1 → **nie naprawiaj sam**, pokaż Piotrkowi (footer wariant C).
-
-**Budżet: to ostatnia runda.** MAX_ROUNDS=2 przy Risk STANDARD, N_EFF=1 zużyte. R2 musi wyjść
-GREEN (albo NITS/NITS-EXT), inaczej spec idzie do ESCALATED i wchodzi ścieżka z briefem dla Fable.
-Konwergencja: jeśli R2 wróci REQUEST_CHANGES, ale **blokery wyraźnie maleją**, przysługuje
-jednorazowe przedłużenie o rundę (`convergence-ext`) — warunki w `/spec-apply-review` Krok 6.
-`rundy-rdzenia` = 0, więc przedłużenie jest dostępne.
+**To jest OSTATNIA runda.** `convergence-ext: R2` jest już zapisane w STATE — kolejnego
+przedłużenia nie ma. R3 musi wyjść GREEN (APPROVE / NITS / NITS-EXT), inaczej spec idzie
+do ESCALATED i wchodzi brief dla Fable.
 
 ## Co zrobione w tym wątku
 
-1. **Preflight R2 (L5)** — `_review/R2-opus-preflight.md`, 29 faktów, obie bramki komendy
-   uruchomione i PASS (`invalid=0 blocked=0 corrected=5 malformed=0 migrated_missing=0`;
-   C/M/E `valid=6 dup=0 fail=0`).
-2. **Parser self-test escapingu** — `PASS=78 FAIL=0` na regexach **przepisanych z produkcyjnego
-   `segmentuj.ts` w tej rundzie**, nie z głowy: 68 przypadków pozytywnych (17 wzorców ×
-   wcięcia 0-3) + **10 negatywnych**, które muszą zostać nietknięte. Wyszło m.in., że `1)`
-   jest markerem listy (reguła v0.2 by go przepuściła).
-3. **Pięć korekt wpisanych do speca** (v0.3 → **v0.3.1**), każda zmierzona:
-   - **`Optional[...]` zamiast `X | None`** — venv to **Python 3.9.6**, produkcja **3.11**
-     (`Dockerfile:2`). PEP 604 wywala `TypeError` **przy imporcie modułu**, więc testy z kroku 1
-     planu były nieuruchamialne lokalnie, mimo że produkcja by ruszyła. Cichy bloker.
-   - **SHA kanonu konsumenta** `4ebec8c` → `d7087bd` (plik bajtowo identyczny, sprawdzone
-     `git diff`) — stale-ref klasy LESSONS#20.
-   - **`3,44×` zamiast `~3×`** — zaniżenie mianownika strażnika budżetu, zmierzone na
-     rozdziale Ewy: `0,0120%` z blobem vs `0,0412%` bez (`ZWIAD-EWA-R8.md`, dwa run-idy).
-   - **215 chunków dla rozdziału Ewy** — spec pisał „nie mamy przedziału". Mamy, i jest
-     o rząd wielkości większy od 27 Bożeny. Wniosek dla operatora: setki cykli
-     stop-wypełnij-wznów, nie trzydzieści.
-   - **Drugi tryb awarii bloba** — chunker nadaje data-URI `nietykalny=false`, więc bez
-     naszego wycięcia ~21k tokenów base64 poleciałoby do modelu; Redaktor nie ma na to
-     strażnika. Nasz eksport jest jedynym miejscem, w którym to się zatrzymuje.
-4. **Zweryfikowane kotwice v0.3, wszystkie trafiają** — `segmentuj.ts:20/91/100-105/118-125/142`,
-   `Divider.js:14,17,84`, `authedFetch.js:28-33`, `export_import.py:238`, `chapters.py:211`,
-   `useChapters.js:184-209`, `ChapterEditor.jsx:60-62`, `Modal.jsx:64,87-90`,
-   `ProjectCard.jsx:197-209`.
-5. **Tie-breaker sortowania potwierdzony wykonaniem** — dwa `.order()` w supabase-py sklejają
-   się w `order=sort_order%2Cid` (builder odpalony bez sieci), drugie nie nadpisuje pierwszego.
+Codex w R2 dał **REQUEST_CHANGES: 3 BLOCKER + 2 MAJOR**, 11/11 kategorii sprawdzonych.
+Wszystkie przyjęte, żadna nie odrzucona. Plus jedna znaleziona sweepem, której Codex nie widział.
+
+**Klasy PRODUKT (te uzasadniają rundę R3, reguła L-C):**
+1. **G2 przeczyło samo sobie** — jednocześnie dopuszczało listy i nazywało je zerem, więc dwaj
+   implementatorzy bramki dostawali przeciwne werdykty na tym samym `chunks.json`. Rozdzielone:
+   G2 = `kod=0 ∧ tabela=0`, `lista` zostaje wyłącznie w G1.
+2. **Sygnatura endpointu nie egzekwowała własnej tabeli** — przy `request: ExportMdRequest`
+   FastAPI zwraca **422 na brak body**, czyli odwrotnie niż wiersz 1. Wpisane
+   `request: Optional[ExportMdRequest] = None`. Sygnatura **zwalidowana wobec produkcji**
+   (`export_import.py:34-38`): `verify_supabase_jwt`, `project_id: str`, prefiks `/projects` —
+   pierwsza wersja poprawki miała trzy zmyślone nazwy, `rg` je złapał (LESSONS#20).
+3. **`blocks` nie miało reguły liczenia**, a G1 porównuje je z zerową tolerancją. Nowy
+   podrozdział: liczymy **z finalnego Markdowna**, odtwarzając granice bloków konsumenta —
+   bo `chunks.json` powstaje z `segmentuj()` na naszym `.md`, więc licząc po HTML-u
+   porównywalibyśmy dwa różne języki. Tabela 9 konsekwencji (lista wieloelementowa = 1 blok,
+   obraz i `---` = `akapit`) + 8 fixture'ów.
+
+**Klasy APARATURA (audyt dowodu):**
+4. **Trzy rekordy C/M/E miały fałszywe `PASS`** — `C` obejmowało wnioski o W2, których przebieg
+   `--tylko-w1` nie wykonał. Zawężone; wnioski oznaczone jako inferencja z kontraktu, nie pomiar.
+   **Trzeci rekord (Bożena, „blisko trzydzieści wywołań W2") znalazł sweep, nie Codex** —
+   ta sama konstrukcja, ten sam defekt. Bez tego R3 miałby czwarty bloker tej samej klasy.
+5. **Rekord CONTRACTED nie miał pola `E`** (miał `mierzalne-od` zamiast, nie obok) — bramka
+   strukturalna niespełniona. Dopisane realne `E`: byte-diff `segmentuj.ts` + 78 przypadków
+   escapingu. `mierzalne-od` zostaje na nieuruchomioną resztę.
+
+**Sizing urósł i jest to zapisane, nie przemilczane:** dyspensa ~67 → **~82 LOC** (fixture'y
+`blocks`), z jawną liczbą nowych przypadków (8). Osie plików (5/5) i czasu bez zmian. Dlatego
+sprawdzenie czterech wejść body jest **ręczne (curl), nie `TestClient`** — automatyzacja
+wymagałaby mocka Supabase, szóstego pliku i zamieniłaby oś plików w FAIL.
+
+## Dlaczego R3 w ogóle przysługuje
+
+Budżet: `N=2`, `rundy-rdzenia=0`, `reset-po-spike=0` → **`N_EFF=2` = MAX_ROUNDS** (Risk STANDARD).
+Czyli próg. Przedłużenie przyznane, bo wszystkie cztery warunki spełnione: `N_EFF = MAX_ROUNDS`
+dokładnie, brak wcześniejszego `convergence-ext`, `rundy-rdzenia=0`, `DELTA=177 > 0` — i **blokery
+wyraźnie maleją: R1 `8 BLOCKER + 5 MAJOR` → R2 `3 BLOCKER + 2 MAJOR`**, przy czym R1 obalał
+wykonalność rdzenia („algorytm HTML→MD nie jest implementowalny bez zgadywania"), a R2 tego rdzenia
+w ogóle nie tknął.
+
+**STOP-and-SPIKE sprawdzone i nie kwalifikuje się** — R2 nie wraca do rdzenia z R1. Rekurencja
+klasy C/M/E (R1 #11 → R2 #1/#2) jest realna, ale to aparatura dowodu, nie rdzeń projektowy;
+spike na realnych danych niczego by tam nie rozstrzygnął.
 
 ## Stan: pliki, commity
 
-- `b502702` — **spec v0.3.1 + preflight R2 + baseline + STATE bump + prompt** (ten wątek)
-- `7a7dec1` — HANDOFF po R1
-- `cfda3ce` — spec v0.3 po R1
-- `docs/specs/md-export/STATE.md` → **`spec: R2-codex-pending`** / `impl: not-started`.
-  **Nie bumpować ręcznie** — zrobi to `/spec-apply-review`.
-- `_review/.base-R2.md` — baseline pomiaru LOC dla ewentualnego NITS-EXT Codexa. **Nie kasować.**
-- `_review/.R2-prompt.md` — prompt doręczony, do ponownego odpalenia gdyby Codex padł.
-- `_review/.R2-codex-run.log`, `.R2-codex-last-msg.md` — artefakty diagnostyczne, niezacommitowane.
+- **`d7e20c7`** — spec v0.4 + response R2 + korekta preflightu + STATE bump (ten wątek)
+- `c9b2e0d` — HANDOFF po handoffie R2
+- `b502702` — spec v0.3.1 + preflight R2
+- `docs/specs/md-export/STATE.md` → **`spec: R2-opus-pending`** / `impl: not-started` /
+  `rundy-rdzenia: 0` / **`convergence-ext: R2`**
+- `_review/R2-opus-response.md` — decyzje per uwaga + klasyfikacja L-C + uzasadnienie przedłużenia
+- `_review/R2-opus-preflight.md` — §Audyt C/M/E pod znacznikiem **KOREKTA PO R2**
+- `_review/.base-R2.md` — baseline R2. **Nie kasować** (handoff R3 zrobi `.base-R3.md`).
 
 ## Wskaźniki do kanonów
 
-- Spec: `docs/specs/md-export/SPEC-MD-EXPORT.md` **v0.3.1**
-- Preflight tej rundy: `_review/R2-opus-preflight.md`; R1: `_review/R1-codex.md` + `R1-opus-response.md`
+- Spec: `docs/specs/md-export/SPEC-MD-EXPORT.md` **v0.4**
+- Ta runda: `_review/R2-codex.md` + `R2-opus-response.md` + `R2-opus-preflight.md`
 - Kanon spec-workflow: **w FABRYCE**,
   `/Users/piotrmichalski/Documents/SaaS_Factory2026/FABRYKA/docs/specs/spec-workflow/`
 - Kontrakt Redaktora: `/Users/piotrmichalski/Documents/SaaS_Factory2026/FABRYKA-redaktor/docs/redaktor/KONTRAKT.md`
