@@ -1,21 +1,47 @@
 # MD-EXPORT — eksport rozdziałów TIOLIBRI do Markdowna dla Redaktora
 
-**Wersja:** 0.2
+**Wersja:** 0.3
 **Mode:** light
 **Risk:** STANDARD   ← MAX_ROUNDS = 2. Uzasadnienie w §Bramki.
 **Data ostatniej zmiany:** 2026-08-07
 
-**Sizing: PASS**, **ale na granicy** — 5 plików, **~495 LOC** produkcyjnych + ~110 LOC testów,
-**~90 min**. Limit osi: **500 LOC / 90 min / 5 plików**. ERRATA E4 (`_media/`, dekodowanie
-base64, limity rozmiaru) zjadła cały zapas: było ~420 LOC / ~80 min; preflight R1 (atomowy
-divider + `decompose()` na `<svg>`) dorzucił ~5 LOC. **Jeśli przy implementacji urośnie
-cokolwiek ponad plan — nie dopychać, tylko odciąć krok 3 (UI) do osobnej fazy** i zostawić
-w tej backend + weryfikację na żywym rozdziale. Bramka thin dalej PASS: to jeden spójny
-przebieg i mieści się poniżej 2h.
+**Sizing: DYSPENSA** — oś LOC przekroczona świadomie, oś plików i czasu PASS.
+**Źródło autoryzacji:** decyzja właściciela w R1 (2026-08-07, `_review/R1-opus-response.md`
+§Decyzje właściciela, pytanie „Zakres") — po odcięciu modala i filtru zmian.
+
+| Plik | Rodzaj | LOC |
+|---|---|---|
+| `tiolibri-api/app/services/md_exporter.py` | NOWY | ~300 |
+| `tiolibri-api/app/routers/export_import.py` | zmiana | ~85 |
+| `tiolibri-api/test_md_exporter.py` | NOWY | ~150 |
+| `tiolibri-frontend/src/features/editor/EditorPage.jsx` | zmiana | ~30 |
+| `tiolibri-frontend/src/features/editor/activityLabels.js` | zmiana | ~2 |
+| **razem** | **5 plików** | **~567 LOC** |
+
+Limit osi: **500 LOC / 90 min / 5 plików**. Pliki PASS (5/5), czas PASS (~90 min), LOC FAIL
+o ~67. Testy są **wliczone do tej samej sumy** (master §4.5, LESSONS#17) — nie ma zapisu
+„~300 LOC + testy osobno". Domen: jedna (eksport treści). Migracji: zero. Decyzji
+architektonicznych: jedna (serializator własny zamiast biblioteki, §Co odrzucone).
+
+Czego tu **nie ma**, bo zostało odcięte decyzją właściciela w R1: modal z wyborem rozdziałów
+oraz filtr „tylko zmienione od ostatniego eksportu". Oba idą do osobnego light speca, jeśli
+okażą się potrzebne po pierwszych przebiegach. Skutkiem ubocznym odcięcia jest to, że kontrakt
+a11y modala przestaje być przedmiotem tego speca — zostaje w §Frontend jako notatka
+dla tamtego speca.
+
+`pytest` **nie jest** w `requirements.txt` ani w `tiolibri-api/venv` (sprawdzone). Instaluje się
+go lokalnie (`pip install pytest`) i **nie dopisuje do `requirements.txt`** — obraz Railway ma
+zostać chudy, a projekt ma już taką konwencję (`tiolibri-api/test_polish_pdf.py` leży w korzeniu
+bez runnera w zależnościach). Plik testowy trafia w to samo miejsce, dlatego nie ma tu szóstego
+pliku ani rippla zależności (LESSONS#7 — nazwane jawnie, nie przemilczane).
 
 **Kanon ustaleń:** `docs/ODPOWIEDZ-most-tiolibri-redaktor.md` (od FABRYKA-redaktor, branch `redaktor`,
 HEAD `4ebec8c`) — nadrzędny wobec `docs/BRIEF-most-tiolibri-redaktor.md`. Odwołania w tekście
 w postaci `(ODPOWIEDZ A3)` wskazują sekcję tego dokumentu.
+
+**Kanon konsumenta:** `FABRYKA-redaktor` → `src/redaktor/chunker/segmentuj.ts` (HEAD `4ebec8c`).
+Reguły escapingu i podziału na bloki są **wyprowadzone z tego pliku**, nie z CommonMarka
+i nie z naszej intuicji — patrz §Kontrakt escapingu.
 
 ---
 
@@ -23,24 +49,40 @@ w postaci `(ODPOWIEDZ A3)` wskazują sekcję tego dokumentu.
 
 | Pytanie | Odp. | Dlaczego |
 |---|---|---|
-| 1. >1 faza implementacji? | NIE | jeden przebieg: konwerter → endpoint → modal |
-| 2. >2h? | NIE | ~80 min, szacunek w §Sizing |
-| 3. migracja DB? | NIE | spec jest czysto odczytowy — patrz D2 |
-| 4. nowa komenda/widok top-level? | NIE | modal w istniejącym Inspectorze edytora |
+| 1. >1 faza implementacji? | NIE | jeden przebieg: konwerter → endpoint → przycisk |
+| 2. >2h? | NIE | ~90 min, rozbicie w §Sizing |
+| 3. migracja DB? | NIE | spec jest czysto odczytowy |
+| 4. nowa komenda/widok top-level? | NIE | przycisk w istniejącym Inspectorze edytora |
 | 5. compound ryzyko? | NIE | patrz niżej |
 
-**thin = PASS → single-file.** Asercja `--light` potwierdzona.
+**thin = PASS → single-file.** Dowód to pięć powyższych odpowiedzi, wszystkie NIE — nie ma
+tu osobnej komendy ani asercji do uruchomienia i poprzednia wersja tego speca sugerowała
+inaczej.
 
 **Risk = STANDARD.** Rozbiór pytania 5: płatności/kredyty — nie; auth/RLS — nie, endpoint
-reużywa istniejącego `_assert_project_access` z `export_import.py:238`, zero nowego modelu
+reużywa istniejącego `_assert_project_access` (`export_import.py:238`), zero nowego modelu
 dostępu; mutacje danych produkcyjnych — **nie, zero zapisów do bazy**; kanon komend — nie;
-nowy parser/command-contract — **to jest jedyne miejsce, w którym warto się kłócić.**
-Powstaje serializator HTML→MD pod obcy kontrakt (chunker Redaktora, K-NAG). Uznaję za
-STANDARD, bo: (a) to serializator naszych własnych danych, nie parser cudzego wejścia,
-(b) tryb pracy jest read-only — najgorszy skutek błędu to zły plik .md na dysku, kasowany
-ponownym eksportem, (c) po drugiej stronie stoi fail-closed K-NAG, który przerywa apply
-przed powstaniem `output.md` (ODPOWIEDZ A4). Strona parsująca (`decyzje.json`, `chunks.json`,
-nadpisywanie treści książki) leży w osobnym specu `md-import` — tam Risk HIGH, 3 rundy.
+nowy parser/command-contract — **tak, i to jest jedyne miejsce, w którym warto się kłócić.**
+
+Powstaje serializator HTML→MD pod obcy kontrakt. Uzasadnienie STANDARD, **bez powoływania się
+na K-NAG jako backstop całości** (to była nieprawda w v0.2):
+
+- **K-NAG chroni wyłącznie strukturę nagłówków i wyłącznie przy `apply`** (ODPOWIEDZ A4:
+  `k-nag.ts` reużywa `segmentuj()`, wyjątek leci w kroku 7 `cli/apply.ts`). Nie ochroni przed
+  utratą treści, złym unwrapem, przypadkowym chunkiem `kod`/`lista`/`tabela`, zepsutym obrazem
+  ani rozjazdem liczby chunków. Przy eksporcie do `chunks.json` K-NAG w ogóle nie działa.
+- **Realny backstop jest u nas:** bramka z kroku 4 (§Plan wdrożenia) porównuje liczniki bloków
+  wyemitowane przez konwerter z typami chunków w `chunks.json` — z zerową tolerancją, przed
+  jakimkolwiek wywołaniem W2.
+- **Uczciwy koszt błędu:** plik nie jest „tylko złym plikiem na dysku". Trafia do W1/W2 i może
+  wygenerować ręczną pracę operatora oraz decyzje podjęte na rozjechanych chunkach. Dlatego
+  krok 4 jest bramką obowiązkową przed masowym użyciem, nie miłym dodatkiem.
+- **Co utrzymuje STANDARD mimo to:** tryb pracy jest read-only (zero zapisów do bazy), skutek
+  błędu jest odwracalny ponownym eksportem, a wejściem jest nasz własny HTML, nie cudze wejście
+  z internetu.
+
+Strona parsująca (`decyzje.json`, `chunks.json`, nadpisywanie treści książki) leży w osobnym
+specu `md-import` — tam Risk HIGH, 3 rundy.
 
 ---
 
@@ -61,68 +103,224 @@ Eksport jest niezależny od wszystkiego, co zostało otwarte po stronie Redaktor
 
 ## Rozwiązanie
 
-Przycisk **„Eksportuj do Redaktora (.md)"** w Inspectorze edytora → modal z listą rozdziałów →
-pobranie ZIP-a, który operator rozpakowuje do `redaktor/wsad/`.
+Przycisk **„Eksportuj do Redaktora (.md)"** w Inspectorze edytora → pobranie ZIP-a z **całą
+książką**, który operator rozpakowuje do `redaktor/wsad/`. Bez modala, bez wyboru rozdziałów —
+decyzja właściciela w R1.
 
 ### Kształt ZIP-a
 
 ```
-<ksiazka>/
-  <ksiazka>-01-<tytul>.md
-  <ksiazka>-02-<tytul>.md
+<book_key>/
+  <book_key>-01-<tytul>.md
+  <book_key>-02-<tytul>.md
   …
   _media/
-    <ksiazka>-01-img-01.png
+    <book_key>-01-img-01.png
     …
   _tiolibri/manifest.json
 ```
 
-Katalog nadrzędny w ZIP-ie nazywa się `<ksiazka>`, więc rozpakowanie w `redaktor/wsad/` daje
-dokładnie `redaktor/wsad/<ksiazka>/` — konwencję zaproponowaną przez Redaktora (ODPOWIEDZ §B).
+Katalog nadrzędny w ZIP-ie nazywa się `<book_key>`, więc rozpakowanie w `redaktor/wsad/` daje
+dokładnie `redaktor/wsad/<book_key>/` — konwencję zaproponowaną przez Redaktora (ODPOWIEDZ §B).
 **`redaktor/praca/` to katalog wyjściowy CLI — nie rozpakowujemy się tam.**
+
+### `book_key` — globalnie unikalny klucz książki
 
 **Nazwy plików muszą być unikalne globalnie, nie w obrębie ZIP-a** (ODPOWIEDZ B2): nazwa pliku
 wyznacza `redaktor/praca/<basename>/` oraz skrzynkę W2 `redaktor/praca/<basename>/_skrzynka/`.
 Dwa `01-wstep.md` z dwóch książek dzielą katalog przebiegu i skrzynkę — to ciche zatrucie,
-Redaktor się nie poskarży. Stąd prefiks nazwą książki.
+Redaktor się nie poskarży.
+
+Sam slug tytułu tego **nie zapewnia**: dwa projekty mogą nazywać się „Osteoporoza". Sufiksy
+`-2`/`-3` wyliczane w obrębie jednego ZIP-a też nie — nic nie wie o poprzednich eksportach.
+
+```
+book_key = f"{slugify(project_title)}-{project_id.replace('-', '')[:8]}"
+```
+
+- `project_id` to UUID projektu; bierzemy pierwsze **8 znaków heksadecymalnych po usunięciu
+  myślników**. Klucz jest **stabilny między eksportami** (UUID się nie zmienia), więc powtórny
+  eksport tej samej książki trafia w ten sam katalog przebiegu Redaktora — to jest pożądane,
+  nie przypadkowe.
+- Pusty slug tytułu → `ksiazka`, więc `book_key` nigdy nie zaczyna się od myślnika.
+- Kolizja `book_key` między dwoma projektami wymagałaby kolizji na 8 znakach UUID **przy tym
+  samym tytule** — przyjmujemy jako niemożliwe w skali jednego konta.
 
 Numer `NN` to **pozycja w posortowanej liście** (1-based, zero-padded do 2), nie surowy
-`sort_order` — ten bywa dziurawy.
+`sort_order` — ten bywa dziurawy. Powyżej 99 rozdziałów padding rośnie do 3 (`NNN`) dla całego
+eksportu, żeby porządek alfabetyczny nie kłamał.
+
+### Slug
+
+`slugify(text)`: NFC → NFKD → odrzucenie znaków łączących (`ą`→`a`, `ł`→`l` osobną mapą, bo
+NFKD go nie rozkłada) → lowercase → `[^a-z0-9]+` na `-` → trim `-` → obcięcie do 40 znaków.
+Pusty wynik → `rozdzial` (dla tytułu rozdziału) / `ksiazka` (dla tytułu projektu).
+
+**ASCII zamiast diakrytyków** mimo że Redaktor je dopuszcza (ODPOWIEDZ B2: „polskie znaki są
+OK"). Powód: nazwa pliku jest **kluczem** (wyznacza katalog przebiegu i skrzynkę W2), a klucze
+mają być nudne; dodatkowo macOS normalizuje nazwy plików do NFD, więc `gęstość` wpisane ręcznie
+w config i `gęstość` wyprodukowane przez unzip to potencjalnie dwa różne stringi bajtowo.
+Potwierdzone przez właściciela w R1.
 
 ### Kontrakt konwersji HTML → Markdown
 
-Nowy serwis `tiolibri-api/app/services/md_exporter.py`, funkcja
-`chapter_to_markdown(html, title) -> (md: str, meta: dict)`. Parser: BeautifulSoup + lxml
-(oba już w `requirements.txt`). Świadomie **nie** bierzemy `html2text` — potrzebna jest pełna
-kontrola nad każdą regułą poniżej, a nie best-effort biblioteki.
+Nowy serwis `tiolibri-api/app/services/md_exporter.py`. Parser: BeautifulSoup + lxml (oba są
+w `requirements.txt` — `beautifulsoup4==4.14.3`, `lxml==6.0.2`, sprawdzone). Świadomie **nie**
+bierzemy `html2text` — potrzebna jest pełna kontrola nad każdą regułą poniżej.
+
+#### Sygnatura i własność limitów
+
+```python
+@dataclass
+class ExportImage:
+    order: int            # 1-based, w kolejności wystąpień w rozdziale
+    kind: str             # "embedded" | "remote"
+    filename: str | None  # "_media/<book_key>-<NN>-img-<KK>.<ext>"; None dla remote
+    data: bytes | None    # zdekodowane bajty; None dla remote i dla pominiętych
+    mime: str | None
+    alt: str
+    src: str | None       # tylko dla remote
+    skipped: bool = False
+    reason: str | None = None   # powód pominięcia, patrz §_media/
+
+@dataclass
+class ChapterResult:
+    md: str                       # gotowa treść pliku .md, NFC, kończy się jednym "\n"
+    images: list[ExportImage]
+    blocks: dict[str, int]        # licznik wyemitowanych bloków per typ chunkera
+    dividers: list[str]           # style separatorów w kolejności wystąpień
+    chars: int                    # długość md w znakach
+
+def chapter_to_markdown(html: str, book_key: str, position: int) -> ChapterResult: ...
+```
+
+- **Limit per obraz (≤10 MB) egzekwuje `chapter_to_markdown`** — to ona dekoduje base64
+  i jako jedyna widzi bajty. Przekroczenie → wyjątek `ImageTooLargeError(chapter_position, order,
+  bytes)`, endpoint zamienia go na 413.
+- **Limit całego ZIP-a (≤80 MB) egzekwuje endpoint** — tylko on sumuje rozdziały.
+- `blocks` jest **wejściem bramki z kroku 4**, nie ozdobą. Klucze to nazwy typów chunkera:
+  `naglowek`, `akapit`, `lista`, `blockquote`, `kod`, `tabela`. Konwerter emituje `kod` i `tabela`
+  **wyłącznie** wtedy, gdy źródłowy HTML miał `<pre>/<code>` blokowe albo `<table>` — a ich
+  konwersja jest poza zakresem tego speca (patrz §Ograniczenia), więc w praktyce oba są zerami
+  i każde niezerowe wystąpienie w `chunks.json` jest błędem.
+
+#### Tabela reguł
 
 | Wejście | Wyjście | Uwaga |
 |---|---|---|
-| `<h1>`…`<h6>` | ATX `#`…`######` | **setext nigdy** — jest poza kontraktem (ODPOWIEDZ A4). Pusty nagłówek pomijany. |
-| `<p>` | akapit, bloki rozdzielone jedną pustą linią | |
-| `<strong>`, `<b>` | `**…**` | |
-| `<em>`, `<i>` | `*…*` | |
-| `<div data-divider>` | `---` w osobnym bloku | węzeł **atomowy — konsumowany w całości PRZED regułą unwrap**. Styl czytany z atrybutu **`data-divider-style`** (`stars`/`line`/`dots`, domyślnie `stars` — `Divider.js:10-22` + `renderHTML` :80-92), ląduje w manifeście w kolejności wystąpień. **Nie z atrybutu `style`** — ten niesie CSS (`text-align: center; …`). |
-| `<hr>` | `---` | |
-| `<ul>`/`<ol>`/`<li>` | `-` / `1.` | |
-| `<blockquote>` | prefiks `> ` | |
-| `<br>` | pojedynczy `\n` wewnątrz akapitu | soft break — nie rozbija akapitu w CommonMark. **Do potwierdzenia na `segmentuj.ts`** (O1). |
-| `<img>` | `![alt](_media/<plik>)` w osobnym bloku + wpis w manifeście | **NIGDY inline `data:` — patrz `_media/` niżej (ERRATA E4)** |
+| `<h1>`…`<h6>` | ATX `#`…`######` + spacja | **setext nigdy** — poza kontraktem (ODPOWIEDZ A4). Nagłówek pusty lub sam whitespace → **pomijany w całości** (nie emitujemy `#` bez tekstu, bo `RE_ATX` łapie `#` na końcu linii). |
+| `<p>` | akapit | pusty lub sam whitespace → **pomijany**, nie zostawia pustego bloku |
+| `<strong>`, `<b>` | `**…**` | patrz §Inline niżej |
+| `<em>`, `<i>` | `*…*` | patrz §Inline niżej |
+| `<div data-divider>` | `---` w osobnym bloku | węzeł **atomowy — konsumowany w całości PRZED regułą unwrap**. Styl czytany z atrybutu **`data-divider-style`** (`stars`/`line`/`dots`, domyślnie `stars`) — definicja atrybutu `Divider.js:14-17`, emisja w renderze node'a `Divider.js:84`. **Nie z atrybutu `style`** — ten niesie CSS (`text-align: center; …`). |
+| `<hr>` | `---` w osobnym bloku | do `dividers` **nie wchodzi** (to nie jest node TipTapa ze stylem) |
+| `<ul>`/`<ol>`/`<li>` | `-` / `1.` `2.` `3.` | numeracja **rosnąca**, nie `1.` powtórzone. Zagnieżdżenie: patrz §Listy |
+| `<blockquote>` | prefiks `> ` na każdej linii | bez lazy continuation — `RE_BQ` wymaga `>` w każdej linii (`segmentuj.ts:100-105`) |
+| `<br>` | pojedynczy `\n` wewnątrz akapitu | **rozstrzygnięte na kodzie, nie do potwierdzenia** — patrz §`<br>` |
+| `<img>` | `![alt](_media/<plik>)` w osobnym bloku | **NIGDY inline `data:`** — patrz §`_media/` |
+| `<figcaption>` | akapit **po** bloku obrazu | |
 | `<svg>`, `<script>`, `<style>` | **usunięte wraz z treścią** (`decompose()`) | **nie unwrap** — zmierzone: `div[data-divider].get_text()` zwraca tekst z wnętrza SVG, więc unwrap wpuściłby go do prozy jako chunk do redakcji |
 | `<span>` i tagi nieznane | unwrap (zostaje tekst) | wyjątek: węzły już skonsumowane atomowo (`div[data-divider]`, `<img>`) i wiersz wyżej |
+| tekst top-level poza blokiem | własny akapit | goły węzeł tekstowy pod `<body>` nie ginie |
 | encje (`&amp;` itd.) | zdekodowane | robi to bs4 |
 
-Poza tabelą, wymogi twarde z kontraktu:
+#### Kolejność operacji (bez tego reguły przeczą sobie nawzajem)
 
-- **NFC** na całym wyjściu (ODPOWIEDZ A5) — `unicodedata.normalize('NFC', …)` na końcu.
-- **`&nbsp;` (U+00A0) → zwykła spacja**, tak samo U+2009, U+202F, U+2007. Patrz D3.
-- **Separatory jako `---`, nie `***`** (ODPOWIEDZ B1). Oba są chunkiem `akapit` i kosztują
-  jedno wywołanie W2, ale `***` mnoży się w tekście.
-- **Escaping minimalny**: backslash tylko przed znakiem, który na początku linii utworzyłby
-  przypadkową strukturę Markdowna (`#`, `-`, `+`, `*`, `>`, `cyfra.`). W środku linii nie
-  escape'ujemy — nadmiarowe backslashe zaśmiecają prozę, którą czyta redaktor.
-- Biały znak: ciągi whitespace wewnątrz bloku zwijane do jednej spacji, bloki rozdzielone
-  dokładnie jedną pustą linią, plik kończy się dokładnie jednym `\n`.
+Dokładnie ta kolejność, bo v0.2 miała tu sprzeczność („whitespace do jednej spacji" kasowało
+`\n` wstawione przez `<br>`):
+
+1. `decompose()` na `<svg>`, `<script>`, `<style>`.
+2. Wyjęcie węzłów atomowych (`div[data-divider]`, `<img>`).
+3. Budowa bloków; wewnątrz bloku **`<br>` staje się twardą granicą linii i nie jest białym znakiem**.
+4. **Zwijanie whitespace osobno w obrębie każdej linii** — ciągi białych znaków (w tym U+00A0,
+   U+2009, U+202F, U+2007) do jednej spacji.
+5. `strip()` każdej linii; linie puste po strip wewnątrz bloku **usuwane** (nie zostawiają
+   pustej linii, która rozbiłaby blok na dwa chunki).
+6. **Escaping per linia** (§Kontrakt escapingu) — na każdej linii bloku, nie tylko pierwszej.
+7. Złożenie bloków: dokładnie jedna pusta linia między blokami.
+8. `unicodedata.normalize('NFC', …)` na całości (ODPOWIEDZ A5).
+9. Plik kończy się dokładnie jednym `\n`.
+
+#### Inline — spacje i puste znaczniki
+
+- Węzły inline **sklejane bez wstawiania spacji**; spacje pochodzą wyłącznie z węzłów
+  tekstowych i przechodzą przez zwijanie z kroku 4.
+- Białe znaki z **wnętrza** `<strong>`/`<em>` wychodzą **na zewnątrz** znaczników:
+  `<strong>tekst </strong>` → `**tekst** `, nigdy `**tekst **`. Powód: `** **` nie jest
+  wyróżnieniem w CommonMark i wygląda dla redaktora jak błąd.
+- `<strong>`/`<em>` puste albo zawierające sam whitespace → **znaczniki nie są emitowane**.
+- Zagnieżdżenie `<strong><em>x</em></strong>` → `***x***`.
+- Literalnych `*`, `_`, `` ` `` **w środku linii nie escape'ujemy.** Chunker nie parsuje inline
+  (`segmentuj.ts` pracuje wyłącznie na początkach linii), a backslashe zaśmiecają prozę, którą
+  czyta redaktor. Konsekwencja dla `md-import` jest zapisana w §Ograniczenia.
+
+#### Listy
+
+- Zagnieżdżenie: **2 spacje wcięcia na poziom**. Wynika wprost z `INDENT_MIN = 2`
+  (`segmentuj.ts:20`) — linia wcięta o ≥2 spacje jest kontynuacją listy, nie nowym blokiem.
+- `<li>` z blokami potomnymi (`<p>`, zagnieżdżona lista): pierwszy blok idzie zaraz za
+  markerem, kolejne w nowej linii wciętej o 2 spacje. Pusta linia wewnątrz listy jest legalna —
+  chunker przeskakuje ją lookaheadem (`segmentuj.ts:118-125`), jeśli po niej wraca marker
+  albo wcięcie ≥2.
+- `<li>` puste → pomijane.
+- `<ol start="N">` — numeracja od `N`.
+
+#### `<br>` → `\n` — rozstrzygnięte na kodzie (dawne O1, zamknięte)
+
+`segmentuj.ts:142`: akapit ciągnie się dopóki następna linia **nie jest pusta i nie zaczyna
+bloku** (`startsBlock` = fence | ATX | blockquote | marker listy). Pojedynczy `\n` **nie
+rozbija akapitu**, więc `<br>` → `\n` jest bezpieczne i zostaje.
+
+**Warunek konieczny:** escaping z kroku 6 musi objąć **każdą** linię bloku. Linia powstała po
+`<br>`, która zaczyna się od `- `, `# `, `> ` albo `1. `, rozbiłaby akapit na dwa chunki —
+i to jest dokładnie ta klasa błędu, której v0.2 nie widziała, escape'ując tylko początek bloku.
+
+### Kontrakt escapingu — wyprowadzony z `segmentuj.ts`, nie z CommonMarka
+
+Reguła v0.2 („`#`, `-`, `+`, `*`, `>`, `cyfra.`") była napisana z głowy i **nie pokrywała
+języka konsumenta** — R1 Codexa udowodnił to kontrpróbą na produkcyjnym chunkerze
+(Node 24 `--experimental-strip-types`, EXIT=0). Reguła obowiązująca jest przepisana z sześciu
+regexów `segmentuj.ts:12-17`:
+
+| Regex konsumenta | Miejsce | Co produkuje bez escapingu |
+|---|---|---|
+| `RE_FENCE_OPEN = /^ {0,3}(`{3,}\|~{3,})/` | `:12` | chunk `kod` — **cała proza do końca pliku**, jeśli fence się nie zamknie |
+| `RE_ATX = /^ {0,3}#{1,6}(\s\|$)/` | `:13` | chunk `naglowek` → **rozjazd K-NAG przy apply** |
+| `RE_TABLE_SEP = /^ {0,3}\|?[ :\|-]*-[ :\|-]*\|?\s*$/` | `:14` | chunk `tabela`, gdy poprzednia linia zawiera `\|` |
+| `RE_BQ = /^ {0,3}> ?/` | `:15` | chunk `blockquote` |
+| `RE_MARKER = /^ {0,3}([-*+]\|\d{1,9}[.)])\s/` | `:16` | chunk `lista` |
+| `RE_BLANK = /^\s*$/` | `:17` | rozbicie bloku na dwa chunki |
+
+**Reguła:** dla każdej linii prozy (nie dla linii, które konwerter emituje jako strukturę)
+sprawdź powyższe pięć wzorców strukturalnych. Jeśli **którykolwiek** pasuje — wstaw `\`
+**przed pierwszym nie-białym znakiem linii**. Backslash wypada przed dopasowaniem regexu, więc
+jedno wstawienie neutralizuje każdy z nich.
+
+Trzy konsekwencje warte nazwania:
+
+- **Escaping jest węższy niż w v0.2, nie szerszy.** `RE_ATX` wymaga `#` z następującym białym
+  znakiem lub końcem linii, a `RE_MARKER` wymaga białego znaku po markerze — więc `#hasztag`
+  i `-myślnik` **nie są** strukturą i **nie dostają** backslasha. v0.2 escape'owała je
+  niepotrzebnie. Mniej backslashy w prozie, którą czyta redaktor.
+- **Tabela to warunek dwuliniowy, ale escape jest jednoliniowy.** `L.includes("|")` byłoby
+  prawdziwe także dla `\|`, więc escape'owanie pipe'ów nic nie daje. Neutralizujemy **linię
+  separatora** — `\` nie należy do klasy `[ :|-]`, więc `RE_TABLE_SEP` przestaje pasować.
+- **Nasze własne `---` (separator i `<hr>`) nigdy nie są escape'owane.** Są emitowane jako
+  struktura i zawsze poprzedzone pustą linią, a warunek tabeli wymaga, żeby **poprzednia**
+  linia zawierała `|` — pusta linia go nie spełnia. Chunk wychodzi jako `akapit`, zgodnie
+  z ODPOWIEDZ B1.
+- **Backslashy w prozie nie podwajamy.** Chunker jest regexowy, nie CommonMarkowy — podwojenie
+  nie zmienia typu chunka, a zaśmieca tekst.
+
+Fixture testowy dla escapingu **wyprowadza się z tej tabeli**, z wariantami 0, 1, 2 i 3 spacji
+wiodących dla każdego wzorca, plus przypadki negatywne (`#hasztag`, `-myślnik`, `1.5 mg`),
+które **nie mogą** dostać backslasha.
+
+Poza tym, wymogi twarde z kontraktu:
+
+- **NFC** na całym wyjściu (ODPOWIEDZ A5).
+- **`&nbsp;` (U+00A0) → zwykła spacja**, tak samo U+2009, U+202F, U+2007. Patrz §Ograniczenia.
+- **Separatory jako `---`, nie `***`** (ODPOWIEDZ B1).
 - **Plik to czysta proza. Zero frontmattera YAML** — potwierdzone empirycznie po stronie
   Redaktora: `---\ntitle: …\n---` staje się jednym chunkiem typu `akapit` i leci do W1/W2
   jako proza do redakcji (ODPOWIEDZ A3). Metadane idą do `_tiolibri/manifest.json`.
@@ -138,31 +336,73 @@ zaniżony ~3× i bramka budżetu świeci zielono, nie mierząc niczego**.
 
 **Uwaga na pochodzenie tej próbki:** zmierzony plik wyszedł **prosto z Google Docs, nie
 z TIOLIBRI**, więc mówi o materiale źródłowym, nie o naszym eksporcie. Wymóg przyjmujemy mimo
-to w całości — tryb awarii jest cichy, a koszt zabezpieczenia zerowy.
+to w całości, bo tryb awarii jest cichy. **Koszt zabezpieczenia nie jest zerowy** — to była
+nieprawda w v0.2, sprzeczna z własnym sizingiem tego samego dokumentu: `_media/`, dekodowanie
+base64 i limity rozmiaru to około **+70 LOC i +10 min**. Przyjęty świadomie.
 
-Czy nasze rozdziały niosą dziś `data:` URI — **niesprawdzone** (baza poza zasięgiem wątku,
-w którym pisano ten spec). Kod daje dwa mechanizmy ciągnące w przeciwne strony:
-`lib/htmlConverter.js` **nie dotyka `<img>`** (konwersja z Google Docs zachowuje `data:`),
-ale edytor ma `Image.configure({ allowBase64: false })` (`ChapterEditor.jsx:60-62`), więc
-TipTap wyrzuca obrazy base64 przy wczytaniu i pierwszy zapis w edytorze utrwala treść bez nich.
-**Konwerter ma być odporny w obie strony** — obecność `data:` traktujemy jako możliwą, a nie
-jako pewną. Do sprawdzenia jednym zapytaniem przy implementacji:
+Czy nasze rozdziały niosą dziś `data:` URI — **niesprawdzone**. Kod daje dwa mechanizmy ciągnące
+w przeciwne strony: `lib/htmlConverter.js` **nie dotyka `<img>`** (konwersja z Google Docs
+zachowuje `data:`), ale edytor ma `Image.configure({ allowBase64: false })`
+(`ChapterEditor.jsx:60-62`), więc TipTap wyrzuca obrazy base64 przy wczytaniu i pierwszy zapis
+w edytorze utrwala treść bez nich. **Konwerter ma być odporny w obie strony.** Do sprawdzenia
+jednym zapytaniem przy implementacji:
 `select count(*) from chapters where processed_html like '%data:image%'`.
 
-Reguły:
+#### Reguły dla `src`
 
-- `src` zaczynające się od `data:` → zdekoduj base64, zapisz do ZIP-a jako
-  `_media/<ksiazka>-<NN>-img-<KK>.<ext>`, w prozie zostaw `![alt](_media/<plik>)`.
-  Rozszerzenie z typu MIME; nieznany/nieobsługiwany MIME → `.bin` + wpis w manifeście
-  z `"mime_unknown": true` (nie wywalamy eksportu przez jeden dziwny obrazek).
-- `src` będące `http(s)://` (Supabase Storage) → **zostaje jak jest**, linia i tak jest
-  krótka. Do `_media/` nie ściągamy — to byłby ruch sieciowy w trakcie budowy ZIP-a,
-  z własnymi trybami awarii, za zero zysku dla mierzalności.
-- `alt` przepisywany bez zmian; pusty `alt` zostaje pusty (nie zmyślamy opisu).
-- Limity: **≤10 MB na obraz, ≤80 MB na cały ZIP**. Przekroczenie → 413 z komunikatem
-  wskazującym rozdział, nie ciche obcięcie.
-- Nazwy plików w `_media/` **generujemy my** ze sluga i licznika — nigdy z `alt`, `title`
-  ani z URL-a. Zero danych użytkownika w ścieżce = zero traversal.
+**`data:` URI** — parsowany jako `data:<mime>[;<param>]*[;base64],<payload>`:
+
+| Przypadek | Zachowanie |
+|---|---|
+| poprawny `;base64` z rozpoznanym MIME | dekoduj, zapisz `_media/<book_key>-<NN>-img-<KK>.<ext>`, w prozie `![alt](_media/<plik>)` |
+| MIME z parametrami (`;charset=…`) | parametry **ignorowane**, rozszerzenie z części przed pierwszym `;` |
+| MIME spoza allowlisty | rozszerzenie `.bin`, wpis w manifeście `"mime_unknown": true`. Allowlista: `image/png`→`.png`, `image/jpeg`→`.jpg`, `image/gif`→`.gif`, `image/webp`→`.webp`, `image/avif`→`.avif`. **`image/svg+xml` też trafia w `.bin`** — format aktywny nie dostaje wykonywalnie wyglądającego rozszerzenia |
+| brak `;base64` (payload percent-encoded) | **obraz pominięty**, blok obrazu **nie jest emitowany**, wpis w manifeście `"skipped": true, "reason": "not_base64"` |
+| `base64.b64decode` rzuca | pominięty, `"reason": "base64_decode_failed"` |
+| payload pusty (0 B po dekodowaniu) | pominięty, `"reason": "empty_payload"` |
+| >10 MB po dekodowaniu | **413 dla całego eksportu** z nazwą rozdziału — nie pomijamy po cichu |
+
+**Deklarowanego MIME nie weryfikujemy wobec bajtów.** Rozszerzenie idzie za deklaracją.
+Sniffing to dodatkowe LOC bez wartości — Redaktor obrazów nie renderuje. Decyzja świadoma,
+nie przeoczenie.
+
+**`http(s)://` (Supabase Storage)** — `src` **zostaje jak jest**, linia i tak jest krótka. Do
+`_media/` nie ściągamy: to ruch sieciowy w trakcie budowy ZIP-a, z własnymi trybami awarii,
+za zero zysku dla mierzalności.
+
+**Inny schemat** (`file:`, `blob:`, względny) — pominięty, `"reason": "unsupported_scheme"`.
+
+#### Reguły dla `alt` i URL-a
+
+- `alt` przepisywany, ale **z neutralizacją znaków, które zamykają składnię obrazu**: `\` → `\\`,
+  `]` → `\]`, `\n`/`\r` → pojedyncza spacja. Bez tego `alt` z `]` produkuje nową strukturę
+  w prozie — v0.2 mówiła „alt bez zmian" i to było błędem.
+- Pusty `alt` zostaje pusty (nie zmyślamy opisu).
+- URL zdalny zawierający spację, `(` albo `)` → owinięty w `<…>`: `![alt](<https://…>)`.
+  Nasze własne nazwy w `_media/` są generowane, więc nigdy tego nie wymagają.
+- Nazwy plików w `_media/` **generujemy my** z `book_key`, pozycji rozdziału i licznika —
+  nigdy z `alt`, `title` ani z URL-a. Zero danych użytkownika w ścieżce = zero traversal.
+
+#### Umiejscowienie bloku obrazu
+
+`<img>` jest konsumowany atomowo i **zawsze ląduje we własnym bloku**:
+
+- gdy `<img>` jest jedyną znaczącą treścią rodzica (`<p>`, `<figure>`) — ten blok **staje się**
+  blokiem obrazu;
+- gdy `<img>` stoi wśród tekstu — jest **wyniesiony** do własnego bloku umieszczonego
+  **bezpośrednio po** bloku, w którym stał; kolejność wyniesionych obrazów zachowuje kolejność
+  dokumentu.
+
+Powód: linia `![alt](…)` ma być blokiem samowystarczalnym niosącym własną kotwicę. Obraz
+zostawiony w środku akapitu wciąż byłby jednym chunkiem `akapit`, ale kotwica edycji
+(exact-match, ODPOWIEDZ A5) mogłaby trafić w składnię obrazu.
+
+#### Limity
+
+- **≤10 MB na obraz, mierzone na bajtach ZDEKODOWANYCH** (nie na długości tekstu base64).
+- **≤80 MB na cały ZIP, mierzone jako suma rozmiarów wpisów PRZED kompresją** — bo to ta suma
+  ogranicza pamięć przy budowie ZIP-a w buforze, nie rozmiar wynikowy.
+- Przekroczenie → 413 z komunikatem wskazującym rozdział, nie ciche obcięcie.
 
 **Świadome ograniczenie:** Redaktor kopiuje `.md` do `redaktor/praca/<basename>/<run-id>/input.md`,
 więc względna ścieżka `_media/…` **nie rozwiąże się w katalogu przebiegu**. To jest bez
@@ -179,90 +419,201 @@ przez powrót do inline** — inline jest dokładnie tym, co E4 zakazuje.
   "exported_at": "2026-08-07T12:00:00+00:00",
   "project_id": "<uuid>",
   "project_title": "Osteoporoza",
-  "book_slug": "osteoporoza",
+  "book_key": "osteoporoza-a1b2c3d4",
   "chapters": [
     {
       "chapter_id": "<uuid>",
-      "filename": "osteoporoza-01-wstep.md",
+      "filename": "osteoporoza-a1b2c3d4-01-wstep.md",
       "title": "Wstęp",
       "sort_order": 0,
       "position": 1,
       "hash": "sha256:<hex>",
       "chars": 18422,
+      "blocks": { "naglowek": 3, "akapit": 41, "lista": 2, "blockquote": 0, "kod": 0, "tabela": 0 },
       "dividers": ["stars", "stars"],
       "images": [
-        { "order": 1, "kind": "embedded", "file": "_media/osteoporoza-01-img-01.png",
+        { "order": 1, "kind": "embedded", "file": "_media/osteoporoza-a1b2c3d4-01-img-01.png",
           "mime": "image/png", "bytes": 83127, "alt": "" },
-        { "order": 2, "kind": "remote", "src": "https://…", "alt": "wykres DXA" }
+        { "order": 2, "kind": "remote", "src": "https://…", "alt": "wykres DXA" },
+        { "order": 3, "kind": "embedded", "skipped": true, "reason": "base64_decode_failed",
+          "alt": "" }
       ]
     }
   ]
 }
 ```
 
-`hash` liczony **sha256 na NFC treści .md**, z prefiksem `"sha256:"` — celowo w formacie
-`chunks.json.hash_input` Redaktora (ODPOWIEDZ §C), żeby `md-import` mógł je porównać wprost.
-`dividers` i `images` istnieją po to, żeby import odtworzył to, czego Markdown nie niesie —
-styl separatora graficznego jest atrybutem node'a TipTapa (`Divider.js`), nie treścią.
+**Kontrakt manifestu (to jest kontrakt eksportu, nie zapowiedź importu):**
+
+- `version: 1`. Czytelnik ma **ignorować nieznane pola** i **odrzucić nieznaną wartość
+  `version`** — bez tego dopisanie pola w przyszłości psuje starych czytelników.
+- `hash` liczony **sha256 na NFC treści .md**, z prefiksem `"sha256:"` — celowo w formacie
+  `chunks.json.hash_input` Redaktora (ODPOWIEDZ §C), żeby `md-import` mógł je porównać wprost.
+- `blocks` to liczniki wyemitowane przez konwerter — **wejście bramki z kroku 4**.
+- `dividers` i `images` istnieją, żeby import odtworzył to, czego Markdown nie niesie — styl
+  separatora jest atrybutem node'a TipTapa (`Divider.js:14-17`), nie treścią.
+- Obraz pominięty ma `"skipped": true` i `"reason"`; **nie ma wtedy `file` ani `bytes`**.
+- Rozdział bez treści nie trafia do manifestu — endpoint odrzuca eksport wcześniej (§Endpoint).
 
 ### Endpoint
 
 `POST /projects/{project_id}/export-md` w istniejącym `app/routers/export_import.py`.
 
-- Body: `{ "chapter_ids": ["<uuid>", …] }`; pusta/brakująca lista = wszystkie nieusunięte rozdziały.
-- Dostęp: `_assert_project_access(project_id, user["id"])` — bez zmian w modelu uprawnień.
-- Odczyt: `chapters` z `deleted_at is null`, `order("sort_order")`, filtr po `chapter_ids`.
-- **Kłódka i status NIE filtrują** — kłódka chroni zapis, nie odczyt (ODPOWIEDZ/HANDOFF, ekran
-  eksportu). U właściciela wszystko siedzi w `draft`.
-- Odpowiedź: `StreamingResponse` + `Content-Disposition` z RFC 5987 `filename*=UTF-8''…` —
-  ten sam wzorzec co `export_project` (`export_import.py:114-122`).
-- `log_activity(action_type="project.export_md", details={chapter_count, book_slug})` +
-  etykieta w `activityLabels.js`.
+**Body** — model Pydantic:
+
+```python
+class ExportMdRequest(BaseModel):
+    chapter_ids: list[UUID] | None = None
+```
+
+| Wejście | Zachowanie |
+|---|---|
+| brak body **albo** `chapter_ids: null` | wszystkie nieusunięte rozdziały projektu |
+| `chapter_ids: []` (jawnie pusta lista) | **400** „wybrano zero rozdziałów" |
+| `chapter_ids` z ID spoza projektu / usuniętym | **404** z listą nierozpoznanych ID |
+| ID niebędące UUID | **422** (walidacja Pydantic) |
+| projekt bez rozdziałów | **400** „projekt nie ma rozdziałów" — nie zwracamy pustego ZIP-a |
+
+Rozróżnienie „lista niepodana" od „jawnie wybrano zero" jest tu **całym sensem** modelu:
+`[] = wszystkie` z v0.2 dawało klasyczny błąd UI, w którym odznaczenie wszystkiego eksportuje
+całą książkę. Frontend tej fazy nie wysyła body w ogóle — pole istnieje pod przyszły modal.
+
+**Odczyt i porządek:**
+
+- `_assert_project_access(project_id, user["id"])` (`export_import.py:238`) — bez zmian
+  w modelu uprawnień.
+- `chapters` z `deleted_at is null`, `order("sort_order")`, **tie-breaker `order("id")`** —
+  `sort_order` bywa dziurawy i bywa równy; bez drugiego klucza kolejność (a więc numery `NN`
+  i nazwy plików) jest niedeterministyczna między eksportami. `created_at` **nie jest używane**,
+  bo nie potwierdziłem tej kolumny w `chapters` — `id` jest pewne.
+- **Kłódka i status NIE filtrują** — kłódka chroni zapis, nie odczyt. **To jest decyzja lokalna
+  tego speca, nie ustalenie z kanonu**: ODPOWIEDZ nie zna pojęcia „ekran eksportu" i v0.2
+  cytowała je błędnie. U właściciela wszystko siedzi w `draft`, więc filtrowanie po statusie
+  odcięłoby całą treść.
+
+**Rozdział bez `processed_html` — fail-closed:**
+
+`useChapters.js:177-212` pokazuje, że rozdział bez `processed_html` jest **legalnym stanem**:
+frontend sięga wtedy po `source_file_path`, ściąga oryginał z bucketu `uploads` i w razie
+potrzeby przepuszcza go przez `convertGoogleDocsHtml`. Ten fallback żyje w JS-ie po stronie
+przeglądarki; **przeniesienie go do Pythona jest poza zakresem tego speca** (drugi konwerter,
+osobna klasa błędów, sizing i tak padł).
+
+Dlatego endpoint: czyta wyłącznie `processed_html`, a jeśli **którykolwiek** z eksportowanych
+rozdziałów ma je puste lub `NULL` → **409 z listą tytułów** i komunikatem „otwórz i zapisz te
+rozdziały w edytorze, potem spróbuj ponownie". Cichy skip byłby dokładnie tą klasą błędu, przed
+którą ostrzega ODPOWIEDZ B2: książka niekompletna, a nikt się nie skarży.
+
+Sprawdzić przy implementacji, żeby wiedzieć czy to w ogóle występuje:
+`select count(*) from chapters where processed_html is null and deleted_at is null`.
+
+**Odpowiedź:**
+
+- `StreamingResponse` + `Content-Disposition` z RFC 5987 `filename*=UTF-8''…` — ten sam wzorzec
+  co `export_project` (`export_import.py:114-122`).
+- `log_activity(action_type="project.export_md", details={chapter_count, book_key})` + etykieta
+  w `activityLabels.js`.
 - Twarda asercja przed spakowaniem: **wszystkie nazwy plików w ZIP-ie unikalne**. Kolizja
-  slugów → sufiks `-2`, `-3`; gdyby i to nie wystarczyło → 500 zamiast cichego nadpisania.
+  slugów tytułów rozdziałów → sufiks `-2`, `-3`; gdyby i to nie wystarczyło → 500 zamiast
+  cichego nadpisania. Globalną unikalność między książkami zapewnia `book_key`, nie ten sufiks.
 
-### Slug
-
-`slugify(text)`: NFC → NFKD → odrzucenie znaków łączących (`ą`→`a`, `ł`→`l` osobną mapą, bo
-NFKD go nie rozkłada) → lowercase → `[^a-z0-9]+` na `-` → trim `-` → obcięcie do 40 znaków.
-Pusty wynik → `rozdzial`. Uzasadnienie ASCII zamiast diakrytyków: D1.
+Błędy 4xx/5xx wracają jako JSON i **są widoczne dla frontendu mimo `responseType: 'blob'`** —
+`authedFetch` sprawdza `res.ok` i rzuca `Error(err.detail)` **przed** gałęzią blobową
+(`lib/authedFetch.js:30` vs `:33`). Sprawdzone; nie wymaga zmian w `authedFetch`.
 
 ### Frontend
 
-`tiolibri-frontend/src/features/editor/ExportMarkdownModal.jsx` + przycisk w Inspectorze
-`EditorPage.jsx`.
+Przycisk w Inspectorze `EditorPage.jsx` + etykieta w `activityLabels.js`. **Bez modala.**
 
-- Lista rozdziałów, **domyślnie wszystkie zaznaczone**.
-- Przy każdym: liczba znaków, badge statusu, ikona kłódki — informacyjnie, **bez filtrowania**.
-  **Liczba znaków liczona z tekstu, nie z długości `processed_html`** — inaczej rozdział z jednym
-  osadzonym obrazem pokaże 118 tys. znaków zamiast 35 tys. (ERRATA E4). Licząc `textContent`
-  sparsowanego HTML-a dostajemy to za darmo: atrybuty, w tym `src`, nie wchodzą.
-- Checkbox „tylko zmienione od ostatniego eksportu" — porównanie hasha z `localStorage`
-  (D2). Wyszarzony, gdy nie było jeszcze eksportu tego projektu.
 - Pobranie przez `authedFetch(..., { responseType: 'blob' })` + `URL.createObjectURL`, dokładnie
-  jak `handleExport` w `ProjectCard.jsx:194-215`. Po sukcesie zapis hashy do localStorage.
-- Pod listą jedno zdanie instrukcji: *„Rozpakuj do `redaktor/wsad/` — nie do `redaktor/praca/`."*
+  jak `handleExport` w `ProjectCard.jsx:194-215`.
+- Kontrakt stanów (to jest cały kontrakt UI tej fazy — jeden przycisk nie potrzebuje więcej):
+  przycisk `disabled` na czas żądania (blokada podwójnego submitu), `aria-busy="true"` w trakcie,
+  komunikat błędu z `err.message` renderowany pod przyciskiem, w tym czytelny tekst dla 409
+  (lista rozdziałów do otwarcia) i 413 (rozdział przekraczający limit).
+- Pod przyciskiem jedno zdanie instrukcji: *„Rozpakuj do `redaktor/wsad/` — nie do
+  `redaktor/praca/`."*
+
+**Notatka dla przyszłego speca modala** (poza zakresem, żeby nie zginęło): `components/ui/Modal.jsx`
+istnieje i ma zamykanie Escape (`:64-80`) oraz kliknięcie w overlay (`:87-90`), ale **nie ma
+focus trapu, nie przywraca focusu do przycisku wywołującego i nie ma `role="dialog"` ani
+`aria-modal`**. Spec modala musi to dołożyć, a nie założyć.
 
 ## Plan wdrożenia
 
-1. `app/services/md_exporter.py` — `chapter_to_markdown()` + `extract_images()` + `slugify()`
-   + `sha256_nfc()`. Testy jednostkowe na każdą regułę tabeli konwersji (nagłówki, bold/italic,
-   divider, hr, listy, blockquote, nbsp, escaping na początku linii, NFC, unwrap nieznanego
-   tagu) **oraz na E4: `data:` → plik w `_media/` + krótka linia w prozie, `https://` → zostaje,
-   nieznany MIME → `.bin` bez wywalania eksportu, przekroczenie limitu → 413.**
-   Test regresyjny wprost: w wyjściowym `.md` **nie może wystąpić ciąg `data:`**.
-2. `POST /projects/{project_id}/export-md` w `export_import.py` — budowa ZIP-a i manifestu,
-   asercja unikalności nazw, `log_activity` + etykieta w `activityLabels.js`.
-3. `ExportMarkdownModal.jsx` + przycisk w `EditorPage.jsx` + zapis hashy do localStorage.
-4. Weryfikacja na żywym materiale: eksport **jednego rozdziału Ewy o osteoporozie —
-   najgęstszego od liczb i dawek, nie najłatwiejszego** (ODPOWIEDZ ERRATA E3; ta sama sztuka
-   służy potem za rozdział kalibracyjny z P4). Przepuszczenie przez Redaktora do etapu
-   `chunks.json` i sprawdzenie trzech rzeczy: **K-NAG nie protestuje**, **żaden chunk nie jest
-   frontmatterem ani metadanymi** (dowód, że manifest obok plików zadziałał — A3), **liczba
-   chunków odpowiada z grubsza liczbie akapitów**. To jest test kontraktu, nie test jednostkowy.
-   Skala oczekiwana: rozdział Bożeny dał 27 chunków, czyli **blisko trzydzieści wywołań W2**
-   przy `provider: plik` — czyli tyleż cykli stop-wypełnij-wznów po stronie operatora
-   (ODPOWIEDZ ERRATA E1 — wcześniejsze „14 wywołań" było liczbą edycji, nie wywołań).
+1. **`app/services/md_exporter.py`** — `chapter_to_markdown()`, `slugify()`, `sha256_nfc()`,
+   `escape_line()`, dekodowanie `data:` URI. Testy w `tiolibri-api/test_md_exporter.py`
+   (`pip install pytest` lokalnie, **bez dopisywania do `requirements.txt`**):
+   - reguły tabeli konwersji: nagłówki (w tym pusty → pominięty), bold/italic (w tym puste
+     i whitespace na krawędziach), divider ze stylem z `data-divider-style`, `<hr>`, listy
+     **z zagnieżdżeniem 2 spacje**, blockquote, `<br>` → `\n` w jednym akapicie, nbsp, NFC,
+     unwrap nieznanego tagu, `decompose()` na `<svg>`, tekst top-level poza `<p>`;
+   - **escaping z fixture wyprowadzonego z `segmentuj.ts`**: po jednym przypadku na każdy
+     z pięciu wzorców strukturalnych × warianty 0–3 spacji wiodących, **plus przypadki
+     negatywne** (`#hasztag`, `-myślnik`, `1.5 mg`), które nie mogą dostać backslasha;
+   - E4: `data:` → plik w `_media/` + krótka linia w prozie, `https://` → zostaje, MIME spoza
+     allowlisty → `.bin`, `image/svg+xml` → `.bin`, brak `;base64` → pominięty z `reason`,
+     malformed base64 → pominięty z `reason`, >10 MB → wyjątek;
+   - `alt` z `]` i z newline, URL ze spacją → `<…>`;
+   - **test regresyjny wprost: w wyjściowym `.md` nie może wystąpić ciąg `data:`.**
+2. **`POST /projects/{project_id}/export-md`** w `export_import.py` — model body, budowa ZIP-a
+   i manifestu, asercja unikalności nazw, limit 80 MB, 409 dla braku `processed_html`,
+   `log_activity` + etykieta w `activityLabels.js`.
+3. **Przycisk w `EditorPage.jsx`** ze stanami z §Frontend.
+4. **Bramka kontraktowa na żywym materiale** — patrz niżej.
+
+### Krok 4 — bramka kontraktowa (zastępuje niewykonalne kryterium z v0.2)
+
+Materiał: **jeden rozdział Ewy o osteoporozie, najgęstszy od liczb i dawek, nie najłatwiejszy**
+(ODPOWIEDZ ERRATA E3; ta sama sztuka służy potem za rozdział kalibracyjny z P4).
+
+v0.2 kazała „przepuścić do etapu `chunks.json` i sprawdzić, że K-NAG nie protestuje". **To jest
+niewykonalne w tym punkcie:** K-NAG działa przy `apply`, po edycjach, w kroku 7 `cli/apply.ts`
+(ODPOWIEDZ A4) — na etapie `chunks.json` w ogóle się nie uruchamia. Zastąpione trzema
+asercjami, wszystkimi uruchamialnymi na `chunks.json`:
+
+| # | Asercja | Tolerancja |
+|---|---|---|
+| G1 | Rozkład typów chunków **równy** `manifest.chapters[i].blocks` — dla każdego typu | **zero** |
+| G2 | Zero chunków typu `kod`, `lista` i `tabela` ponad te zadeklarowane w `blocks` (a te są zerami, bo `<pre>`/`<table>` są poza zakresem) | **zero** |
+| G3 | Ciąg nagłówków w `chunks.json` (liczba → poziom → tekst, po normalizacji białych znaków i wielkości liter) **równy** ciągowi `<h1..h6>` w źródłowym HTML | **zero** |
+| G4 | Żaden chunk nie jest frontmatterem ani metadanymi (dowód, że manifest obok plików zadziałał — A3) | **zero** |
+
+G3 to **lokalna symulacja K-NAG**: K-NAG porównuje pozycyjnie liczbę nagłówków → poziom →
+tekst, klucz jest case-insensitive i normalizuje białe znaki (ODPOWIEDZ A4), i używa tego samego
+`segmentuj()`. Symulacja nie zastępuje prawdziwego K-NAG — **pełny dowód powstaje dopiero przy
+`apply`** i jest osobnym, ręcznym przebiegiem właściciela, poza tą fazą.
+
+Porzucone kryterium „liczba chunków odpowiada z grubsza liczbie akapitów": nie miało ani
+tolerancji, ani mianownika (nagłówki, listy, obrazy i separatory też tworzą bloki). Zastąpione
+przez G1, które ma mianownik (`blocks` z konwertera) i zerową tolerancję.
+
+**Skala pracy operatora — literalnie obserwacja, nie prognoza:** rozdział **Bożeny** dał
+27 chunków, czyli blisko trzydzieści wywołań W2 przy `provider: plik` — tyleż cykli
+stop-wypełnij-wznów (ODPOWIEDZ ERRATA E1; wcześniejsze „14 wywołań" było liczbą edycji, nie
+wywołań). **Dla rozdziału Ewy nie mamy oczekiwanego przedziału** — v0.2 nazywała liczbę Bożeny
+„skalą oczekiwaną" i to było rozciągnięciem pomiaru na materiał, którego nikt nie mierzył.
+
+## Ograniczenia (świadomie poza zakresem)
+
+- **`<pre>`, `<code>` blokowe i `<table>`** — konwersja poza zakresem. Konwerter ich nie
+  produkuje, a bramka G2 traktuje ich pojawienie się w `chunks.json` jako błąd. Jeśli treść
+  książek zacznie ich używać — osobny spec.
+- **`&nbsp;` → spacja kasuje polską typografię sierot.** Kontrakt Redaktora tego wymaga, więc
+  nie ma wyboru na wyjściu. TIOLIBRI wstawia te nbsp celowo (spójniki `w`, `i`, `a` na końcu
+  linii). Odtworzenie po powrocie z redakcji to zadanie dla `md-import`. **Nie jest to decyzja
+  do podjęcia — to ograniczenie do zapisania**, żeby nie zginęło między specami.
+- **Brak escapingu inline (`*`, `_`, `` ` `` w środku linii)** — nieszkodliwy dla chunkera, ale
+  `md-import` musi wiedzieć, że wyjście Redaktora nie jest jednoznacznie odwracalne do HTML-a
+  w tych miejscach.
+- **Rozdział bez `processed_html`** — endpoint go nie eksportuje, tylko odrzuca całość (409).
+  Port `convertGoogleDocsHtml` do Pythona to osobna decyzja.
+- **Filtr „tylko zmienione od ostatniego eksportu"** — odcięty w R1. Nie miał przepływu danych:
+  frontend dostaje sam `Blob`, `authedFetch` nie wystawia nagłówków, nikt nie rozpakowuje ZIP-a
+  w JS. Hashe i tak lądują w `manifest.json` w ZIP-ie, więc nic nie ginie trwale — temat wraca
+  przy `md-import`, który manifest i tak czyta.
+- **Modal z wyborem rozdziałów** — odcięty w R1 razem z kontraktem a11y. Osobny light spec,
+  jeśli okaże się potrzebny.
 
 ## Co odrzucone
 
@@ -271,60 +622,54 @@ Pusty wynik → `rozdzial`. Uzasadnienie ASCII zamiast diakrytyków: D1.
 - **`***` jako separator** — mnoży się w tekście; `---` (ODPOWIEDZ B1).
 - **Rozpakowywanie do `redaktor/praca/`** — to katalog wyjściowy, tworzony przez ich CLI
   (ODPOWIEDZ §B).
-- **Nazwy unikalne w obrębie ZIP-a** — muszą być unikalne globalnie (ODPOWIEDZ B2).
+- **Nazwy unikalne w obrębie ZIP-a** — muszą być unikalne globalnie (ODPOWIEDZ B2). Stąd
+  `book_key` z UUID-em, a nie sam slug tytułu.
 - **`html2text` / `markdownify`** — best-effort, brak kontroli nad setextem, escapingiem
   i separatorami. Kontrakt jest zbyt wąski na bibliotekę ogólnego przeznaczenia.
-- **Kolumna w bazie na „ostatni eksport"** — patrz D2.
-- **Wyrzucanie `<img>` z prozy i odtwarzanie po indeksie bloku** — rozważone, odrzucone:
-  kotwiczenie po indeksie jest kruche, bo K-NAG pilnuje tylko nagłówków. Linia
-  `![alt](_media/…)` jest blokiem samowystarczalnym i sama niesie kotwicę, a manifest i tak
-  trzyma prawdę.
+- **Escaping napisany z CommonMarka** — konsumentem nie jest CommonMark, tylko sześć regexów
+  `segmentuj.ts:12-17`. Reguła z v0.2 przepuszczała fenced code, `cyfra)` i tabele.
+- **Kolumna w bazie na „ostatni eksport"** — migracja = thin FAIL + Risk HIGH, czyli inny spec.
+- **Wyrzucanie `<img>` z prozy i odtwarzanie po indeksie bloku** — kotwiczenie po indeksie jest
+  kruche, bo K-NAG pilnuje tylko nagłówków. Linia `![alt](_media/…)` jest blokiem
+  samowystarczalnym, a manifest i tak trzyma prawdę.
 - **`![alt](data:image/png;base64,…)` — obraz inline w prozie.** Odrzucone twardo przez
   ERRATA E4: 83 kB w jednej linii to edytowalny chunk lecący do modelu jako proza, a przy
   ~70% balastu mianownik strażnika budżetu rozjeżdża pomiar ~3×.
+- **Sniffing bajtów obrazu wobec deklarowanego MIME** — Redaktor obrazów nie renderuje,
+  rozszerzenie jest kosmetyką. LOC bez wartości.
 - **Ściąganie obrazów zdalnych (`https://`) do `_media/`** — linia z URL-em jest już krótka,
-  więc mierzalności to nie zmienia, a dokłada ruch sieciowy i tryby awarii w trakcie budowy ZIP-a.
-- **Pętla „cała książka jednym kliknięciem"** — bez sensu przed `PHASE-18` Redaktora: przy
-  `provider: plik` przebieg staje na KAŻDYM wywołaniu W2, więc pętla po katalogu daje
-  kilkanaście razy więcej ręcznej roboty naraz, nie automatyzację (ODPOWIEDZ P1).
+  a to dokłada ruch sieciowy i tryby awarii w trakcie budowy ZIP-a.
+- **Pętla „cała książka jednym kliknięciem" po stronie Redaktora** — bez sensu przed `PHASE-18`:
+  przy `provider: plik` przebieg staje na KAŻDYM wywołaniu W2, więc pętla po katalogu daje
+  kilkanaście razy więcej ręcznej roboty naraz, nie automatyzację (ODPOWIEDZ P1). **To nie jest
+  to samo, co nasz eksport całej książki** — my pakujemy pliki, przebiegi Redaktora zostają
+  osobne.
 - **Import / round-trip** — osobny spec `md-import`: thin FAIL (2 fazy, >2h) + Risk HIGH
   (nadpisuje treść prawdziwej książki) → full struktura, 3 rundy. **Kolejność potwierdzona
   przez Redaktora** (ODPOWIEDZ ERRATA E2): eksport przed importem, bo eksport odblokowuje
-  realną pracę, a import tylko domyka pętlę — dopóki go nie ma, wartość i tak jest
-  dostarczona, bo `raport.html` mówi, co Redaktor znalazł. Drugi powód: import wymaga poprawek
-  z §C, więc niech dojrzeje, zamiast być budowany dwa razy.
+  realną pracę, a import tylko domyka pętlę — dopóki go nie ma, wartość i tak jest dostarczona,
+  bo `raport.html` mówi, co Redaktor znalazł.
 
-## Decyzje wymagające potwierdzenia w review
+## Decyzje właściciela (zamknięte w R1)
 
-**D1. Nazwy plików ASCII, mimo że Redaktor dopuszcza diakrytyki.** ODPOWIEDZ B2 mówi „polskie
-znaki są OK (mamy już taki katalog w produkcji)". Mimo to slugujemy do ASCII, bo nazwa pliku
-jest **kluczem** (wyznacza katalog przebiegu i skrzynkę W2), a klucze mają być nudne. Dodatkowo
-macOS normalizuje nazwy plików do NFD, więc `gęstość` wpisane ręcznie w config i `gęstość`
-wyprodukowane przez unzip to potencjalnie dwa różne stringi bajtowo. Ryzyko jest małe, ale
-koszt uniknięcia zerowy. **Do zakwestionowania, jeśli czytelność nazw jest ważniejsza.**
+Wszystkie trzy rozstrzygnięte 2026-08-07, ślad w `_review/R1-opus-response.md`:
 
-**D2. „Zmienione od ostatniego eksportu" w localStorage, nie w bazie.** Filtr wymaga
-zapamiętania hashy z poprzedniego eksportu. Kolumna/tabela = migracja DB = thin FAIL + Risk
-HIGH, czyli inny spec i inny rygor. localStorage utrzymuje ten spec czysto odczytowym.
-Koszt: stan jest per przeglądarka i ginie po wyczyszczeniu danych — a jedynym skutkiem
-utraty jest to, że filtr chwilowo nic nie odfiltruje. **Świadomy trade-off, nie przeoczenie.**
+- **Zakres** → modal i filtr zmian odcięte; zostaje przycisk „eksportuj całą książkę".
+  Dyspensa sizingu na ~67 LOC ponad limit, źródło autoryzacji jak w nagłówku.
+- **Klucz książki** → `slug(tytuł)-<8 hex z project_id>`, ASCII. §`book_key`.
+- **Filtr zmian** → wypada z tej fazy. §Ograniczenia.
 
-**D3. `&nbsp;` → zwykła spacja kasuje polską typografię sierot.** Kontrakt Redaktora tego
-wymaga, więc nie ma wyboru na wyjściu. Ale TIOLIBRI wstawia te nbsp celowo (spójniki `w`, `i`,
-`a` na końcu linii). Po powrocie z redakcji trzeba je odtworzyć — to zadanie dla `md-import`,
-nie dla eksportu. **Zapisane tutaj, żeby nie zginęło między specami.**
-
-**O1. `<br>` → `\n` do potwierdzenia na `segmentuj.ts`.** W CommonMark pojedynczy newline nie
-rozbija akapitu, ale chunker Redaktora może liczyć bloki po swojemu. Jeśli rozbija — zmienić
-na spację. Sprawdzalne na rozdziale weryfikacyjnym z kroku 4, bez pytania drugiej strony.
+Dawne **O1** (`<br>` → `\n` czy spacja) **nie jest już otwarte** — rozstrzygnięte na
+`segmentuj.ts:142`, patrz §`<br>`.
 
 ---
 
 ## Dla Piotrka — jedno zdanie
 
-Spec eksportu do Markdowna założony jako light (thin PASS, Risk STANDARD → 2 rundy) i od razu
-wypełniony z kanonu ODPOWIEDZI — przejrzyj trzy decyzje D1–D3 na końcu, bo tam podjąłem wybory
-za Ciebie, a potem `/spec-handoff md-export`.
+Spec przepisany po R1: escaping wyprowadzony z prawdziwego chunkera zamiast z głowy, endpoint
+przestał gubić rozdziały i cicho eksportować całość przy pustym wyborze, krok weryfikacji
+zamieniony na cztery uruchamialne asercje, a zakres ścięty do tego, co wybrałeś — przycisk
+zamiast modala.
 
 **Kopiuj dalej — w tym samym wątku:**
 ```
