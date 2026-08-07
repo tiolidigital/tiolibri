@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { authedFetch } from '../../lib/authedFetch'
 import { useChapters } from './useChapters'
 import { useTypography } from './useTypography'
 import { useCover } from './useCover'
@@ -48,6 +49,10 @@ export default function EditorPage() {
   })
 
   const [showInspector, setShowInspector] = useState(false)
+
+  // Eksport .md dla Redaktora
+  const [exportingMd, setExportingMd] = useState(false)
+  const [exportMdError, setExportMdError] = useState(null)
 
   // Real autosave state surfaced by ChapterEditor for the header badge.
   const [saveState, setSaveState] = useState({ saving: false, lastSaved: null, saveError: null })
@@ -293,6 +298,30 @@ export default function EditorPage() {
   const handleInspectorToggle = useCallback(() => {
     setShowInspector((prev) => !prev)
   }, [])
+
+  const handleExportMd = useCallback(async () => {
+    if (exportingMd) return // blokada podwójnego submitu
+    setExportingMd(true)
+    setExportMdError(null)
+    try {
+      const blob = await authedFetch(`/projects/${projectId}/export-md`, {
+        method: 'POST',
+        responseType: 'blob',
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${(project?.title || 'ksiazka').replace(/[^a-zA-Z0-9\-_]/g, '_')}-redaktor.zip`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      setExportMdError(err.message || 'Nie udało się wyeksportować')
+    } finally {
+      setExportingMd(false)
+    }
+  }, [exportingMd, projectId, project])
 
   if (loading) {
     return (
@@ -665,6 +694,24 @@ export default function EditorPage() {
                   typographySettings={typographySettings}
                   coverImageUrl={coverUrl}
                 />
+
+                <div className="pt-3 border-t border-gray-200">
+                  <Button
+                    variant="secondary"
+                    className="w-full"
+                    onClick={handleExportMd}
+                    disabled={exportingMd}
+                    aria-busy={exportingMd ? 'true' : 'false'}
+                  >
+                    {exportingMd ? 'Eksportuję…' : 'Eksportuj do Redaktora (.md)'}
+                  </Button>
+                  <p className="mt-2 text-xs text-gray-500">
+                    Rozpakuj do <code>redaktor/wsad/</code> — nie do <code>redaktor/praca/</code>.
+                  </p>
+                  {exportMdError && (
+                    <p className="mt-2 text-xs text-red-600 whitespace-pre-line">{exportMdError}</p>
+                  )}
+                </div>
               </div>
             </div>
           </aside>

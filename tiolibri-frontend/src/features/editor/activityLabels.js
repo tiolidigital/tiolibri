@@ -13,6 +13,7 @@ const ACTION_LABELS = {
   'project.snapshot_manual': () => 'zapisał(a) ręczny snapshot projektu',
   'project.export': (d) => `wyeksportował(a) projekt${d.filename ? ` (${d.filename})` : ''}`,
   'project.import_from_tiolibri': (d) => `zaimportował(a) projekt "${d.original_title || ''}"`,
+  'project.export_md': (d) => `wyeksportował(a) książkę do Redaktora (${d.chapter_count ?? '?'} rozdz.)`,
 }
 
 export function actionLabel(event) {

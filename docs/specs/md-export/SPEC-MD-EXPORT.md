@@ -1,27 +1,40 @@
 # MD-EXPORT — eksport rozdziałów TIOLIBRI do Markdowna dla Redaktora
 
-**Wersja:** 0.4.1
+**Wersja:** 0.4.2
 **Mode:** light
 **Risk:** STANDARD   ← MAX_ROUNDS = 2. Uzasadnienie w §Bramki.
 **Data ostatniej zmiany:** 2026-08-07
 
-**Sizing: DYSPENSA** — oś LOC przekroczona świadomie, oś plików i czasu PASS.
-**Źródło autoryzacji:** decyzja właściciela w R1 (2026-08-07, `_review/R1-opus-response.md`
-§Decyzje właściciela, pytanie „Zakres") — po odcięciu modala i filtru zmian.
+**Sizing: DYSPENSA ROZSZERZONA DO ZMIERZONEGO ROZMIARU** — oś LOC przekroczona świadomie,
+oś plików i czasu PASS.
+**Źródło autoryzacji (aktualne):** decyzja właściciela z 2026-08-07 podjęta w wątku implementacji
+R2, po blokerze #2 z `_impl/R1-codex-review.md` („recenzent nie może sam rozszerzyć
+autoryzacji"). Wybór świadomy: **jedna kohezywna faza zamiast splitu**, bo kod istniał i był
+zielony, a 509 z tych LOC to testy. Ślad: `_impl/R2-sonnet-summary.md` §Sizing.
+**Źródło poprzednie (nieaktualne, zachowane dla audytu):** decyzja właściciela w R1
+(`_review/R1-opus-response.md` §Decyzje właściciela, pytanie „Zakres") — autoryzowała ~582 LOC.
 
-| Plik | Rodzaj | LOC |
-|---|---|---|
-| `tiolibri-api/app/services/md_exporter.py` | NOWY | ~300 |
-| `tiolibri-api/app/routers/export_import.py` | zmiana | ~85 |
-| `tiolibri-api/test_md_exporter.py` | NOWY | ~165 |
-| `tiolibri-frontend/src/features/editor/EditorPage.jsx` | zmiana | ~30 |
-| `tiolibri-frontend/src/features/editor/activityLabels.js` | zmiana | ~2 |
-| **razem** | **5 plików** | **~582 LOC** |
+| Plik | Rodzaj | LOC planowane | LOC zmierzone (R2) |
+|---|---|---|---|
+| `tiolibri-api/app/services/md_exporter.py` | NOWY | ~300 | **547** |
+| `tiolibri-api/test_md_exporter.py` | NOWY | ~165 | **509** |
+| `tiolibri-api/app/routers/export_import.py` | zmiana | ~85 | **+201 −2** |
+| `tiolibri-frontend/src/features/editor/EditorPage.jsx` | zmiana | ~30 | **+47** |
+| `tiolibri-frontend/src/features/editor/activityLabels.js` | zmiana | ~2 | **+1** |
+| **razem** | **5 plików** | ~582 | **~1307 LOC churn** (1305 dodań + 2 usunięcia) |
 
-Limit osi: **500 LOC / 90 min / 5 plików**. Pliki PASS (5/5), czas PASS (~90 min), LOC FAIL
-o ~82. Testy są **wliczone do tej samej sumy** (master §4.5, LESSONS#17) — nie ma zapisu
-„~300 LOC + testy osobno". Domen: jedna (eksport treści). Migracji: zero. Decyzji
-architektonicznych: jedna (serializator własny zamiast biblioteki, §Co odrzucone).
+Limit osi: **500 LOC / 90 min / 5 plików**. Pliki PASS (5/5), czas PASS, **LOC FAIL o ~807 —
+objęte dyspensą wyżej**. Testy są **wliczone do tej samej sumy** (master §4.5, LESSONS#17) —
+nie ma zapisu „~300 LOC + testy osobno". Domen: jedna (eksport treści). Migracji: zero.
+Decyzji architektonicznych: jedna (serializator własny zamiast biblioteki, §Co odrzucone).
+
+**Dokładna liczba przypadków testowych — 162** (LESSONS#17 pkt 5: wzrost macierzy nie może być
+cichym rozciągnięciem). Ścieżka wzrostu: R1 = **110**, R2 = **162** (+52). Cały przyrost R2
+to **remedium narzucone przez review R1**, nie nowy zakres: 26 przypadków emfazy w nagłówku
+(wyjście (B′) z blokera G3, wymagane wprost: „testy pełnej oraz częściowej emfazy"), 9 przypadków
+parytetu parserów wokół ścieżki fallbacku (uwaga Codexa o braku dowodu równoważności),
+reszta to regresje trzymające emfazę poza nagłówkiem nietkniętą. **Każdy dalszy wzrost macierzy
+wymaga ponownego jawnego potwierdzenia właściciela** — ta dyspensa go nie obejmuje.
 
 **Dyspensa urosła w R2: ~67 → ~82 LOC.** Powód jest jeden i nazwany: bloker #5 R2 wymusił
 fixture'y `blocks` (8 przypadków parametryzowanych, ~+15 LOC w pliku testowym), bez których
@@ -299,8 +312,8 @@ i obraz są w `blocks` policzone jako `akapit` i tak mają być, bo tak je widzi
 |---|---|---|
 | `<h1>`…`<h6>` | ATX `#`…`######` + spacja | **setext nigdy** — poza kontraktem (ODPOWIEDZ A4). Nagłówek pusty lub sam whitespace → **pomijany w całości** (nie emitujemy `#` bez tekstu, bo `RE_ATX` łapie `#` na końcu linii). |
 | `<p>` | akapit | pusty lub sam whitespace → **pomijany**, nie zostawia pustego bloku |
-| `<strong>`, `<b>` | `**…**` | patrz §Inline niżej |
-| `<em>`, `<i>` | `*…*` | patrz §Inline niżej |
+| `<strong>`, `<b>` | `**…**` | patrz §Inline niżej. **Wyjątek: w `<h1>`…`<h6>` marker NIE jest emitowany** — patrz §Emfaza w nagłówku |
+| `<em>`, `<i>` | `*…*` | patrz §Inline niżej. **Ten sam wyjątek dla nagłówka** |
 | `<div data-divider>` | `---` w osobnym bloku | węzeł **atomowy — konsumowany w całości PRZED regułą unwrap**. Styl czytany z atrybutu **`data-divider-style`** (`stars`/`line`/`dots`, domyślnie `stars`) — definicja atrybutu `Divider.js:14-17`, emisja w renderze node'a `Divider.js:84`. **Nie z atrybutu `style`** — ten niesie CSS (`text-align: center; …`). |
 | `<hr>` | `---` w osobnym bloku | do `dividers` **nie wchodzi** (to nie jest node TipTapa ze stylem) |
 | `<ul>`/`<ol>`/`<li>` | `-` / `1.` `2.` `3.` | numeracja **rosnąca**, nie `1.` powtórzone. Zagnieżdżenie: patrz §Listy |
@@ -342,6 +355,39 @@ Dokładnie ta kolejność, bo v0.2 miała tu sprzeczność („whitespace do jed
 - Literalnych `*`, `_`, `` ` `` **w środku linii nie escape'ujemy.** Chunker nie parsuje inline
   (`segmentuj.ts` pracuje wyłącznie na początkach linii), a backslashe zaśmiecają prozę, którą
   czyta redaktor. Konsekwencja dla `md-import` jest zapisana w §Ograniczenia.
+
+#### Emfaza w nagłówku — wyjątek od tabeli reguł (rozstrzygnięcie blokera G3, impl R2)
+
+**W `<h1>`…`<h6>` nie emitujemy żadnych markerów emfazy** — ani gdy emfaza obejmuje cały
+nagłówek, ani gdy tylko jego część. Poza nagłówkiem (akapit, `<li>`, blockquote) emfaza
+działa dokładnie jak w tabeli reguł.
+
+Powód, w kolejności ważności:
+
+1. **G3 ma zerową tolerancję i inaczej jest wewnętrznie sprzeczne z tabelą reguł.** G3 porównuje
+   tekst nagłówka z `get_text()` źródłowego `<hN>`, dopuszczając wyłącznie normalizację białych
+   znaków i wielkości liter. Każdy `**` po lewej stronie łamie równość. W R1 dało to 29/30
+   różnic na rozdziale 8. Ten wyjątek czyni G3 prawdziwym **z konstrukcji**, nie przez
+   osłabienie bramki.
+2. **Każdy marker w nagłówku to mina pod `apply`.** `chunkuj.ts:13` ustawia `nietykalny` tylko
+   dla `kod` i `tabela`, a te są u nas twardymi zerami (G2) — więc **nagłówki są chunkami
+   edytowalnymi** i idą do W2. K-NAG normalizuje tylko białe znaki i wielkość liter, więc `**`
+   jest dla niego częścią tekstu; zgubienie pary gwiazdek przez model rzuca wyjątek przed
+   publikacją, po setkach cykli operatora.
+3. **Emfaza w nagłówku nie niesie informacji.** Google Docs pogrubia treść nagłówka
+   mechanicznie. Emfaza **częściowa nie jest tu wyjątkiem** — zmierzone na produkcji, rozdz. 1
+   Ewy: `<h1><img/>WSTĘP: <strong>Jak zaczęła się moja historia z osteoporozą.</strong></h1>`.
+   To ten sam artefakt, tylko z nieobjętym prefiksem.
+
+**Droga do tej reguły (żeby nie wróciła jako „uproszczenie").** Codex w review implementacji R1
+zarządził wyjście **(B)**: zdejmować markery tylko przy emfazie obejmującej całość, częściową
+zostawić. Przebieg 12/12 z **literalnym** G3 (po zdjęciu diagnostycznej normalizacji z harnessu,
+która to maskowała) pokazał, że (B) zostawia jeden realny nagłówek z `**` — ten z rozdz. 1 wyżej.
+Właściciel rozszerzył (B) do **(B′)** decyzją z 2026-08-07; ślad w `_impl/R2-sonnet-summary.md`.
+
+Odrzucone wyjście **(A)** — „G3 zdejmuje markery przed porównaniem": naprawia harness zamiast
+produktu, zostawia `**` w edytowalnym chunku i rozluźnia bramkę dokładnie o tę emfazę, która
+potem wysadza K-NAG.
 
 #### Listy
 
@@ -840,8 +886,14 @@ Redaktora nie ma sensu przed `PHASE-18`** — i to jest ta sama konkluzja, co w 
 Wszystkie trzy rozstrzygnięte 2026-08-07, ślad w `_review/R1-opus-response.md`:
 
 - **Zakres** → modal i filtr zmian odcięte; zostaje przycisk „eksportuj całą książkę".
-  Dyspensa sizingu ponad limit — **~82 LOC** po wzroście w R2 (w R1 autoryzowane ~67), źródło
-  autoryzacji i powód wzrostu jak w nagłówku §Sizing.
+  Dyspensa sizingu ponad limit — w R1 spec autoryzował ~82 LOC ponad 500; **rozszerzona
+  2026-08-07 do zmierzonego rozmiaru ~1307 LOC churn**, patrz nagłówek §Sizing.
+
+## Decyzje właściciela (impl R2, 2026-08-07)
+
+- **Sizing** → dyspensa rozszerzona do zmierzonego rozmiaru zamiast splitu fazy. §Sizing.
+- **Emfaza w nagłówku** → **(B′)**: żadnych markerów w `<hN>`, także przy emfazie częściowej.
+  §Emfaza w nagłówku.
 - **Klucz książki** → `slug(tytuł)-<8 hex z project_id>`, ASCII. §`book_key`.
 - **Filtr zmian** → wypada z tej fazy. §Ograniczenia.
 
