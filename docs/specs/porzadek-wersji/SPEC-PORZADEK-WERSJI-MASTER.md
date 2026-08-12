@@ -1,0 +1,205 @@
+# PORZADEK-WERSJI — metadane projektu, etykieta wersji i snapshoty zamiast kopii
+
+**Wersja:** 0.1
+**Stage:** master-draft
+**Risk:** HIGH   <!-- migracja DB (thin#3) ORAZ compound (thin#5: trigger prune kasuje dane właściciela) → MAX_ROUNDS = 3 -->
+**Data ostatniej zmiany:** 2026-08-12
+**Status:** master-draft — w trakcie pisania
+
+**Źródło ustaleń:** `HANDOFF-porzadek-wersji-projektow.md` (rozmowa projektowa 2026-08-11, spisana 2026-08-12)
+**Bramki:** thin FAIL (1,2,3 = TAK; 4 = NIE) → struktura full. Risk HIGH ((3)=t ∧ (5)=t) → MAX_ROUNDS = 3.
+
+---
+
+## 1. Problem
+
+Piotrek robił kopie całych projektów „żeby móc się wrócić, jak coś zepsuję". Wyszło z tego
+**12 kafelków na dashboardzie, z których dwa są aktualne**, a reszta to ślady po pracy.
+
+Tytuł projektu jest dziś **jedynym nośnikiem informacji** o tym, czym dana kopia jest — i jest
+przycięty na karcie (`truncate`), więc „4.0" i „predaktor-" muszą się zmieścić w tytule i tak
+ich nie widać. Nie ma gdzie zapisać „to jest kopia sprzed Redaktora, do porównania po imporcie".
+
+Konsekwencja mierzalna: pomyłka w wyborze projektu = redakcja albo eksport starej treści.
+Różnice są duże — Ewa 4.0 ma ~2-3 tys. słów więcej niż 3.0 i **żaden** rozdział nie zgadza się
+hashem między wersjami (pamięć `project-kanoniczne-projekty-w-bazie`).
+
+Drugi wątek tego samego problemu: **aplikacja już robi snapshoty całych projektów co 6 h**
+(30 sztuk w bazie: Ewa 4.0 — 9, Bożena `507b3ee4` — 10) i **ani jeden nie jest ręczny**.
+Właściciel robił kopie projektów nie wiedząc, że dostaje to samo w tle — bo snapshot nie ma
+nazwy i po 15 automatach znika.
+
+Cytat wyznaczający zakres: *„chciałbym, żeby przy każdym tytule było jakieś miejsce na komentarze,
+na jakiś opis"* + *„mamy książkę Ewy, gdzie ja wklikuję się, tak jakbym wchodził do folderu
+i tam mamy te różne kopie"*.
+
+## 2. Cel
+
+Dać projektowi **trzy nośniki informacji poza tytułem** (notatka, etykieta wersji, nazwa książki),
+żeby na jedno spojrzenie było widać, która wersja jest ta właściwa — i **uwiarygodnić snapshoty**
+(nazwa + przypięcie odporne na retencję), żeby przestały być gorszą kopią projektu, a stały się
+domyślnym odruchem „zabezpieczam się przed wpadką".
+
+Miara sukcesu: po fazach 1A-1B właściciel patrzy na dashboard i **bez otwierania projektu** wie,
+który jest aktualny i czym są pozostałe; po fazach 2A-2B „kopia przed Redaktorem" to jeden klik,
+ma nazwę, żyje wiecznie i **nie robi kafelka na dashboardzie**.
+
+## 3. Architektura / decyzje
+
+### 3.1 Trzy kolumny w `projects` (rdzeń)
+
+| Kolumna | Typ | Uwagi |
+|---|---|---|
+| `note` | `TEXT NULL` | wolny tekst właściciela, `CHECK (char_length(note) <= 300)` |
+| `role` | `TEXT NULL` | `CHECK (role IN ('AKTUALNA','ROBOCZA','ARCHIWUM'))`, bez DEFAULT |
+| `book` | `TEXT NULL` | nazwa książki, nośnik grupowania z fazy 3 |
+
+**`role` jako TEXT + CHECK, nie PG enum** — dorzucenie czwartej wartości do enuma to migracja
+z `ALTER TYPE`, do CHECK-a to jedna linia. Zbiór wartości jest świeży i może się jeszcze ruszyć.
+
+**Bez DEFAULT i bez backfillu po ID w migracji.** Brak roli = brak plakietki na karcie; właściciel
+nadaje `AKTUALNA` dwóm kanonicznym projektom ręcznie, jednym kliknięciem. Wpisywanie UUID-ów
+produkcyjnych do migracji byłoby wiązaniem schematu z zawartością konkretnej bazy.
+
+**Nazwa etykiety: `AKTUALNA / ROBOCZA / ARCHIWUM`** (decyzja właściciela 2026-08-12).
+⚠️ Świadomie **NIE „KANON"** — to żargon warsztatu, nie słownik właściciela (zgrzyt Z37).
+
+### 3.2 Ścieżka zapisu — bez nowego endpointu API
+
+Zapis metadanych idzie **istniejącą ścieżką** `updateProject(id, updates)`
+([useProjects.js:62-75](tiolibri-frontend/src/features/projects/useProjects.js#L62-L75)) — supabase-js
+prosto z przeglądarki pod RLS. Nowy endpoint w API byłby trzecią ścieżką zapisu do tej samej tabeli.
+
+**Konsekwencja, którą spec musi nazwać:** skoro walidacja nie przechodzi przez Pydantic, **jedyną
+twardą bramką na `note` i `role` jest CHECK w bazie**. Walidacja we froncie jest kosmetyczna
+(komunikat dla człowieka), nie kontraktowa — i tak ma być opisana w kryteriach akceptacji.
+
+**Pułapka do domknięcia w tej samej fazie:** model `Project`
+([schemas.py:75](tiolibri-api/app/models/schemas.py#L75)) jest `response_model` dla `GET /projects/{id}` —
+bez dopisania trzech pól endpoint **utnie je po cichu**, mimo że w bazie będą.
+
+### 3.3 Duplikat nie dziedziczy `role` ani `note`
+
+Twarda reguła: kopia projektu oznaczonego `AKTUALNA` wychodzi jako `ROBOCZA` z notatką
+„kopia z `<data>`, źródło: `<tytuł>`". `book` **dziedziczy się normalnie** (to ta sama książka).
+Inaczej po miesiącu są dwie „aktualne" i wracamy do punktu wyjścia.
+Miejsce: `duplicate_project` ([projects.py:98-99](tiolibri-api/app/routers/projects.py#L98)).
+
+### 3.4 Snapshoty — `label` + `pinned`, prune liczy tylko nieprzypięte
+
+Dwie dziury, przez które snapshoty dziś nie zastępują kopii:
+
+1. **Snapshot nie ma nazwy** — `list_snapshots` zwraca `triggered_by` i `created_at`
+   ([snapshots.py:36-41](tiolibri-api/app/routers/snapshots.py#L36-L41)). Nie da się powiedzieć
+   „ten jest sprzed Redaktora".
+2. **Retencja jest ślepa** — trigger `prune_project_snapshots` trzyma 15 najnowszych po `created_at`
+   i kasuje resztę, nie patrząc czy ręczny
+   ([20260421_spec1.sql:61-79](tiolibri-frontend/docs/migrations/20260421_spec1.sql#L61-L79)).
+   Ręczny snapshot „przed Redaktorem" **zniknie** po 15 automatach — jako kopia bezpieczeństwa
+   jest dziś **niewiarygodny**, i to jest właściwe uzasadnienie fazy 2.
+
+Fix: `label TEXT` + `pinned BOOLEAN NOT NULL DEFAULT false` na `project_snapshots`, a prune liczy
+limit 15 **wyłącznie z `pinned = false`**.
+
+**Uczciwe ograniczenie do zapisania w kryteriach:** snapshot przywraca **w to samo miejsce** — nie
+zobaczysz dwóch wersji obok siebie. Podział ról: **kopia projektu = porównanie „przed/po",
+snapshot = cofnięcie po wpadce.** Kopie nie znikają z narzędziownika, przestają być domyślnym odruchem.
+
+### 3.5 Pułapki produkcyjne — do przeniesienia do faz
+
+- ⚠️ **Usunięcie projektu to twardy DELETE prosto z przeglądarki**
+  ([useProjects.js:77-87](tiolibri-frontend/src/features/projects/useProjects.js#L77-L87)) —
+  bez endpointu w API, kaskadą leci wszystko: rozdziały, historia wersji, snapshoty.
+  **`projects` nie ma `deleted_at`** — rozdziały mają kosz, projekty nie. Nie ma „cofnij".
+  Bezpieczna ścieżka sprzątania: kebab → **„Eksportuj backup (.tiolibri)"** (już istnieje,
+  [ProjectCard.jsx:96-106](tiolibri-frontend/src/features/projects/ProjectCard.jsx#L96-L106))
+  → plik na dysk → dopiero `usuń`.
+- **Kolejność rejestracji routerów w `main.py`** — `export_import` i `snapshots` PRZED `projects`,
+  inaczej trasy parametryczne zasłaniają statyczne.
+- **supabase-py w tym venv wywala się na `.update().eq().select().execute()`** — nie dokładać `.select()`
+  po stronie backendu (klient JS tego nie dotyczy).
+- **Eksport do Redaktora czyta zawsze bieżącą `chapters.processed_html`** z `deleted_at IS NULL`,
+  nigdy `chapter_versions` ([export_import.py:169-176](tiolibri-api/app/routers/export_import.py#L169-L176)) —
+  „stara wersja rozdziału" w eksporcie jest niemożliwa, jedyne ryzyko to zły `project_id`, czyli
+  dokładnie to, co naprawia faza 1.
+
+## 4. Plan faz
+
+| Faza | Opis | Sizing est. |
+|---|---|---|
+| PHASE-1A | Metadane: migracja 3 kolumn (`note`/`role`/`book`) + CHECK, model `Project`, duplikat resetuje `role`/`note` | ~50 min |
+| PHASE-1B | UI: plakietka `role` na karcie, notatka `line-clamp-2` + edycja inline, pole `book` z podpowiedziami, domyślne sortowanie `AKTUALNA` na górze | ~65 min |
+| — | **Sprzątanie balastu** — nie faza implementacyjna: backup `.tiolibri` + usunięcie 8 projektów, czynność właściciela | — |
+| PHASE-2A | Snapshoty DB+API: migracja `label`/`pinned`, przepisany trigger `prune_project_snapshots` (limit z nieprzypiętych), endpointy label/pin | ~55 min |
+| PHASE-2B | Snapshoty UI: nazwa przy ręcznym snapshocie, plakietka „przypięty", pin/unpin w panelu | ~45 min |
+| PHASE-3 | **WARUNKOWA** — grupowanie kafelków po `book`, grupa zwijana, `localStorage` | ~70 min |
+
+**PHASE-3 jest zagatowana decyzją właściciela** (kolejność ustalona 2026-08-12: 1A → 1B → sprzątanie
+→ *dopiero wtedy* decyzja o 3). Po sprzątaniu zostaną 2-4 kafelki i grupowanie może się okazać
+niepotrzebne. Nie wchodzi do implementacji bez jawnego „tak" — ale `book` wypełniamy **od razu
+w fazie 1**, żeby nie robić drugiej migracji i drugiego ręcznego uzupełniania.
+
+## 5. Sizing check
+
+Per faza — 3 osie §4.5, KAŻDA musi PASS. Estymaty celują w ~80% limitu (LESSONS#17 — faza wchodząca
+w R1 przy suficie nie ma miejsca na przyjęcie blokerów review).
+
+| Faza | Pliki (≤8) | LOC/hity (≤500) | Czas (≤90 min) |
+|---|---|---|---|
+| PHASE-1A | 3 — migracja `.sql`, `schemas.py`, `projects.py` | ~150 | ~50 min |
+| PHASE-1B | 4 — `ProjectCard.jsx`, `DashboardPage.jsx`, `useProjects.js`, `NewProjectModal.jsx` | ~230 | ~65 min |
+| PHASE-2A | 2 — migracja `.sql` (kolumny + rewrite triggera), `snapshots.py` | ~150 | ~55 min |
+| PHASE-2B | 2 — `ProjectSnapshots.jsx`, `useSnapshots.js` | ~120 | ~45 min |
+| PHASE-3 | 2 — `DashboardPage.jsx`, nowy komponent grupy | ~150 | ~70 min |
+
+**Sizing: PASS**
+
+Uwaga do estymat (LESSONS#17): liczby są sprzed kodu, a estymata pisana przed kodem zaniża
+systematycznie. Grunt pod nie: `ProjectCard.jsx` 259 LOC, `DashboardPage.jsx` 153, `useProjects.js` 125,
+`projects.py` 431, `snapshots.py` 258, `ProjectSnapshots.jsx` 158, `useSnapshots.js` 40, `schemas.py` 99
+(zmierzone 2026-08-12). Testy liczą się do **tej samej** sumy LOC co kod fazy.
+
+## 6. Co odrzucone
+
+- **Folder jako osobny byt** — nowa tabela, nowa nawigacja (wejdź/wróć), przenoszenie między folderami,
+  pytanie „czyj folder" przy projektach udostępnionych, i od tego momentu każda kolejna funkcja musi
+  pytać „a w którym folderze". Płacisz za drzewo, którego głębokość nigdy nie przekroczy 1.
+  Zamiast tego: grupowanie po polu `book` — zero nowej encji, zero routingu.
+- **Nazwa „KANON" dla etykiety** — żargon warsztatu, nie słownik właściciela (zgrzyt Z37).
+- **PG enum dla `role`** — dorzucenie wartości to `ALTER TYPE`; CHECK to jedna linia.
+- **Nowy endpoint API na zapis metadanych** — istnieje `updateProject` przez supabase-js pod RLS;
+  trzecia ścieżka zapisu do `projects` byłaby długiem, nie porządkiem.
+- **Miękkie kasowanie projektów (`deleted_at` + kosz)** — realna dziura (twardy DELETE bez „cofnij"),
+  ale to osobny problem o innym profilu ryzyka. Tu zostaje udokumentowana bezpieczna ścieżka:
+  eksport `.tiolibri` przed usunięciem.
+- **Zero kopii w apce** — jeśli właściciel chce jedną żywą zapasową pod ręką, zostaje najświeższa,
+  z rolą `ARCHIWUM` i notatką po co jest. Snapshoty mają zastąpić odruch, nie zakazać narzędzia.
+- **Naprawa zmielonych tytułów rozdziałów** (`'ROZDZIA1Osteoporoza…'`) — poza zakresem tego specu.
+  Rekomendacja bez zmian: poprawić 12 + 24 ręcznie, nie zakładać specu.
+
+## 7. Sprzątanie balastu — stan wejściowy
+
+Zweryfikowane 2026-08-11 po treści (sha256 NFC z `md_exporter.chapter_to_markdown` vs `input.md`
+z przebiegów Redaktora): **36/36 rozdziałów zgodnych** — do Fabryki poszły najnowsze wersje,
+żadna stara kopia nie pasuje (Ewa: 4.0 → 12/12, każda starsza → 0/12).
+
+- **Zostawić i oznaczyć `AKTUALNA`:** Ewa `d73dcc3b` („Kości Na Całe Życie 4.0"),
+  Bożena `507b3ee4` („predaktor-…2.0").
+- **Do backupu i usunięcia (8):** `e8aead35` (kopia Bożeny, bit w bit identyczna z kanonem),
+  Ewa `6afd44b4` (1.0), `b0841702` (2.0), `17adb766` (3.0), `6ffe53f3` (3.0 import),
+  `11c96cd4` (3.0 TADEUSZ), `06ed1af3` (3 rozdz.), `70e90efb` (`test book`).
+
+Pełne ID i metoda weryfikacji: pamięć `project-kanoniczne-projekty-w-bazie`.
+
+---
+
+## Dla Piotrka — jedno zdanie
+
+Folder speca `porzadek-wersji` założony w trybie full (Risk HIGH, 3 rundy) z wypełnionym masterem
+na bazie handoffu — przeczytaj i powiedz, czy plan faz się zgadza, potem `/spec-fill porzadek-wersji`
+(Codex dociąga sekcje strukturalne) albo od razu `/spec-handoff porzadek-wersji`.
+
+**Kopiuj dalej — w tym samym wątku:**
+```
+/spec-fill porzadek-wersji
+```
