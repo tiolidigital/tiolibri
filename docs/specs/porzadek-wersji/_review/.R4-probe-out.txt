@@ -1,0 +1,16 @@
+RUN_ID=R4PF46658779
+==============================================================================
+STEP=P1-S1-brak-UA EXPECT=403 + '1010' GOT=HTTP 403 {"raw": "error code: 1010\n"} RESULT=PASS
+STEP=P2-kanal-zyje EXPECT=200 + current_user=postgres GOT=HTTP 201 user=postgres RESULT=PASS
+STEP=P3-DO-diagnostics EXPECT=23514/pf_named_check w json_agg GOT=HTTP 201 wynik=[{"step": "A", "expect": "23514/pf_named_check", "got": "23514/pf_named_check"}, {"step": "B", "expect": "legalny zapis przechodzi", "got": "OK"}] RESULT=PASS
+STEP=P4-json_agg-pusty EXPECT=1 wiersz z wynik=None (nie 0 wierszy) GOT=HTTP 201 rows=1 wynik=None RESULT=PASS
+STEP=P5-R1-projects-UPDATE EXPECT=dokladnie 1 polityka GOT=HTTP 201 n=1 :: [{"policyname": "Users can update own projects", "cmd": "UPDATE", "permissive": "PERMISSIVE", "roles": "{public}", "qual": "(auth.uid() = user_id)", "with_check": "(auth.uid() = user_id)"}] RESULT=PASS
+STEP=P6-R4-snapshots-polityki EXPECT=0 polityk cmd=UPDATE GOT=HTTP 201 cmds=['INSERT', 'SELECT'] :: [{"policyname": "Users can insert accessible project_snapshots", "cmd": "INSERT", "with_check": "user_has_project_access(project_id)"}, {"policyname": "Users can view accessible project_snapshots", "cmd": "SELECT", "with_check": null}] RESULT=PASS
+STEP=P7-hash-regproc EXPECT=32 znaki md5 + tgenabled='O' GOT=HTTP 201 h=568fef8488179dc83f2e1d69622aaf9e tg=O RESULT=PASS
+STEP=P8-read-only-odmawia EXPECT=25006 GOT=HTTP 400 {"message": "Failed to run sql query: ERROR:  25006: cannot execute CREATE TABLE in a read-only transaction\n"} RESULT=PASS
+STEP=P9-sklad-bazy EXPECT=12 projektow / 3 wlascicieli GOT=HTTP 201 projektow=12 wlascicieli=3 RESULT=PASS
+STEP=P10-RLS-podstawienie EXPECT=wlasciciel>0 ∧ obcy=0 GOT=HTTP 201 {'wlasciciel': 8, 'obcy': 0} RESULT=PASS
+STEP=P11-postflight EXPECT=0 sladow RUN_ID w projects, total=12 GOT=HTTP 201 {'p': 0, 's': 31, 'total': 12} RESULT=PASS
+==============================================================================
+KROKOW=11 PASS=11 FAIL=0
+EXIT=0

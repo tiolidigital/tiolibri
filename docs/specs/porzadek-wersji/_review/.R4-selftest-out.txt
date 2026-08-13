@@ -1,0 +1,8 @@
+==============================================================================
+WKLAD=FAIL REGULA=stara HTTP=201 rows=1 tresc=[{"wynik": null}] EXPECT=PASS GOT=PASS RESULT=PASS
+WKLAD=FAIL REGULA=nowa  HTTP=201 rows=1 tresc=[{"wynik": null}] EXPECT=FAIL GOT=FAIL RESULT=PASS
+WKLAD=PASS REGULA=stara HTTP=201 rows=1 tresc=[{"wynik": [{"x": 1}]}] EXPECT=PASS GOT=PASS RESULT=PASS
+WKLAD=PASS REGULA=nowa  HTTP=201 rows=1 tresc=[{"wynik": [{"x": 1}]}] EXPECT=PASS GOT=PASS RESULT=PASS
+==============================================================================
+BLEDOW=0
+EXIT=0
