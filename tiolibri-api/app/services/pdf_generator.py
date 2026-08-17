@@ -184,6 +184,10 @@ img:not(.cover-page img) {
 .title-page h1 {
     font-size: 24pt;
     page-break-before: avoid;
+    /* Presety mają twarde `h1 { text-align: left }` (nagłówki rozdziałów),
+       które wygrywa z wyśrodkowaniem dziedziczonym po .title-page.
+       Tu chcemy środek — strona tytułowa to nie nagłówek rozdziału. */
+    text-align: center;
 }
 
 .title-page .subtitle {
