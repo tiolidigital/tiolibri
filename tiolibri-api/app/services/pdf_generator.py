@@ -110,6 +110,32 @@ def download_and_encode_image(url: str) -> Optional[str]:
         return None
 
 
+# A5 portrait w punktach + przelicznik cm→pt (marginesy przychodzą w cm).
+A5_HEIGHT_PT = 595.276
+CM_TO_PT = 28.3465
+
+
+def split_chapter_opener(html: str) -> tuple:
+    """Wydziela całostronicową grafikę otwierającą rozdział z pierwszego H1.
+
+    Edytor trzyma ją jako pierwsze dziecko nagłówka: `<h1><img ...>Rozdział 1: …</h1>`.
+    Zwraca `(img_html, reszta)` — albo `(None, html)`, gdy rozdział zaczyna się inaczej.
+    Nagłówek zostaje nietknięty poza usunięciem obrazka, więc ID i tekst do spisu
+    treści są te same co przed zmianą.
+    """
+    match = re.match(
+        r'\s*(<h1[^>]*>)\s*(<img[^>]*>)',
+        html,
+        re.IGNORECASE,
+    )
+    if not match:
+        return None, html
+
+    img = match.group(2)
+    rest = html[:match.end(1)] + html[match.end(2):]
+    return img, rest
+
+
 BASE_CSS = """
 body {
     font-family: "DejaVu Serif", "Liberation Serif", Georgia, serif;
@@ -173,6 +199,24 @@ img:not(.cover-page img) {
     display: block;
     margin: 0;
     padding: 0;
+}
+
+/* Strona otwierająca rozdział: sama grafika, bez numeru strony.
+   Numer wisiałby na ilustracji — konwencja książkowa mówi, że strony
+   z całostronicową planszą folio nie noszą. Licznik stron leci dalej,
+   tylko nie jest drukowany (patrz @page chapter-opener). */
+.chapter-opener {
+    page: chapter-opener;
+    page-break-after: always;
+    text-align: center;
+}
+
+.chapter-opener img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    width: auto;
+    /* max-height dokłada się niżej, bo zależy od marginesów strony */
 }
 
 .title-page {
@@ -336,7 +380,7 @@ TOC_CSS = """
 }
 
 .toc-item {
-    padding: 0.3em 0;
+    padding: 0.45em 0;
     border-bottom: 1px dotted #ddd;
 }
 
@@ -345,24 +389,27 @@ TOC_CSS = """
     text-decoration: none;
 }
 
+/* Rozmiary w `em`, nie w punktach: spis treści ma skalować się razem
+   z ustawieniem wielkości pisma dla treści książki. Sztywne 9-11pt robiło
+   spis wyraźnie drobniejszy od tekstu, którym książka jest złożona. */
 .toc-h1 {
-    font-size: 11pt;
+    font-size: 1.05em;
     font-weight: bold;
     padding-left: 0;
 }
 
 .toc-h2 {
-    font-size: 10pt;
+    font-size: 1em;
     font-weight: normal;
     padding-left: 1.5em;
-    color: #444;
+    color: #333;
 }
 
 .toc-h3 {
-    font-size: 9pt;
+    font-size: 0.95em;
     font-weight: normal;
     padding-left: 3em;
-    color: #666;
+    color: #555;
 }
 """
 
@@ -446,6 +493,24 @@ def generate_pdf(
         @bottom-center {{
             content: none;
         }}
+    }}
+
+    @page chapter-opener {{
+        size: A5 portrait;
+        margin-top: {margin_top}cm;
+        margin-bottom: {margin_bottom}cm;
+        margin-left: {margin_left}cm;
+        margin-right: {margin_right}cm;
+
+        @bottom-center {{
+            content: none;
+        }}
+    }}
+
+    /* Grafika otwierająca nie może wyjść poza pole tekstowe — inaczej wchodzi
+       w dolny margines, tam gdzie normalnie siedzi numer strony. */
+    .chapter-opener img {{
+        max-height: {A5_HEIGHT_PT - (margin_top + margin_bottom) * CM_TO_PT:.1f}pt;
     }}
 
     @page:first {{
@@ -540,10 +605,16 @@ def generate_pdf(
         # 🆕 STABLE PAGE BREAKS - wrap chapter in div with conditional page-break-before
         # First chapter: no page-break-before
         # All subsequent chapters: page-break-before: always
-        if render_idx == 0:
-            html_parts.append(f'<div class="chapter">{content}</div>')
+        break_before = '' if render_idx == 0 else ' style="page-break-before: always;"'
+
+        # Grafika otwierająca dostaje własną stronę bez numeru; łamanie strony
+        # przenosi się na nią, bo to ona zaczyna rozdział.
+        opener, content_body = split_chapter_opener(content)
+        if opener:
+            html_parts.append(f'<div class="chapter-opener"{break_before}>{opener}</div>')
+            html_parts.append(f'<div class="chapter">{content_body}</div>')
         else:
-            html_parts.append(f'<div class="chapter" style="page-break-before: always;">{content}</div>')
+            html_parts.append(f'<div class="chapter"{break_before}>{content}</div>')
         render_idx += 1
 
     html_parts.append('</div>')
