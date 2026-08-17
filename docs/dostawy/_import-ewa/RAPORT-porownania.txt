@@ -1,0 +1,140 @@
+# Porownanie prozy: nasz eksport z produkcji <-> input.md Redaktora
+# data: 2026-08-15 | projekt Ewy d73dcc3b-74ed-4d23-8cbb-d600c8f5306f | eksport-prod.zip 94808 B
+
+NN  dokument                               slow(nasz) slow(input)   A   B  uwagi
+----------------------------------------------------------------------------------------------------
+01  WSTEP_Historia-z-osteoporoza.md              1753        1753   =   =  
+02  ROZDZIAL-1_Osteoporoza-co-to-oznacza.md       2995        2995   =   =  
+03  ROZDZIAL-2_Fakty-naukowe.md                  1971        1971   =   =  
+04  ROZDZIAL-3_Skladniki-budulcowe.md            2078        2078   =   =  
+05  ROZDZIAL-4_Sojusznicy-zdrowych-kosci.md       1420        1420   =   =  
+06  ROZDZIAL-5_Mikrobiota-jelitowa.md            1843        1843   =   =  
+07  ROZDZIAL-6_Co-przeszkadza-kosciom.md         1983        1983   =   =  
+08  ROZDZIAL-7_Mapa-drogowa-dieta.md             1963        1963   =   =  
+09  ROZDZIAL-8_Suplementacja-4_1.md              4614        4815   X   X  123 roznic slownych, podobienstwo 0.9528
+10  ROZDZIAL-9_Ruch.md                           2257        2257   =   =  
+11  ROZDZIAL-10_Sen-slonce-stres.md              3698        3698   =   =  
+12  ZAKONCZENIE_Co-teraz.md                      1195        1195   =   =  
+
+====================================================================================================
+NN 09  ROZDZIAL-8_Suplementacja-4_1.md
+  input: /Users/piotrmichalski/Documents/SaaS_Factory2026/FABRYKA-redaktor/redaktor/praca/ROZDZIAL-8_Suplementacja-4_1/2026-08-11-4e0e64/input.md
+  123 roznic slownych, podobienstwo 0.9528
+  --- replace  (nasz 1 sl. -> input 1 sl.)
+      kontekst: ...
+      NASZ  : ROZDZIAŁ
+      INPUT : ![][image1]ROZDZIAŁ
+  --- replace  (nasz 1 sl. -> input 1 sl.)
+      kontekst: ...ROZDZIAŁ 8: Suplementacja
+      NASZ  : -
+      INPUT : \-
+  --- replace  (nasz 1 sl. -> input 1 sl.)
+      kontekst: ...odkłada się w tętnicach i powoduje
+      NASZ  : zawały!”
+      INPUT : zawały\!”
+  --- replace  (nasz 1 sl. -> input 1 sl.)
+      kontekst: ...suplement odbuduje Twoje kości w 30
+      NASZ  : dni!”
+      INPUT : dni\!”
+  --- replace  (nasz 1 sl. -> input 1 sl.)
+      kontekst: ...IU witaminy D tylko z pożywienia
+      NASZ  : -
+      INPUT : \-
+  --- replace  (nasz 1 sl. -> input 1 sl.)
+      kontekst: ...DUŻO i W JAKIEJ FORMIE suplementować
+      NASZ  : -
+      INPUT : \-
+
+
+### R8 — po zdjeciu escape'ow Google Docs i obrazka referencyjnego
+nasz eksport : 4614 slow
+input.md     : 4813 slow
+delta        : +199 slow
+podobienstwo : 0.975708
+
+blokow roznic: 16
+====================================================================================================
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...Śniadanie - owsianka „wysokowapniowa”: mleko 2% (200 ml)
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...ok. 240 mg Ca, skyr/jogurt gęsty (200 g)
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...ok. 270 mg Ca, płatki owsiane (60 g)
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...ok. 30 mg Ca, łyżka chia/sezamu (10 g)
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...sałatką: sardynki z puszki z ośćmi (100 g)
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...ok. 400 mg Ca, łyżka tahini (15 g)
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...75 mg Ca, zielone liście (jarmuż/rukola, 50–80 g)
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...ok. 80 mg Ca, 2 kromki pieczywa pełnoziarnistego
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...omlet z serem i kefirem: kefir/jogurt (200 ml)
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...ok. 240 mg Ca, ser żółty/dojrzewający (30 g)
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...g) = ok. 225 mg Ca, 2–3 jaja
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...ok. 60 mg Ca, warzywa (ok. 200 g)
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...pokarmu. Ile D3 naprawdę potrzebujesz? Twój cel: 25(OH)D
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...Zwykle 800–2000 IU dziennie, a celem jest 25(OH)D
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+[insert] nasz 0 sl. -> input 199 sl.
+  kontekst: ...wieczorem, przenieś ją na poranek lub okolice południa.
+  NASZ  : (brak)
+  INPUT : Ważne z ostatniej chwili Chciałabym zwrócić uwagę na ważną publikację, która ukazała się niedawno na łamach The BMJ – jednego z najbardziej cenionych czasopism medycznych na świecie. Jest to metaanaliza obejmująca dane ponad 154 000 dorosłych osób, której wyniki pokazują, że u ogólnie zdrowych seniorów suplementacja wapniem, witaminą D lub ich połączeniem przynosi niewielką – lub wręcz żadną – korzyść w zapobieganiu złamaniom i upadkom. Bardzo ważne zastrzeżenie: wyniki te dotyczą przede wszystkim osób bez zdiagnozowanych zaburzeń kostnych, takich jak osteopenia czy osteoporoza. Nie odnoszą się więc bezpośrednio do kobiet z rozpoznaną osteoporozą lub potwierdzonym niedoborem witaminy D – w ich przypadku suplementacja pozostaje uzasadniona. Sami autorzy podkreślają, że nie ma podstaw do rutynowego podawania tych suplementów każdej starszej osobie wyłącznie „na wszelki wypadek". Jednocześnie wyraźnie wskazują, że trening równowagi, ćwiczenia oporowe oraz spersonalizowane programy zapobiegania upadkom mają udowodnioną skuteczność i powinny stanowić integralną część profilaktyki – niezależnie od tego, czy dana osoba ma osteoporozę, czy nie. Źródło: Olivier Massé, Claudia Mei Mercurio, Sébastien Dupuis, Maya Al Sahwi, Alexandra Arruda, Gabriel Dallaire, Katherine Desforges, Nicolas Dugré, David Williamson. Calcium, vitamin D, or combined supplementation to prevent fractures and falls: systematic review and meta-analysis. BMJ, 2026; 393: e088050 DOI: 10.1136/bmj-2025-088050
+----------------------------------------------------------------------------------------------------
+[replace] nasz 1 sl. -> input 1 sl.
+  kontekst: ...za resorpcję kości. W uproszczeniu: mniej stresu oksydacyjnego
+  NASZ  : =
+  INPUT : \=
+----------------------------------------------------------------------------------------------------
+
+BMJ / DOI w obu wersjach:
+  nasz   BMJ x0  DOI x0  '10.1136' x0
+  input  BMJ x2  DOI x1  '10.1136' x1

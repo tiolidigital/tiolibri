@@ -1,0 +1,768 @@
+{
+ "projekt_zrodlowy": "d73dcc3b-74ed-4d23-8cbb-d600c8f5306f",
+ "book_key": "kosci-na-cale-zycie-4-0-d73dcc3b",
+ "rozdzialy": [
+  {
+   "nn": "01",
+   "dokument": "WSTEP_Historia-z-osteoporoza.md",
+   "html_bajtow": 12829,
+   "roundtrip_bajtowy": true,
+   "bloki_zgodne": true,
+   "proza_zgodna": true,
+   "naglowki_odtworzone": 8,
+   "naglowki_przebudowane": [
+    {
+     "h": 2,
+     "nowy": "Co znajdziesz w środku – mapa e-booka.",
+     "stary": "Co znajdziesz w środku - mapa e-booka."
+    }
+   ],
+   "linki": [],
+   "obrazki": [
+    "https://klhnyagtobgtxnexdsls.supabase.co/storage/v1/object/public/assets/b0841702-7597-4566-9d6a-6a9f533b2fb5/images/1773427422941-wstep-0.png"
+   ],
+   "uwagi": [],
+   "bloki": {
+    "naglowek": 9,
+    "akapit": 48,
+    "lista": 0,
+    "blockquote": 0,
+    "kod": 0,
+    "tabela": 0
+   }
+  },
+  {
+   "nn": "02",
+   "dokument": "ROZDZIAL-1_Osteoporoza-co-to-oznacza.md",
+   "html_bajtow": 24426,
+   "roundtrip_bajtowy": true,
+   "bloki_zgodne": true,
+   "proza_zgodna": true,
+   "naglowki_odtworzone": 6,
+   "naglowki_przebudowane": [
+    {
+     "h": 1,
+     "nowy": "ROZDZIAŁ 1: Osteoporoza – co to oznacza dla Twojego organizmu?",
+     "stary": "ROZDZIAŁ 1: Osteoporoza - co to oznacza dla Twojego organizmu?"
+    }
+   ],
+   "linki": [
+    "https://www.sheffield.ac.uk/FRAX/tool.aspx?country=12"
+   ],
+   "obrazki": [
+    "https://klhnyagtobgtxnexdsls.supabase.co/storage/v1/object/public/assets/d73dcc3b-74ed-4d23-8cbb-d600c8f5306f/images/1779351957320-rozdzial-1.png"
+   ],
+   "uwagi": [],
+   "bloki": {
+    "naglowek": 7,
+    "akapit": 116,
+    "lista": 4,
+    "blockquote": 0,
+    "kod": 0,
+    "tabela": 0
+   }
+  },
+  {
+   "nn": "03",
+   "dokument": "ROZDZIAL-2_Fakty-naukowe.md",
+   "html_bajtow": 15285,
+   "roundtrip_bajtowy": true,
+   "bloki_zgodne": true,
+   "proza_zgodna": true,
+   "naglowki_odtworzone": 14,
+   "naglowki_przebudowane": [
+    {
+     "h": 1,
+     "nowy": "ROZDZIAŁ 2: Co działa najlepiej – fakty naukowe.",
+     "stary": "ROZDZIAŁ 2: Co działa najlepiej - fakty naukowe."
+    },
+    {
+     "h": 3,
+     "nowy": "Wapń – kiedy suplement ma sens?",
+     "stary": "Wapń - kiedy suplement ma sens?"
+    },
+    {
+     "h": 3,
+     "nowy": "Witamina D – tutaj suplementacja jest kluczowa.",
+     "stary": "Witamina D - tutaj suplementacja jest kluczowa."
+    },
+    {
+     "h": 2,
+     "nowy": "Mleko i alternatywy – jak mądrze wybierać.",
+     "stary": "Mleko i alternatywy - jak mądrze wybierać."
+    },
+    {
+     "h": 3,
+     "nowy": "Alternatywy roślinne – na co uważać.",
+     "stary": "Alternatywy roślinne - na co uważać."
+    },
+    {
+     "h": 2,
+     "nowy": "Co mówią najnowsze badania – dieta śródziemnomorska i okinawska.",
+     "stary": "Co mówią najnowsze badania - dieta śródziemnomorska i okinawska."
+    },
+    {
+     "h": 3,
+     "nowy": "Dieta śródziemnomorska – najlepiej przebadana.",
+     "stary": "Dieta śródziemnomorska - najlepiej przebadana."
+    },
+    {
+     "h": 3,
+     "nowy": "Dieta okinawska – mało kalorii, dużo składników odżywczych.",
+     "stary": "Dieta okinawska - mało kalorii, dużo składników odżywczych."
+    },
+    {
+     "h": 3,
+     "nowy": "Czego unikać – diety restrykcyjne.",
+     "stary": "Czego unikać - diety restrykcyjne."
+    }
+   ],
+   "linki": [],
+   "obrazki": [
+    "https://klhnyagtobgtxnexdsls.supabase.co/storage/v1/object/public/assets/b0841702-7597-4566-9d6a-6a9f533b2fb5/images/1773428556757-rozdzial-2.png"
+   ],
+   "uwagi": [],
+   "bloki": {
+    "naglowek": 23,
+    "akapit": 50,
+    "lista": 0,
+    "blockquote": 0,
+    "kod": 0,
+    "tabela": 0
+   }
+  },
+  {
+   "nn": "04",
+   "dokument": "ROZDZIAL-3_Skladniki-budulcowe.md",
+   "html_bajtow": 15987,
+   "roundtrip_bajtowy": true,
+   "bloki_zgodne": true,
+   "proza_zgodna": true,
+   "naglowki_odtworzone": 19,
+   "naglowki_przebudowane": [
+    {
+     "h": 1,
+     "nowy": "ROZDZIAŁ 3: Fundament – składniki budulcowe.",
+     "stary": "ROZDZIAŁ 3: Fundament - składniki budulcowe."
+    },
+    {
+     "h": 2,
+     "nowy": "WAPŃ – ile naprawdę potrzebujesz i skąd go brać.",
+     "stary": "WAPŃ - ile naprawdę potrzebujesz i skąd go brać."
+    },
+    {
+     "h": 2,
+     "nowy": "WITAMINA D3 – optymalne poziomy, źródła, suplementacja.",
+     "stary": "WITAMINA D3 - optymalne poziomy, źródła, suplementacja."
+    },
+    {
+     "h": 2,
+     "nowy": "WITAMINA K2 – zapomniany bohater metabolizmu kości?",
+     "stary": "WITAMINA K2 - zapomniany bohater metabolizmu kości?"
+    },
+    {
+     "h": 2,
+     "nowy": "MAGNEZ – partner wapnia w mineralizacji.",
+     "stary": "MAGNEZ - partner wapnia w mineralizacji."
+    },
+    {
+     "h": 2,
+     "nowy": "BIAŁKO – ile i jakie dla kości po 40+.",
+     "stary": "BIAŁKO - ile i jakie dla kości po 40+."
+    }
+   ],
+   "linki": [],
+   "obrazki": [
+    "https://klhnyagtobgtxnexdsls.supabase.co/storage/v1/object/public/assets/b0841702-7597-4566-9d6a-6a9f533b2fb5/images/1773429321523-rozdzil-3.png"
+   ],
+   "uwagi": [],
+   "bloki": {
+    "naglowek": 25,
+    "akapit": 61,
+    "lista": 0,
+    "blockquote": 0,
+    "kod": 0,
+    "tabela": 0
+   }
+  },
+  {
+   "nn": "05",
+   "dokument": "ROZDZIAL-4_Sojusznicy-zdrowych-kosci.md",
+   "html_bajtow": 11530,
+   "roundtrip_bajtowy": true,
+   "bloki_zgodne": true,
+   "proza_zgodna": true,
+   "naglowki_odtworzone": 20,
+   "naglowki_przebudowane": [
+    {
+     "h": 2,
+     "nowy": "WITAMINA C – rola w budowie kości.",
+     "stary": "WITAMINA C - rola w budowie kości."
+    },
+    {
+     "h": 2,
+     "nowy": "KRZEM – gdzie go znaleźć w pożywieniu.",
+     "stary": "KRZEM - gdzie go znaleźć w pożywieniu."
+    }
+   ],
+   "linki": [],
+   "obrazki": [
+    "https://klhnyagtobgtxnexdsls.supabase.co/storage/v1/object/public/assets/b0841702-7597-4566-9d6a-6a9f533b2fb5/images/1773429377033-rozdzial-4.png"
+   ],
+   "uwagi": [],
+   "bloki": {
+    "naglowek": 22,
+    "akapit": 41,
+    "lista": 0,
+    "blockquote": 0,
+    "kod": 0,
+    "tabela": 0
+   }
+  },
+  {
+   "nn": "06",
+   "dokument": "ROZDZIAL-5_Mikrobiota-jelitowa.md",
+   "html_bajtow": 15213,
+   "roundtrip_bajtowy": true,
+   "bloki_zgodne": true,
+   "proza_zgodna": true,
+   "naglowki_odtworzone": 17,
+   "naglowki_przebudowane": [
+    {
+     "h": 2,
+     "nowy": "OŚ JELITO-KOŚĆ – jak mikrobiota reguluje wchłanianie wapnia.",
+     "stary": "OŚ JELITO-KOŚĆ - jak mikrobiota reguluje wchłanianie wapnia."
+    },
+    {
+     "h": 3,
+     "nowy": "Menopauza, estradiol i mikrobiota – trójkąt zależności.",
+     "stary": "Menopauza, estradiol i mikrobiota - trójkąt zależności."
+    },
+    {
+     "h": 2,
+     "nowy": "SCFA – krótkołańcuchowe kwasy tłuszczowe i zdrowie kości.",
+     "stary": "SCFA - krótkołańcuchowe kwasy tłuszczowe i zdrowie kości."
+    },
+    {
+     "h": 2,
+     "nowy": "PROBIOTYKI DLA KOŚCI – co mówią badania",
+     "stary": "PROBIOTYKI DLA KOŚCI - co mówią badania"
+    },
+    {
+     "h": 3,
+     "nowy": "Badanie z Goteborgu – obiecujące, z przyszłością, ale nie jedyne.",
+     "stary": "Badanie z Goteborgu - obiecujące, z przyszłością, ale nie jedyne."
+    },
+    {
+     "h": 2,
+     "nowy": "PRAKTYCZNE WSKAZÓWKI – jak wspierać mikrobiotę dla zdrowia kości.",
+     "stary": "PRAKTYCZNE WSKAZÓWKI - jak wspierać mikrobiotę dla zdrowia kości."
+    },
+    {
+     "h": 3,
+     "nowy": "Błonnik – fundament zdrowej mikrobioty.",
+     "stary": "Błonnik - fundament zdrowej mikrobioty."
+    },
+    {
+     "h": 3,
+     "nowy": "Fermentowane produkty – naturalne bakteryjne wsparcie jelita.",
+     "stary": "Fermentowane produkty - naturalne bakteryjne wsparcie jelita."
+    },
+    {
+     "h": 3,
+     "nowy": "Różnorodność roślin – klucz do bogatej mikrobioty.",
+     "stary": "Różnorodność roślin - klucz do bogatej mikrobioty."
+    },
+    {
+     "h": 3,
+     "nowy": "Prebiotyki – pokarm dla dobrych bakterii.",
+     "stary": "Prebiotyki - pokarm dla dobrych bakterii."
+    },
+    {
+     "h": 2,
+     "nowy": "PRAKTYCZNA WSKAZÓWKA – strategia 3×1.",
+     "stary": "PRAKTYCZNA WSKAZÓWKA - strategia 3×1."
+    }
+   ],
+   "linki": [],
+   "obrazki": [
+    "https://klhnyagtobgtxnexdsls.supabase.co/storage/v1/object/public/assets/d73dcc3b-74ed-4d23-8cbb-d600c8f5306f/images/1779351972409-rozdzial-5.png"
+   ],
+   "uwagi": [],
+   "bloki": {
+    "naglowek": 28,
+    "akapit": 53,
+    "lista": 1,
+    "blockquote": 0,
+    "kod": 0,
+    "tabela": 0
+   }
+  },
+  {
+   "nn": "07",
+   "dokument": "ROZDZIAL-6_Co-przeszkadza-kosciom.md",
+   "html_bajtow": 15014,
+   "roundtrip_bajtowy": true,
+   "bloki_zgodne": true,
+   "proza_zgodna": true,
+   "naglowki_odtworzone": 22,
+   "naglowki_przebudowane": [
+    {
+     "h": 2,
+     "nowy": "KOFEINA – czy rezygnować z kawy?",
+     "stary": "KOFEINA - czy rezygnować z kawy?"
+    },
+    {
+     "h": 2,
+     "nowy": "ALKOHOL – wpływ na metabolizm kości.",
+     "stary": "ALKOHOL - wpływ na metabolizm kości."
+    },
+    {
+     "h": 2,
+     "nowy": "CUKIER – zdrowe węglowodany są potrzebne.",
+     "stary": "CUKIER - zdrowe węglowodany są potrzebne."
+    },
+    {
+     "h": 3,
+     "nowy": "Błonnik – złożony cukier, który chroni kości.",
+     "stary": "Błonnik - złożony cukier, który chroni kości."
+    },
+    {
+     "h": 2,
+     "nowy": "NAPOJE GAZOWANE – ograniczaj.",
+     "stary": "NAPOJE GAZOWANE - ograniczaj."
+    }
+   ],
+   "linki": [],
+   "obrazki": [
+    "https://klhnyagtobgtxnexdsls.supabase.co/storage/v1/object/public/assets/17adb766-c0e2-481b-8201-5248c6fae490/images/1775154346562-rozdzial-6.png"
+   ],
+   "uwagi": [],
+   "bloki": {
+    "naglowek": 27,
+    "akapit": 53,
+    "lista": 0,
+    "blockquote": 0,
+    "kod": 0,
+    "tabela": 0
+   }
+  },
+  {
+   "nn": "08",
+   "dokument": "ROZDZIAL-7_Mapa-drogowa-dieta.md",
+   "html_bajtow": 15279,
+   "roundtrip_bajtowy": true,
+   "bloki_zgodne": true,
+   "proza_zgodna": true,
+   "naglowki_odtworzone": 15,
+   "naglowki_przebudowane": [
+    {
+     "h": 1,
+     "nowy": "Rozdział 7: Twoja mapa drogowa – dieta dla zdrowych kości.",
+     "stary": "Rozdział 7: Twoja mapa drogowa - dieta dla zdrowych kości."
+    },
+    {
+     "h": 3,
+     "nowy": "3. W przypadku nadwagi lub otyłości – redukcja z głową.",
+     "stary": "3. W przypadku nadwagi lub otyłości - redukcja z głową."
+    },
+    {
+     "h": 3,
+     "nowy": "5. Białko: 1,0–1,2 gramów na kilogram masy ciała dziennie.",
+     "stary": "5. Białko: 1,0-1,2 gramów na kilogram masy ciała dziennie."
+    },
+    {
+     "h": 3,
+     "nowy": "6. Wapń, witamina D, witamina C i witaminy z grupy B – kluczowe w diecie.",
+     "stary": "6. Wapń, witamina D, witamina C i witaminy z grupy B - kluczowe w diecie."
+    },
+    {
+     "h": 3,
+     "nowy": "7. Kwasy omega-3 i omega-6 – równowaga ma znaczenie.",
+     "stary": "7. Kwasy omega-3 i omega-6 - równowaga ma znaczenie."
+    },
+    {
+     "h": 3,
+     "nowy": "9. Rośliny strączkowe – co najmniej raz w tygodniu.",
+     "stary": "9. Rośliny strączkowe - co najmniej raz w tygodniu."
+    },
+    {
+     "h": 3,
+     "nowy": "12. Ryby – co najmniej dwa razy w tygodniu.",
+     "stary": "12. Ryby - co najmniej dwa razy w tygodniu."
+    },
+    {
+     "h": 3,
+     "nowy": "13. Orzechy i nasiona – 30 gramów dziennie.",
+     "stary": "13. Orzechy i nasiona - 30 gramów dziennie."
+    },
+    {
+     "h": 3,
+     "nowy": "14. Błonnik – 25–30 gramów dziennie.",
+     "stary": "14. Błonnik - 25-30 gramów dziennie."
+    },
+    {
+     "h": 3,
+     "nowy": "16. Zmiana stylu życia – to nie tylko dieta.",
+     "stary": "16. Zmiana stylu życia - to nie tylko dieta."
+    },
+    {
+     "h": 2,
+     "nowy": "Czego unikać – krótka lista zakazów.",
+     "stary": "Czego unikać - krótka lista zakazów."
+    },
+    {
+     "h": 3,
+     "nowy": "Produkty przetworzone – „bomby” sodowe.",
+     "stary": "Produkty przetworzone - „bomby” sodowe."
+    },
+    {
+     "h": 2,
+     "nowy": "Dieta śródziemnomorska i okinawska – ramy dla wszystkich zasad.",
+     "stary": "Dieta śródziemnomorska i okinawska - ramy dla wszystkich zasad."
+    },
+    {
+     "h": 2,
+     "nowy": "Podsumowanie – od szczegółów do całości.",
+     "stary": "Podsumowanie - od szczegółów do całości."
+    }
+   ],
+   "linki": [],
+   "obrazki": [
+    "https://klhnyagtobgtxnexdsls.supabase.co/storage/v1/object/public/assets/b0841702-7597-4566-9d6a-6a9f533b2fb5/images/1773429979554-rozdzial-7.png"
+   ],
+   "uwagi": [],
+   "bloki": {
+    "naglowek": 29,
+    "akapit": 59,
+    "lista": 0,
+    "blockquote": 0,
+    "kod": 0,
+    "tabela": 0
+   }
+  },
+  {
+   "nn": "09",
+   "dokument": "ROZDZIAL-8_Suplementacja-4_1.md",
+   "html_bajtow": 37368,
+   "roundtrip_bajtowy": false,
+   "bloki_zgodne": false,
+   "proza_zgodna": true,
+   "naglowki_odtworzone": 0,
+   "naglowki_przebudowane": [
+    {
+     "h": 1,
+     "nowy": "**ROZDZIAŁ 8: Suplementacja – co działa, co nie, i jak to robić dobrze.**",
+     "stary": "ROZDZIAŁ 8: Suplementacja - co działa, co nie, i jak to robić dobrze."
+    },
+    {
+     "h": 2,
+     "nowy": "**WAPŃ – Fundament, ale nie taki prosty.**",
+     "stary": "WAPŃ - Fundament, ale nie taki prosty."
+    },
+    {
+     "h": 3,
+     "nowy": "**Czy w ogóle potrzebujesz suplementu wapnia?**",
+     "stary": "Czy w ogóle potrzebujesz suplementu wapnia?"
+    },
+    {
+     "h": 3,
+     "nowy": "**Które formy wapnia działają najlepiej?**",
+     "stary": "Które formy wapnia działają najlepiej?"
+    },
+    {
+     "h": 3,
+     "nowy": "**Jak czytać etykietę suplementu?**",
+     "stary": "Jak czytać etykietę suplementu?"
+    },
+    {
+     "h": 3,
+     "nowy": "**KIEDY brać wapń – to ma znaczenie.**",
+     "stary": "KIEDY brać wapń - to ma znaczenie."
+    },
+    {
+     "h": 3,
+     "nowy": "**Czego unikać przy przyjmowaniu wapnia.**",
+     "stary": "Czego unikać przy przyjmowaniu wapnia."
+    },
+    {
+     "h": 2,
+     "nowy": "**WITAMINA D3 – hormon, nie witamina.**",
+     "stary": "WITAMINA D3 - hormon, nie witamina."
+    },
+    {
+     "h": 3,
+     "nowy": "**Ile D3 naprawdę potrzebujesz?**",
+     "stary": "Ile D3 naprawdę potrzebujesz?"
+    },
+    {
+     "h": 3,
+     "nowy": "**Jak dobrać dawkę D3 na podstawie badania krwi?**",
+     "stary": "Jak dobrać dawkę D3 na podstawie badania krwi?"
+    },
+    {
+     "h": 3,
+     "nowy": "**KIEDY i JAK brać witaminę D3.**",
+     "stary": "KIEDY i JAK brać witaminę D3."
+    },
+    {
+     "h": 2,
+     "nowy": "**Inne suplementy – co działa, co jest przereklamowane.**",
+     "stary": "Inne suplementy - co działa, co jest przereklamowane."
+    },
+    {
+     "h": 3,
+     "nowy": "**Magnez – potrzebny, ale nie dla każdego.**",
+     "stary": "Magnez - potrzebny, ale nie dla każdego."
+    },
+    {
+     "h": 3,
+     "nowy": "**Witamina K2 (menachinon-7) – obiecująca, ale dane niejednoznaczne.**",
+     "stary": "Witamina K2 (menachinon-7) - obiecująca, ale dane niejednoznaczne."
+    },
+    {
+     "h": 3,
+     "nowy": "**Białko – suplement? Niekoniecznie. Ale musisz mieć go wystarczająco.**",
+     "stary": "Białko - suplement? Niekoniecznie. Ale musisz mieć go wystarczająco."
+    },
+    {
+     "h": 3,
+     "nowy": "**Kolagen – specyficzne białko, które może być „dodatkiem ekstra”.**",
+     "stary": "Kolagen - specyficzne białko, które może być „dodatkiem ekstra”."
+    },
+    {
+     "h": 3,
+     "nowy": "**Probiotyki – wczesny etap badań.**",
+     "stary": "Probiotyki - wczesny etap badań."
+    },
+    {
+     "h": 2,
+     "nowy": "**Czego NIE suplementować (chyba że masz konkretny niedobór).**",
+     "stary": "Czego NIE suplementować (chyba że masz konkretny niedobór)."
+    },
+    {
+     "h": 2,
+     "nowy": "**Interakcje – czego NIE łączyć.**",
+     "stary": "Interakcje - czego NIE łączyć."
+    },
+    {
+     "h": 2,
+     "nowy": "**Skutki uboczne suplementacji – czego się spodziewać.**",
+     "stary": "Skutki uboczne suplementacji - czego się spodziewać."
+    },
+    {
+     "h": 3,
+     "nowy": "**Wapń.**",
+     "stary": "Wapń."
+    },
+    {
+     "h": 3,
+     "nowy": "**Witamina D3.**",
+     "stary": "Witamina D3."
+    },
+    {
+     "h": 3,
+     "nowy": "**Magnez.**",
+     "stary": "Magnez."
+    },
+    {
+     "h": 3,
+     "nowy": "**Probiotyki.**",
+     "stary": "Probiotyki."
+    },
+    {
+     "h": 2,
+     "nowy": "**GOTOWY SCHEMAT – Twój dzienny plan suplementacji.**",
+     "stary": "GOTOWY SCHEMAT - Twój dzienny plan suplementacji."
+    },
+    {
+     "h": 3,
+     "nowy": "**SCENARIUSZ 1: Jesz około 600–700 mg Ca z diety**",
+     "stary": "SCENARIUSZ 1: Jesz około 600-700 mg Ca z diety"
+    },
+    {
+     "h": 3,
+     "nowy": "**SCENARIUSZ 2: Jesz mniej niż 500 mg Ca z diety**",
+     "stary": "SCENARIUSZ 2: Jesz mniej niż 500 mg Ca z diety"
+    },
+    {
+     "h": 3,
+     "nowy": "**SCENARIUSZ 3: Masz niedobór witaminy D (poniżej 20 ng/mL)**",
+     "stary": "SCENARIUSZ 3: Masz niedobór witaminy D (poniżej 20 ng/mL)"
+    },
+    {
+     "h": 2,
+     "nowy": "**Jak monitorować skuteczność?**",
+     "stary": "Jak monitorować skuteczność?"
+    },
+    {
+     "h": 2,
+     "nowy": "**PODSUMOWANIE: Co robić teraz?**",
+     "stary": "PODSUMOWANIE: Co robić teraz?"
+    }
+   ],
+   "linki": [
+    "http://m.in"
+   ],
+   "obrazki": [
+    "https://klhnyagtobgtxnexdsls.supabase.co/storage/v1/object/public/assets/17adb766-c0e2-481b-8201-5248c6fae490/images/1775154332943-rozdzial-8.png"
+   ],
+   "uwagi": [
+    "data:base64 (83126 B) -> https://klhnyagtobgtxnexdsls.supabase.co/storage/v1/object/public/assets/17adb766-c0e2-481b-8201-5248c6fae490/images/1775154332943-rozdzial-8.png"
+   ],
+   "bloki": {
+    "naglowek": 30,
+    "akapit": 175,
+    "lista": 10,
+    "blockquote": 0,
+    "kod": 0,
+    "tabela": 0
+   }
+  },
+  {
+   "nn": "10",
+   "dokument": "ROZDZIAL-9_Ruch.md",
+   "html_bajtow": 17906,
+   "roundtrip_bajtowy": true,
+   "bloki_zgodne": true,
+   "proza_zgodna": true,
+   "naglowki_odtworzone": 17,
+   "naglowki_przebudowane": [
+    {
+     "h": 1,
+     "nowy": "Rozdział 9: Ruch – filar równie ważny jak żywienie.",
+     "stary": "Rozdział 9: Ruch - filar równie ważny jak żywienie."
+    },
+    {
+     "h": 2,
+     "nowy": "Tai chi – więcej niż „łagodna gimnastyka”.",
+     "stary": "Tai chi - więcej niż „łagodna gimnastyka”."
+    },
+    {
+     "h": 2,
+     "nowy": "„Rest insertion” – krótkie przerwy, większy efekt.",
+     "stary": "„Rest insertion” - krótkie przerwy, większy efekt."
+    },
+    {
+     "h": 2,
+     "nowy": "Bezpieczeństwo przede wszystkim – czego unikać.",
+     "stary": "Bezpieczeństwo przede wszystkim - czego unikać."
+    },
+    {
+     "h": 2,
+     "nowy": "Realistyczne oczekiwania – co ruch zrobi, a czego nie zrobi.",
+     "stary": "Realistyczne oczekiwania - co ruch zrobi, a czego nie zrobi."
+    }
+   ],
+   "linki": [],
+   "obrazki": [],
+   "uwagi": [],
+   "bloki": {
+    "naglowek": 22,
+    "akapit": 49,
+    "lista": 8,
+    "blockquote": 0,
+    "kod": 0,
+    "tabela": 0
+   }
+  },
+  {
+   "nn": "11",
+   "dokument": "ROZDZIAL-10_Sen-slonce-stres.md",
+   "html_bajtow": 28173,
+   "roundtrip_bajtowy": true,
+   "bloki_zgodne": true,
+   "proza_zgodna": true,
+   "naglowki_odtworzone": 20,
+   "naglowki_przebudowane": [
+    {
+     "h": 1,
+     "nowy": "ROZDZIAŁ 10: Sen, słońce, stres – pozostałe filary.",
+     "stary": "ROZDZIAŁ 10: Sen, słońce, stres - pozostałe filary."
+    },
+    {
+     "h": 2,
+     "nowy": "Sen – więcej niż odpoczynek.",
+     "stary": "Sen - więcej niż odpoczynek."
+    },
+    {
+     "h": 3,
+     "nowy": "Melatonina – hormon snu i kości.",
+     "stary": "Melatonina - hormon snu i kości."
+    },
+    {
+     "h": 2,
+     "nowy": "Słońce i witamina D – więcej niż tylko kości.",
+     "stary": "Słońce i witamina D - więcej niż tylko kości."
+    },
+    {
+     "h": 2,
+     "nowy": "Stres – jak niszczy Twoje kości.",
+     "stary": "Stres - jak niszczy Twoje kości."
+    },
+    {
+     "h": 3,
+     "nowy": "Kortyzol – hormon stresu.",
+     "stary": "Kortyzol - hormon stresu."
+    },
+    {
+     "h": 3,
+     "nowy": "Techniki zarządzania stresem – co naprawdę działa?",
+     "stary": "Techniki zarządzania stresem - co naprawdę działa?"
+    },
+    {
+     "h": 2,
+     "nowy": "Praktyczny plan działania – zaczynamy od małych kroków.",
+     "stary": "Praktyczny plan działania - zaczynamy od małych kroków."
+    }
+   ],
+   "linki": [],
+   "obrazki": [
+    "https://klhnyagtobgtxnexdsls.supabase.co/storage/v1/object/public/assets/d73dcc3b-74ed-4d23-8cbb-d600c8f5306f/images/1779351999214-rozdzial-10.png"
+   ],
+   "uwagi": [],
+   "bloki": {
+    "naglowek": 28,
+    "akapit": 113,
+    "lista": 0,
+    "blockquote": 0,
+    "kod": 0,
+    "tabela": 0
+   }
+  },
+  {
+   "nn": "12",
+   "dokument": "ZAKONCZENIE_Co-teraz.md",
+   "html_bajtow": 8434,
+   "roundtrip_bajtowy": true,
+   "bloki_zgodne": true,
+   "proza_zgodna": true,
+   "naglowki_odtworzone": 8,
+   "naglowki_przebudowane": [
+    {
+     "h": 2,
+     "nowy": "Do młodych kobiet – to jest Twoja szansa.",
+     "stary": "Do młodych kobiet - to jest Twoja szansa."
+    },
+    {
+     "h": 2,
+     "nowy": "Do kobiet w moim wieku – jeszcze nie jest za późno.",
+     "stary": "Do kobiet w moim wieku - jeszcze nie jest za późno."
+    }
+   ],
+   "linki": [],
+   "obrazki": [
+    "https://klhnyagtobgtxnexdsls.supabase.co/storage/v1/object/public/assets/d73dcc3b-74ed-4d23-8cbb-d600c8f5306f/images/1779352015965-zakonczenie.png"
+   ],
+   "uwagi": [],
+   "bloki": {
+    "naglowek": 10,
+    "akapit": 44,
+    "lista": 1,
+    "blockquote": 0,
+    "kod": 0,
+    "tabela": 0
+   }
+  }
+ ]
+}

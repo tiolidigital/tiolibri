@@ -1,0 +1,276 @@
+{
+ "wygenerowano": "2026-08-13",
+ "tworczyni": "ewa",
+ "po_co": "Aktualny stan tekstu per dokument = output.md JEDYNEGO przebiegu 'zastosowany'. Katalog roboczy do operacji hurtowych (pogrubienia, myslniki). output.md w katalogach przebiegow NIE jest modyfikowany - trzyma go bramka E2E raport===output (PHASE-20b).",
+ "pliki": [
+  {
+   "dokument": "ROZDZIAL-10_Sen-slonce-stres.md",
+   "run_id": "2026-08-11-6e9c8e",
+   "zrodlo": "redaktor/praca/ROZDZIAL-10_Sen-slonce-stres/2026-08-11-6e9c8e/output.md",
+   "sha256_przed_hurtem": "f0e947c11077c7312d7061f685007fb397140fc033025a35fe9dc7c7bde048ba",
+   "bajtow": 27875,
+   "etykiet_bold": 18
+  },
+  {
+   "dokument": "ROZDZIAL-1_Osteoporoza-co-to-oznacza.md",
+   "run_id": "2026-08-12-d83aa0",
+   "zrodlo": "redaktor/praca/ROZDZIAL-1_Osteoporoza-co-to-oznacza/2026-08-12-d83aa0/output.md",
+   "sha256_przed_hurtem": "05c3d9cb9066a2ed31420fd42bcd9e7f7d060f30e552bb5b7bd264653199527c",
+   "bajtow": 23815,
+   "etykiet_bold": 25
+  },
+  {
+   "dokument": "ROZDZIAL-2_Fakty-naukowe.md",
+   "run_id": "2026-08-12-3f65af",
+   "zrodlo": "redaktor/praca/ROZDZIAL-2_Fakty-naukowe/2026-08-12-3f65af/output.md",
+   "sha256_przed_hurtem": "38758387b1498464f42c702e3200d95765c287fee220cb214bcee262a8d173ed",
+   "bajtow": 15364,
+   "etykiet_bold": 0
+  },
+  {
+   "dokument": "ROZDZIAL-3_Skladniki-budulcowe.md",
+   "run_id": "2026-08-12-5c0c16",
+   "zrodlo": "redaktor/praca/ROZDZIAL-3_Skladniki-budulcowe/2026-08-12-5c0c16/output.md",
+   "sha256_przed_hurtem": "a2ccd4aa32d37059037fbdd081f5799ea3326990462922efb15639e2f444df72",
+   "bajtow": 15750,
+   "etykiet_bold": 11
+  },
+  {
+   "dokument": "ROZDZIAL-4_Sojusznicy-zdrowych-kosci.md",
+   "run_id": "2026-08-12-decc59",
+   "zrodlo": "redaktor/praca/ROZDZIAL-4_Sojusznicy-zdrowych-kosci/2026-08-12-decc59/output.md",
+   "sha256_przed_hurtem": "726e9383c92b7ec9013c94b7feacf05a874aaab6e6f4d2afa0f9d6b413ca6dec",
+   "bajtow": 11252,
+   "etykiet_bold": 13
+  },
+  {
+   "dokument": "ROZDZIAL-5_Mikrobiota-jelitowa.md",
+   "run_id": "2026-08-12-e295d4",
+   "zrodlo": "redaktor/praca/ROZDZIAL-5_Mikrobiota-jelitowa/2026-08-12-e295d4/output.md",
+   "sha256_przed_hurtem": "cefc7766e46f67b5d378862bc7a67b04caf44cb3b2f55e2ba5447902cff264ca",
+   "bajtow": 15019,
+   "etykiet_bold": 0
+  },
+  {
+   "dokument": "ROZDZIAL-6_Co-przeszkadza-kosciom.md",
+   "run_id": "2026-08-12-371cba",
+   "zrodlo": "redaktor/praca/ROZDZIAL-6_Co-przeszkadza-kosciom/2026-08-12-371cba/output.md",
+   "sha256_przed_hurtem": "fb28cc1ce132a0a0fc230489ee97352ffbefa99aae86ecf2ecaa997663c3ae31",
+   "bajtow": 14897,
+   "etykiet_bold": 0
+  },
+  {
+   "dokument": "ROZDZIAL-7_Mapa-drogowa-dieta.md",
+   "run_id": "2026-08-12-ff21b7",
+   "zrodlo": "redaktor/praca/ROZDZIAL-7_Mapa-drogowa-dieta/2026-08-12-ff21b7/output.md",
+   "sha256_przed_hurtem": "bc203e9576a29bffc807999c86997632cbdd02304625ccd1d80bb8daf4e4d214",
+   "bajtow": 15145,
+   "etykiet_bold": 3
+  },
+  {
+   "dokument": "ROZDZIAL-8_Suplementacja-4_1.md",
+   "run_id": "2026-08-11-4e0e64",
+   "zrodlo": "redaktor/praca/ROZDZIAL-8_Suplementacja-4_1/2026-08-11-4e0e64/output.md",
+   "sha256_przed_hurtem": "142066eb8a8e636814e1e4f0c6558c4920491dbacb8897319fd6cb2d1da7a091",
+   "bajtow": 118755,
+   "etykiet_bold": 39
+  },
+  {
+   "dokument": "ROZDZIAL-9_Ruch.md",
+   "run_id": "2026-08-12-f75902",
+   "zrodlo": "redaktor/praca/ROZDZIAL-9_Ruch/2026-08-12-f75902/output.md",
+   "sha256_przed_hurtem": "0aab5a217f35a4072544aea0efa90e0d94686e3f713efa0013653a14b5c099c6",
+   "bajtow": 17984,
+   "etykiet_bold": 0
+  },
+  {
+   "dokument": "WSTEP_Historia-z-osteoporoza.md",
+   "run_id": "2026-08-12-eff5fe",
+   "zrodlo": "redaktor/praca/WSTEP_Historia-z-osteoporoza/2026-08-12-eff5fe/output.md",
+   "sha256_przed_hurtem": "aaf78d87ebcb25aeb1e60d8eaf52b37f7063959963a35829c9e61219e556133b",
+   "bajtow": 12727,
+   "etykiet_bold": 0
+  },
+  {
+   "dokument": "ZAKONCZENIE_Co-teraz.md",
+   "run_id": "2026-08-12-07ad4d",
+   "zrodlo": "redaktor/praca/ZAKONCZENIE_Co-teraz/2026-08-12-07ad4d/output.md",
+   "sha256_przed_hurtem": "6d518442e631b4504d785b1127514433de540ddbe3f7e47e39d28e8dee9bce6a",
+   "bajtow": 8325,
+   "etykiet_bold": 0
+  }
+ ],
+ "operacje_hurtowe": [
+  {
+   "operacja": "myslniki-wtracenia",
+   "data": "2026-08-14",
+   "decyzja": "Wtracenia i dialogi -> polpauza ze spacjami (U+2013). Decyzja wlasciciela 2026-08-14, pamiec: myslnik-decyzja-globalna-otwarta.",
+   "wzorce": [
+    " - (goly dywiz) -> – ; 11 rozdzialow, 390 miejsc",
+    " \\- (dywiz escapowany przez Google Docs) -> – ; wylacznie ROZDZIAL-8, 88 miejsc"
+   ],
+   "razem": 478,
+   "NIE_ruszone": "dywizy laczace wyrazy (0 zmian, zweryfikowane per plik); zakresy liczbowe (NADAL OTWARTE, osobna decyzja)",
+   "dowod": "rekonstrukcja: po znormalizowaniu wszystkich wariantow myslnika 12/12 plikow identyczne z kopia sprzed operacji",
+   "uwaga": "sha256_przed_hurtem NIE jest aktualizowane - z definicji trzyma stan sprzed operacji hurtowych",
+   "pliki": [
+    {
+     "dokument": "ROZDZIAL-10_Sen-slonce-stres.md",
+     "zamieniono": 54,
+     "sha256_po": "20bb9066379c1515f4ef0d0d02175a6aa88f415e120d7fcb81d037e5dd83314d",
+     "bajtow_po": 27983
+    },
+    {
+     "dokument": "ROZDZIAL-1_Osteoporoza-co-to-oznacza.md",
+     "zamieniono": 44,
+     "sha256_po": "4afa8fab6809f30664bec6dfeab33961b31954a300a2c1bb2fd48c2242ec0771",
+     "bajtow_po": 23903
+    },
+    {
+     "dokument": "ROZDZIAL-2_Fakty-naukowe.md",
+     "zamieniono": 34,
+     "sha256_po": "4f2a2962fd5caaaf301974b5dc075cf5587a3ba9c357824d1dac1e487c6b5b34",
+     "bajtow_po": 15432
+    },
+    {
+     "dokument": "ROZDZIAL-3_Skladniki-budulcowe.md",
+     "zamieniono": 35,
+     "sha256_po": "57bc71edb4469dcb742b0ef4693ed2017cae1ef26e7074c011c981168314fc9b",
+     "bajtow_po": 15820
+    },
+    {
+     "dokument": "ROZDZIAL-4_Sojusznicy-zdrowych-kosci.md",
+     "zamieniono": 20,
+     "sha256_po": "ab2e5edda19e2b524ce074c572937cbcd73fb479fe2957c1045f1bb0d7f04f13",
+     "bajtow_po": 11292
+    },
+    {
+     "dokument": "ROZDZIAL-5_Mikrobiota-jelitowa.md",
+     "zamieniono": 43,
+     "sha256_po": "e33d810fad2ebf69458adf3812187c8e5d823cff2dc61db4866929dead2e6615",
+     "bajtow_po": 15105
+    },
+    {
+     "dokument": "ROZDZIAL-6_Co-przeszkadza-kosciom.md",
+     "zamieniono": 37,
+     "sha256_po": "a4d4375b345acd922f42166094f1b46805050bc2c2ddbd0bc82fd9059bea0dcc",
+     "bajtow_po": 14971
+    },
+    {
+     "dokument": "ROZDZIAL-7_Mapa-drogowa-dieta.md",
+     "zamieniono": 37,
+     "sha256_po": "9b7925176583a6da61d6e3ea06068487566d0173bcc3fc7a91d3785099115b39",
+     "bajtow_po": 15219
+    },
+    {
+     "dokument": "ROZDZIAL-8_Suplementacja-4_1.md",
+     "zamieniono": 88,
+     "sha256_po": "69122117818473e40d1ea0114a8f10bbdc83d63fb219efc1827d329cb5815738",
+     "bajtow_po": 118843
+    },
+    {
+     "dokument": "ROZDZIAL-9_Ruch.md",
+     "zamieniono": 32,
+     "sha256_po": "febd797480aa9ab4da70e3f7240d85b9fb396a7043ae536bbb2628548db2770e",
+     "bajtow_po": 18048
+    },
+    {
+     "dokument": "WSTEP_Historia-z-osteoporoza.md",
+     "zamieniono": 30,
+     "sha256_po": "616eb43653e3a66a761ebc127553ab11cee9cca838066ef3d2dfafab43fc8284",
+     "bajtow_po": 12787
+    },
+    {
+     "dokument": "ZAKONCZENIE_Co-teraz.md",
+     "zamieniono": 24,
+     "sha256_po": "699817434436398078acbc476399967be725afc7c8cb829e0f73ecb169683a32",
+     "bajtow_po": 8373
+    }
+   ]
+  },
+  {
+   "operacja": "zakresy-liczbowe",
+   "data": "2026-08-14",
+   "decyzja": "Zakresy liczb, dawek i lat -> polpauza BEZ spacji (U+2013). Polska norma ksiazkowa. Decyzja wlasciciela 2026-08-14.",
+   "wzorzec": "(?<=\\d)-(?=\\d) -> – , stosowane per token rozdzielony bialymi znakami",
+   "wykluczenia": "tokeny zawierajace http / data:image / doi / 10.NNNN/ / @ - 22 dywizy CHRONIONE (fragmenty UUID w URL-ach do Supabase Storage oraz DOI 10.1136/bmj-2025-088050)",
+   "razem": 199,
+   "NIE_ruszone": "laczenie wyrazow (omega-3, D3-K2); URL-e do Storage; DOI",
+   "dowod": "rekonstrukcja: po zrownaniu '-' i '–' 12/12 plikow identyczne z kopia sprzed operacji; 0 URL-i z polpauza",
+   "pliki": [
+    {
+     "dokument": "ROZDZIAL-10_Sen-slonce-stres.md",
+     "zamieniono": 47,
+     "sha256_po": "32bd72bd6a2d1f409b2bec181464c730769a5314dc975d89ffda83eb2f7bc071",
+     "bajtow_po": 28077
+    },
+    {
+     "dokument": "ROZDZIAL-1_Osteoporoza-co-to-oznacza.md",
+     "zamieniono": 14,
+     "sha256_po": "27acc48bdba4a58b8f306f32fb56ace0861211eaa7bc586edf5559c7a9b076e8",
+     "bajtow_po": 23931
+    },
+    {
+     "dokument": "ROZDZIAL-2_Fakty-naukowe.md",
+     "zamieniono": 20,
+     "sha256_po": "57c25490970e627c0ee8031b6b3504d53262fdc5d009e2f4aff7c06761f7d408",
+     "bajtow_po": 15472
+    },
+    {
+     "dokument": "ROZDZIAL-3_Skladniki-budulcowe.md",
+     "zamieniono": 18,
+     "sha256_po": "0d575b6a3a41ffd25ec1bcb360736aaec1349355feefd1d63689d0ec1848d6bb",
+     "bajtow_po": 15856
+    },
+    {
+     "dokument": "ROZDZIAL-4_Sojusznicy-zdrowych-kosci.md",
+     "zamieniono": 3,
+     "sha256_po": "489a3f817e2cd4c0914e7fbbc1ff7ee07d8c40770b3823c001c2f1f9fdbae6ab",
+     "bajtow_po": 11298
+    },
+    {
+     "dokument": "ROZDZIAL-5_Mikrobiota-jelitowa.md",
+     "zamieniono": 2,
+     "sha256_po": "5bb8eec99ca435ffa2cb7f6108f6d65d96929cfe99f7ccc5acdf5ed18daaae12",
+     "bajtow_po": 15109
+    },
+    {
+     "dokument": "ROZDZIAL-6_Co-przeszkadza-kosciom.md",
+     "zamieniono": 10,
+     "sha256_po": "652fafbb7cf8cfa3ef4de24186a7223e90ef4f2d997e758f59ad4c42f613f0ac",
+     "bajtow_po": 14991
+    },
+    {
+     "dokument": "ROZDZIAL-7_Mapa-drogowa-dieta.md",
+     "zamieniono": 21,
+     "sha256_po": "6d77c0f436f549616910704bb4417e32e4b9f2e21d612ba9ebb5e495d3afb191",
+     "bajtow_po": 15261
+    },
+    {
+     "dokument": "ROZDZIAL-8_Suplementacja-4_1.md",
+     "zamieniono": 52,
+     "sha256_po": "118836ae5ab8d3a98be24232902938e8e5820a3e10867f1278e156bd83c96a93",
+     "bajtow_po": 118947
+    },
+    {
+     "dokument": "ROZDZIAL-9_Ruch.md",
+     "zamieniono": 0,
+     "sha256_po": "febd797480aa9ab4da70e3f7240d85b9fb396a7043ae536bbb2628548db2770e",
+     "bajtow_po": 18048
+    },
+    {
+     "dokument": "WSTEP_Historia-z-osteoporoza.md",
+     "zamieniono": 6,
+     "sha256_po": "4b3c85e141ccca995fbf06aeef4fa574e6725287a75bc3fc4271c9f0d6ebf066",
+     "bajtow_po": 12799
+    },
+    {
+     "dokument": "ZAKONCZENIE_Co-teraz.md",
+     "zamieniono": 6,
+     "sha256_po": "95d3c297fcd226a5f0d80b954f00d2194ef7a271d7e00a519d37dd052a9b036a",
+     "bajtow_po": 8385
+    }
+   ]
+  }
+ ]
+}

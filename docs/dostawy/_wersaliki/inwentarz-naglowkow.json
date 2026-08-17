@@ -1,0 +1,1836 @@
+[
+ {
+  "sort_order": 1,
+  "chapter_id": "d3c2437d-6cd6-428b-a59a-fa155995070d",
+  "poziom": "h1",
+  "tekst": "Zanim zaczniesz",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 2,
+  "chapter_id": "1d34bb8d-edc5-4a15-8bc8-dda280c0d7a2",
+  "poziom": "h1",
+  "tekst": "WSTĘP: Jak zaczęła się moja historia z osteoporozą.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 2,
+  "chapter_id": "1d34bb8d-edc5-4a15-8bc8-dda280c0d7a2",
+  "poziom": "h2",
+  "tekst": "Dla kogo jest ten e-book?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 2,
+  "chapter_id": "1d34bb8d-edc5-4a15-8bc8-dda280c0d7a2",
+  "poziom": "h2",
+  "tekst": "Czego NIE znajdziesz w tym e-booku.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 2,
+  "chapter_id": "1d34bb8d-edc5-4a15-8bc8-dda280c0d7a2",
+  "poziom": "h2",
+  "tekst": "Co znajdziesz w środku – mapa e-booka.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 2,
+  "chapter_id": "1d34bb8d-edc5-4a15-8bc8-dda280c0d7a2",
+  "poziom": "h2",
+  "tekst": "Jak korzystać z tego e-booka?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 2,
+  "chapter_id": "1d34bb8d-edc5-4a15-8bc8-dda280c0d7a2",
+  "poziom": "h2",
+  "tekst": "Opcja 1: Przeczytaj od początku do końca.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 2,
+  "chapter_id": "1d34bb8d-edc5-4a15-8bc8-dda280c0d7a2",
+  "poziom": "h2",
+  "tekst": "Opcja 2: Zacznij od tego, co Cię najbardziej interesuje.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 2,
+  "chapter_id": "1d34bb8d-edc5-4a15-8bc8-dda280c0d7a2",
+  "poziom": "h2",
+  "tekst": "Co zrobić PO przeczytaniu?",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 2,
+  "chapter_id": "1d34bb8d-edc5-4a15-8bc8-dda280c0d7a2",
+  "poziom": "h2",
+  "tekst": "Moja obietnica dla Ciebie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 3,
+  "chapter_id": "c5bc772e-cc48-4c0b-b252-d8c07901bd5f",
+  "poziom": "h1",
+  "tekst": "ROZDZIAŁ 1: Osteoporoza – co to oznacza dla Twojego organizmu?",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 3,
+  "chapter_id": "c5bc772e-cc48-4c0b-b252-d8c07901bd5f",
+  "poziom": "h3",
+  "tekst": "Rola hormonów.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 3,
+  "chapter_id": "c5bc772e-cc48-4c0b-b252-d8c07901bd5f",
+  "poziom": "h2",
+  "tekst": "Czynniki ryzyka: co możesz kontrolować, a czego nie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 3,
+  "chapter_id": "c5bc772e-cc48-4c0b-b252-d8c07901bd5f",
+  "poziom": "h3",
+  "tekst": "Czynniki, których nie kontrolujesz (ale musisz o nich wiedzieć)",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 3,
+  "chapter_id": "c5bc772e-cc48-4c0b-b252-d8c07901bd5f",
+  "poziom": "h3",
+  "tekst": "Czynniki, które możesz kontrolować.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 3,
+  "chapter_id": "c5bc772e-cc48-4c0b-b252-d8c07901bd5f",
+  "poziom": "h2",
+  "tekst": "Podsumowanie rozdziału 1.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 3,
+  "chapter_id": "c5bc772e-cc48-4c0b-b252-d8c07901bd5f",
+  "poziom": "h3",
+  "tekst": "Kiedy iść do lekarza.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h1",
+  "tekst": "ROZDZIAŁ 2: Co działa najlepiej – fakty naukowe.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h2",
+  "tekst": "Kiedy suplementy pomagają (a kiedy nie).",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Suplementy nie załatwią wszystkiego.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Wapń – kiedy suplement ma sens?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Czy suplementacja wapnia jest bezpieczna?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Witamina D – tutaj suplementacja jest kluczowa.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Przeciwwskazania do suplementacji witaminy D.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Podsumowanie: suplementy tak, ale z głową.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h2",
+  "tekst": "Mleko i alternatywy – jak mądrze wybierać.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Prawda o mleku.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "„Ale ja nie toleruję laktozy...”",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "„Ale mam alergię na białka mleka...”",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Alternatywy roślinne – na co uważać.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Podsumowanie: mleko czy alternatywy?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h2",
+  "tekst": "Dlaczego potrzebujesz więcej niż samego wapnia w diecie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Synergiczne działanie składników.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Kości to nie jedyny problem menopauzy.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h2",
+  "tekst": "Co mówią najnowsze badania – dieta śródziemnomorska i okinawska.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Dieta śródziemnomorska – najlepiej przebadana.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Dieta okinawska – mało kalorii, dużo składników odżywczych.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Inne wzorce żywienia warte uwagi.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h3",
+  "tekst": "Czego unikać – diety restrykcyjne.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 4,
+  "chapter_id": "78c75890-d1c3-4cf4-97b8-b86ca700a1b1",
+  "poziom": "h2",
+  "tekst": "Podsumowanie rozdziału 2.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h1",
+  "tekst": "ROZDZIAŁ 3: Fundament – składniki budulcowe.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h2",
+  "tekst": "WAPŃ – ile naprawdę potrzebujesz i skąd go brać.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Twoje zapotrzebowanie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Najlepsze źródła wapnia.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Jak sprawić, by wapń się dobrze wchłaniał?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "A co z suplementami?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h2",
+  "tekst": "WITAMINA D3 – optymalne poziomy, źródła, suplementacja.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Skąd brać witaminę D?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Ile witaminy D potrzebujesz?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Jak suplementować witaminę D, żeby działała?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Lek czy suplement?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Badanie poziomu witaminy D.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h2",
+  "tekst": "WITAMINA K2 – zapomniany bohater metabolizmu kości?",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Co robi witamina K2?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Co mówią badania?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Źródła witaminy K2.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h2",
+  "tekst": "MAGNEZ – partner wapnia w mineralizacji.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Co mówią badania?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Kiedy magnez jest ważny?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Źródła magnezu.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h2",
+  "tekst": "BIAŁKO – ile i jakie dla kości po 40+.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Ile białka potrzebujesz?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Czy więcej białka równa się mocniejsze kości?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h3",
+  "tekst": "Praktyczne wskazówki.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 5,
+  "chapter_id": "811ddd42-c1b9-4a12-8987-b7b0b93035c5",
+  "poziom": "h2",
+  "tekst": "Podsumowanie rozdziału 3.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h1",
+  "tekst": "ROZDZIAŁ 4: Sojusznicy zdrowych kości.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h2",
+  "tekst": "WITAMINA C – rola w budowie kości.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Dlaczego witamina C ma znaczenie dla kości?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Ile witaminy C potrzebujesz?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Źródła witaminy C.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Praktyczne wskazówki.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h2",
+  "tekst": "KRZEM – gdzie go znaleźć w pożywieniu.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Czym jest krzem i dlaczego może być ważny?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Źródła krzemu.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Praktyczne wskazówki.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h2",
+  "tekst": "BOR, CYNK, FOSFOR: Co mówią dowody?",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Bor.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Cynk.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Fosfor.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h2",
+  "tekst": "FITOESTROGENY (IZOFLAWONY): Nadzieja czy mit?",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Czym są fitoestrogeny?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Co mówią badania?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Źródła izoflawonów",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Czy włączyć soję do diety?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h2",
+  "tekst": "CO Z INNYMI „CUDOWNYMI” SKŁADNIKAMI?",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h3",
+  "tekst": "Pluskwica groniasta, berberyna, DHEA.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 6,
+  "chapter_id": "a22b947c-2d42-4f48-b88f-c7804a83b6b2",
+  "poziom": "h2",
+  "tekst": "Podsumowanie rozdziału 4.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h1",
+  "tekst": "ROZDZIAŁ 5: Mikrobiota jelitowa a zdrowie kości.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h2",
+  "tekst": "OŚ JELITO-KOŚĆ – jak mikrobiota reguluje wchłanianie wapnia.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Menopauza, estradiol i mikrobiota – trójkąt zależności.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Niedobór hormonów płciowych i przepuszczalność bariery jelitowej.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h2",
+  "tekst": "SCFA – krótkołańcuchowe kwasy tłuszczowe i zdrowie kości.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Czym są SCFA i skąd się biorą?",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Jak SCFA wspierają kości?",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Jak zwiększyć produkcję SCFA?",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h2",
+  "tekst": "Dysbioza, a zapalenie niszczące kości",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Co to jest dysbioza?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Jak dysbioza niszczy kości?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Co powoduje dysbiozę?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h2",
+  "tekst": "PROBIOTYKI DLA KOŚCI – co mówią badania",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Czy probiotyki mogą zmniejszać ubytek masy kostnej?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Badanie z Goteborgu – obiecujące, z przyszłością, ale nie jedyne.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Inne obiecujące kierunki badań.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Ale... dowody są mieszane.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Co to oznacza dla Ciebie?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h2",
+  "tekst": "PRAKTYCZNE WSKAZÓWKI – jak wspierać mikrobiotę dla zdrowia kości.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Błonnik – fundament zdrowej mikrobioty.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Ile błonnika?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Jak wprowadzać błonnik do diety?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Najlepsze źródła błonnika dla mikrobioty i kości.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Fermentowane produkty – naturalne bakteryjne wsparcie jelita.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Różnorodność roślin – klucz do bogatej mikrobioty.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h3",
+  "tekst": "Prebiotyki – pokarm dla dobrych bakterii.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h2",
+  "tekst": "PRAKTYCZNA WSKAZÓWKA – strategia 3×1.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 7,
+  "chapter_id": "df5181df-f46c-4eb3-ab5b-544c2879ba35",
+  "poziom": "h2",
+  "tekst": "Podsumowanie rozdziału 5.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h1",
+  "tekst": "ROZDZIAŁ 6: Co może przeszkadzać Twoim kościom.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h2",
+  "tekst": "SÓL: Ile to za dużo?",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Dlaczego sól ma znaczenie dla kości?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Ile soli jest bezpieczne?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Jak ograniczyć sól w praktyce?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "A co z kiszonkami?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h2",
+  "tekst": "KOFEINA – czy rezygnować z kawy?",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Wpływ kofeiny na wapń.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Mechanizm działania.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Praktyczne wskazówki.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h2",
+  "tekst": "ALKOHOL – wpływ na metabolizm kości.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Dane są jednoznaczne.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Jak alkohol niszczy kości?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Co jest bezpieczne?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h2",
+  "tekst": "CUKIER – zdrowe węglowodany są potrzebne.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Węglowodany nie są wrogiem kości.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Problem nie leży w węglowodanach tylko w ich jakości.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Dlaczego nadmiar cukru jest problemem?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Które węglowodany są dobre dla kości?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Błonnik – złożony cukier, który chroni kości.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "A co, jeśli mam już zaburzenia metabolizmu węglowodanów?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Podsumowanie: cukry proste versus węglowodany złożone.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h2",
+  "tekst": "NAPOJE GAZOWANE – ograniczaj.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Czy kwasy niszczą kości?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Problem dotyczy niektórych napojów gazowanych i ich składu a nie samej „kwaśności”.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h3",
+  "tekst": "Praktyczne wskazówki.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 8,
+  "chapter_id": "d322342b-4d71-41c4-9c20-d1078e281a14",
+  "poziom": "h2",
+  "tekst": "Podsumowanie rozdziału 6.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h1",
+  "tekst": "Rozdział 7: Twoja mapa drogowa – dieta dla zdrowych kości.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h2",
+  "tekst": "Potrzebujesz strategii, a nie tylko listy zakupów.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h2",
+  "tekst": "16 zasad zdrowego odżywiania dla kości.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "1. Nigdy nie jest za późno, by zacząć dbać o siebie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "2. Pilnuj prawidłowej masy ciała.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "3. W przypadku nadwagi lub otyłości – redukcja z głową.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "4. Ustal fizjologiczny harmonogram posiłków.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "5. Białko: 1,0–1,2 gramów na kilogram masy ciała dziennie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "6. Wapń, witamina D, witamina C i witaminy z grupy B – kluczowe w diecie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "7. Kwasy omega-3 i omega-6 – równowaga ma znaczenie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "8. Owoce i warzywa muszą być w Twojej diecie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "9. Rośliny strączkowe – co najmniej raz w tygodniu.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "10. Regularne spożywanie niskotłuszczowych źródeł białka.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "11. Umiarkowane spożywanie tłuszczów i słodyczy.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "12. Ryby – co najmniej dwa razy w tygodniu.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "13. Orzechy i nasiona – 30 gramów dziennie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "14. Błonnik – 25–30 gramów dziennie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "15. Wapń z produktów mlecznych.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "16. Zmiana stylu życia – to nie tylko dieta.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h2",
+  "tekst": "Czego unikać – krótka lista zakazów.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "Bezwzględnie: palenie tytoniu.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "Napoje słodzone i alkohol.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "Nadmiar czerwonego mięsa i przetworów.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "Produkty przetworzone – „bomby” sodowe.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h2",
+  "tekst": "Dieta śródziemnomorska i okinawska – ramy dla wszystkich zasad.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "Dieta śródziemnomorska.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h3",
+  "tekst": "Dieta okinawska.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h2",
+  "tekst": "Regularna aktywność fizyczna jest niezbędna.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 9,
+  "chapter_id": "72f4b4d4-6728-4689-beb8-7aaeb33700ef",
+  "poziom": "h2",
+  "tekst": "Podsumowanie – od szczegółów do całości.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h1",
+  "tekst": "ROZDZIAŁ 8: Suplementacja – co działa, co nie, i jak to robić dobrze.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h2",
+  "tekst": "WAPŃ – Fundament, ale nie taki prosty.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Czy w ogóle potrzebujesz suplementu wapnia?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Które formy wapnia działają najlepiej?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Jak czytać etykietę suplementu?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "KIEDY brać wapń – to ma znaczenie.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Czego unikać przy przyjmowaniu wapnia.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h2",
+  "tekst": "WITAMINA D3 – hormon, nie witamina.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Ile D3 naprawdę potrzebujesz?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Jak dobrać dawkę D3 na podstawie badania krwi?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "KIEDY i JAK brać witaminę D3.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h2",
+  "tekst": "Inne suplementy – co działa, co jest przereklamowane.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Magnez – potrzebny, ale nie dla każdego.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Witamina K2 (menachinon-7) – obiecująca, ale dane niejednoznaczne.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Białko – suplement? Niekoniecznie. Ale musisz mieć go wystarczająco.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Kolagen – specyficzne białko, które może być „dodatkiem ekstra”.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Probiotyki – wczesny etap badań.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h2",
+  "tekst": "Czego NIE suplementować (chyba że masz konkretny niedobór).",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h2",
+  "tekst": "Interakcje – czego NIE łączyć.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h2",
+  "tekst": "Skutki uboczne suplementacji – czego się spodziewać.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Wapń.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Witamina D3.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Magnez.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "Probiotyki.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h2",
+  "tekst": "GOTOWY SCHEMAT – Twój dzienny plan suplementacji.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "SCENARIUSZ 1: Jesz około 600–700 mg Ca z diety",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "SCENARIUSZ 2: Jesz mniej niż 500 mg Ca z diety",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h3",
+  "tekst": "SCENARIUSZ 3: Masz niedobór witaminy D (poniżej 20 ng/mL)",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h2",
+  "tekst": "Jak monitorować skuteczność?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 10,
+  "chapter_id": "3e0817b1-5c6d-4d42-9f3f-678c26fc0752",
+  "poziom": "h2",
+  "tekst": "PODSUMOWANIE: Co robić teraz?",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h1",
+  "tekst": "Rozdział 9: Ruch – filar równie ważny jak żywienie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Spójrz na nie, nie przez różowe okulary.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Dwa cele, dwa typy ćwiczeń.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Dlaczego zapobieganie upadkom jest priorytetem.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Jak zmniejszyć ryzyko upadków?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Trening równowagi i reaktywnego kroku.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Tai chi – więcej niż „łagodna gimnastyka”.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Farmakoterapia a upadki.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Dlaczego kości potrzebują obciążenia mechanicznego?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Pięć zasad skutecznego treningu dla kości.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "1. Zasada specyficzności.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "2. Zasada progresywnego obciążenia.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "3. Zasada odwracalności.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "4. Zasada wartości początkowych.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "5. Zasada malejących zysków.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "„Rest insertion” – krótkie przerwy, większy efekt.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Bezpieczeństwo przede wszystkim – czego unikać.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Ruchy wysokiego ryzyka.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Rola fizjoterapeuty.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Lista pytań do fizjoterapeuty.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Realistyczne oczekiwania – co ruch zrobi, a czego nie zrobi.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 11,
+  "chapter_id": "ab67bb78-2977-4f95-b199-1c3b56e743b3",
+  "poziom": "h2",
+  "tekst": "Podsumowanie rozdziału 9.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h1",
+  "tekst": "ROZDZIAŁ 10: Sen, słońce, stres – pozostałe filary.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h2",
+  "tekst": "Sen – więcej niż odpoczynek.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Ile snu naprawdę potrzebujesz?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Co się dzieje podczas snu?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Melatonina – hormon snu i kości.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Jak poprawić sen naturalnie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Kiedy rozważyć suplementację melatoniny.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h2",
+  "tekst": "Słońce i witamina D – więcej niż tylko kości.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Skąd brać witaminę D?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Jak działa synteza witaminy D ze słońca?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Ile słońca potrzebujesz?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Suplementacja bardziej niezawodna niż słońce",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Zalecenia suplementacyjne",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h2",
+  "tekst": "Balansowanie korzyści i ryzyka słońca.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h2",
+  "tekst": "Stres – jak niszczy Twoje kości.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Kortyzol – hormon stresu.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Przewlekły stres i zapalenie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Zmiany behawioralne związane ze stresem.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Techniki zarządzania stresem – co naprawdę działa?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Jak zacząć?",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h2",
+  "tekst": "Jak te trzy filary się łączą.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h2",
+  "tekst": "Praktyczny plan działania – zaczynamy od małych kroków.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Tydzień 1: Priorytet sen.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Tydzień 2: Dodaj witaminę D.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Tydzień 3: Wprowadź zarządzanie stresem.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Tydzień 4: Utrzymaj nawyki i ocena.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h3",
+  "tekst": "Długoterminowo: Buduj system wsparcia.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 12,
+  "chapter_id": "491479f3-21fe-45ab-a25c-17833d6e9bf6",
+  "poziom": "h2",
+  "tekst": "Podsumowanie rozdziału 11.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 13,
+  "chapter_id": "ead59ecf-8e97-4e56-97cc-11a85dd1bb1a",
+  "poziom": "h1",
+  "tekst": "ZAKOŃCZENIE: Co teraz? I gdzie się spotkamy za kilka lat.",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 13,
+  "chapter_id": "ead59ecf-8e97-4e56-97cc-11a85dd1bb1a",
+  "poziom": "h2",
+  "tekst": "Do młodych kobiet – to jest Twoja szansa.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 13,
+  "chapter_id": "ead59ecf-8e97-4e56-97cc-11a85dd1bb1a",
+  "poziom": "h2",
+  "tekst": "Do kobiet w moim wieku – jeszcze nie jest za późno.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 13,
+  "chapter_id": "ead59ecf-8e97-4e56-97cc-11a85dd1bb1a",
+  "poziom": "h2",
+  "tekst": "Co zrobić teraz? Pierwszy krok.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 13,
+  "chapter_id": "ead59ecf-8e97-4e56-97cc-11a85dd1bb1a",
+  "poziom": "h3",
+  "tekst": "Zrób densytometrię (badanie DEXA).",
+  "ma_caps": true
+ },
+ {
+  "sort_order": 13,
+  "chapter_id": "ead59ecf-8e97-4e56-97cc-11a85dd1bb1a",
+  "poziom": "h3",
+  "tekst": "Sprawdź witaminę D.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 13,
+  "chapter_id": "ead59ecf-8e97-4e56-97cc-11a85dd1bb1a",
+  "poziom": "h3",
+  "tekst": "Dodaj jedno źródło wapnia dziennie.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 13,
+  "chapter_id": "ead59ecf-8e97-4e56-97cc-11a85dd1bb1a",
+  "poziom": "h3",
+  "tekst": "Zacznij chodzić do fizjoterapeuty.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 13,
+  "chapter_id": "ead59ecf-8e97-4e56-97cc-11a85dd1bb1a",
+  "poziom": "h2",
+  "tekst": "Moja nadzieja.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 13,
+  "chapter_id": "ead59ecf-8e97-4e56-97cc-11a85dd1bb1a",
+  "poziom": "h2",
+  "tekst": "Podsumowując.",
+  "ma_caps": false
+ },
+ {
+  "sort_order": 14,
+  "chapter_id": "6313cd99-0852-49b0-8f5d-75dd92ac2526",
+  "poziom": "h1",
+  "tekst": "Literatura i źródła naukowe",
+  "ma_caps": false
+ }
+]

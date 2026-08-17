@@ -1,0 +1,94 @@
+{
+ "dostawa": "ewa",
+ "data": "2026-08-15",
+ "zrodlo": "redaktor/ewa-biezaca/",
+ "uwaga": "sha256 stanu PO hurcie myslnikow — to jest stan wysylany. NIE uzywac sha256_przed_hurtem z MANIFEST.json.",
+ "pliki": [
+  {
+   "dokument": "ROZDZIAL-10_Sen-slonce-stres.md",
+   "bajtow": 28077,
+   "sha256": "32bd72bd6a2d1f409b2bec181464c730769a5314dc975d89ffda83eb2f7bc071",
+   "bajtow_przed_hurtem": 27875,
+   "run_id": "2026-08-11-6e9c8e"
+  },
+  {
+   "dokument": "ROZDZIAL-1_Osteoporoza-co-to-oznacza.md",
+   "bajtow": 23931,
+   "sha256": "27acc48bdba4a58b8f306f32fb56ace0861211eaa7bc586edf5559c7a9b076e8",
+   "bajtow_przed_hurtem": 23815,
+   "run_id": "2026-08-12-d83aa0"
+  },
+  {
+   "dokument": "ROZDZIAL-2_Fakty-naukowe.md",
+   "bajtow": 15472,
+   "sha256": "57c25490970e627c0ee8031b6b3504d53262fdc5d009e2f4aff7c06761f7d408",
+   "bajtow_przed_hurtem": 15364,
+   "run_id": "2026-08-12-3f65af"
+  },
+  {
+   "dokument": "ROZDZIAL-3_Skladniki-budulcowe.md",
+   "bajtow": 15856,
+   "sha256": "0d575b6a3a41ffd25ec1bcb360736aaec1349355feefd1d63689d0ec1848d6bb",
+   "bajtow_przed_hurtem": 15750,
+   "run_id": "2026-08-12-5c0c16"
+  },
+  {
+   "dokument": "ROZDZIAL-4_Sojusznicy-zdrowych-kosci.md",
+   "bajtow": 11298,
+   "sha256": "489a3f817e2cd4c0914e7fbbc1ff7ee07d8c40770b3823c001c2f1f9fdbae6ab",
+   "bajtow_przed_hurtem": 11252,
+   "run_id": "2026-08-12-decc59"
+  },
+  {
+   "dokument": "ROZDZIAL-5_Mikrobiota-jelitowa.md",
+   "bajtow": 15109,
+   "sha256": "5bb8eec99ca435ffa2cb7f6108f6d65d96929cfe99f7ccc5acdf5ed18daaae12",
+   "bajtow_przed_hurtem": 15019,
+   "run_id": "2026-08-12-e295d4"
+  },
+  {
+   "dokument": "ROZDZIAL-6_Co-przeszkadza-kosciom.md",
+   "bajtow": 14991,
+   "sha256": "652fafbb7cf8cfa3ef4de24186a7223e90ef4f2d997e758f59ad4c42f613f0ac",
+   "bajtow_przed_hurtem": 14897,
+   "run_id": "2026-08-12-371cba"
+  },
+  {
+   "dokument": "ROZDZIAL-7_Mapa-drogowa-dieta.md",
+   "bajtow": 15261,
+   "sha256": "6d77c0f436f549616910704bb4417e32e4b9f2e21d612ba9ebb5e495d3afb191",
+   "bajtow_przed_hurtem": 15145,
+   "run_id": "2026-08-12-ff21b7"
+  },
+  {
+   "dokument": "ROZDZIAL-8_Suplementacja-4_1.md",
+   "bajtow": 118947,
+   "sha256": "118836ae5ab8d3a98be24232902938e8e5820a3e10867f1278e156bd83c96a93",
+   "bajtow_przed_hurtem": 118755,
+   "run_id": "2026-08-11-4e0e64"
+  },
+  {
+   "dokument": "ROZDZIAL-9_Ruch.md",
+   "bajtow": 18048,
+   "sha256": "febd797480aa9ab4da70e3f7240d85b9fb396a7043ae536bbb2628548db2770e",
+   "bajtow_przed_hurtem": 17984,
+   "run_id": "2026-08-12-f75902"
+  },
+  {
+   "dokument": "WSTEP_Historia-z-osteoporoza.md",
+   "bajtow": 12799,
+   "sha256": "4b3c85e141ccca995fbf06aeef4fa574e6725287a75bc3fc4271c9f0d6ebf066",
+   "bajtow_przed_hurtem": 12727,
+   "run_id": "2026-08-12-eff5fe"
+  },
+  {
+   "dokument": "ZAKONCZENIE_Co-teraz.md",
+   "bajtow": 8385,
+   "sha256": "95d3c297fcd226a5f0d80b954f00d2194ef7a271d7e00a519d37dd052a9b036a",
+   "bajtow_przed_hurtem": 8325,
+   "run_id": "2026-08-12-07ad4d"
+  }
+ ],
+ "plikow": 12,
+ "bajtow_razem": 298174
+}
