@@ -1,84 +1,101 @@
-# HANDOFF — 2026-08-17 (wersaliki zdjęte, książka Ewy gotowa do oglądania)
+**Temat:** książka Ewy — czyszczenie nagłówków i strony tytułowej przed pokazaniem autorce — bo Ewa ogląda 2026-08-18 i nie może zobaczyć literówek ani rozjazdu wersalików
 
-**Temat:** książka Ewy (projekt `1f23458e`) ma spójne nagłówki — wersaliki zdjęte
-z H1/H2/H3, dwa zmielone tytuły rozdziałów naprawione. Ewa ogląda 2026-08-18.
+# HANDOFF — 2026-08-17
 
-## NASTĘPNY KROK — do zrobienia przez właściciela, ZANIM Ewa spojrzy
+## NASTĘPNY KROK — jeden
 
-1. **Literówka w tytule projektu.** W bazie jest
-   `Kości Na Całe Życie**b** 4.0 — po redakcji (2026-08-15)` — z doklejonym „b".
-   **Ten tytuł idzie prosto na stronę tytułową PDF/EPUB** ([pdf_generator.py:470](tiolibri-api/app/services/pdf_generator.py#L470)).
-   Nie ruszałem, bo tytuł to twoje pole i nie wiem, jaki ma być docelowo.
-   Poprawka: Project Details → Tytuł.
-2. **Wygenerować EPUB/PDF** i sprawdzić okładkę + spis treści oczami.
+**Dodać podtytuł książki na stronę tytułową: „Przewodnik żywieniowy po diagnozie osteoporozy".**
+
+Tabela `projects` **nie ma pola na podtytuł** (kolumny: `author`, `cover_image_url`,
+`created_at`, `custom_styles`, `id`, `language`, `status`, `style_preset`, `title`,
+`typography_settings`, `updated_at`, `user_id`). Więc to zmiana kodu produkcyjnego,
+nie danych — i dlatego jej **nie zacząłem** (kontekst wątku dobił do progu).
+
+Zakres, gdyby robić: migracja `ALTER TABLE projects ADD COLUMN subtitle text`
+→ [pdf_generator.py:468-473](tiolibri-api/app/services/pdf_generator.py#L468-L473)
+(blok `title-page`, + reguła CSS koło [pdf_generator.py:183](tiolibri-api/app/services/pdf_generator.py#L183))
+→ `epub_generator.py` (strona tytułowa) → input w Project Details.
+**Właściciel jeszcze nie zdecydował, czy to idzie przez `/spec-draft`** — zapytać.
+
+## Do naprawy przy okazji (zgłoszone przez właściciela)
+
+**Bug w Project Details: przy pisaniu w polu tytułu kursor skacze na początek/koniec linii.**
+Właśnie przez to w tytule wylądowało „Życie**b**" — właściciel próbował wpisać półpauzę.
+Nie diagnozowałem. Podejrzenie: kontrolowany input przepisywany po każdym keystroke
+(ten sam wzorzec co naprawiony `loadContent` race w EditorPage) — szukać w komponencie
+ustawień projektu we `tiolibri-frontend/src/features/projects/`.
 
 ## Co zrobiono w tym wątku
 
-### Wersaliki — ZDJĘTE (decyzja właściciela: H1 i H2)
+### 1. Wersaliki zdjęte z nagłówków — commit `b4613e1`
 
-**Ustalenie, które zmieniło plan:** `text-transform` **nie występuje** ani w presetach,
-ani w generatorach. Wersaliki były wpisane **literalnie w treść** — więc to była edycja
-danych, nie jednolinijkowa zmiana CSS.
+`text-transform` **nie występuje** w presetach ani generatorach — wersaliki były wpisane
+literalnie w treść, więc to była edycja danych, nie CSS.
 
-- **38 nagłówków** zmienionych w treści + **12 `chapters.title`**, w 12 z 14 rozdziałów.
-- **10 nagłówków z CAPS zostawionych świadomie** (wypisane w skrypcie w słowniku `ZOSTAJE`):
-  - **emfaza autorki** — `Czego NIE znajdziesz`, `Co zrobić PO przeczytaniu?`,
-    `Czego NIE suplementować`, `Interakcje – czego NIE łączyć`;
-  - **skróty** — `SCFA` (4×), `DHEA`, `DEXA`.
-- Decyzje niebanalne: `WAPŃ – Fundament` → `Wapń – fundament` (małą po półpauzie);
-  `KIEDY`/`JAK` → zdjęte (to pytanie, nie kontrast, inaczej niż `NIE`);
-  `BOR, CYNK, FOSFOR` → `Bor, cynk, fosfor`; `FITOESTROGENY (IZOFLAWONY)` →
-  `Fitoestrogeny (izoflawony)`; człon po dwukropku zostaje z wielkiej —
-  zgodnie z `Rozdział 7:` i `Rozdział 9:`, które już wcześniej były pisane normalnie.
+- **38 nagłówków** H1/H2/H3 + **12 `chapters.title`** w 12 z 14 rozdziałów.
+- **10 nagłówków z CAPS zostawionych świadomie** (słownik `ZOSTAJE` w skrypcie):
+  emfaza autorki (`Czego NIE znajdziesz`, `Co zrobić PO przeczytaniu?`,
+  `Czego NIE suplementować`, `Interakcje – czego NIE łączyć`) i skróty
+  (`SCFA` 4×, `DHEA`, `DEXA`).
+- Dwa tytuły zmielone przez stary upload naprawione: `Zastrzeeniemedyczne` → `Zanim zaczniesz`,
+  `Literaturaizrodanaukowe.md` → `Literatura i źródła naukowe`.
 
-### Dwa zmielone tytuły rozdziałów — NAPRAWIONE
+### 2. Pola projektu poprawione (zmiana w danych, bez commita)
 
-Ten sam bug starego uploadu, co `ROZDZIA1Osteoporoza…`. Poprawny wariant wzięty z H1 w treści:
+| pole | przed | po |
+|---|---|---|
+| `title` | `Kości Na Całe Życieb 4.0 — po redakcji (2026-08-15)` | `Kości na całe życie` |
+| `author` | `Profesor Ewa Stachowska` | `Prof. dr hab. n. med. Ewa Stachowska` |
 
-- `Zastrzeeniemedyczne` → **`Zanim zaczniesz`**
-- `Literaturaizrodanaukowe.md` → **`Literatura i źródła naukowe`** (miał w tytule `.md`)
+Zapis autora **wzięty dosłownie z okładki** (`cover.jpg`, 1200×1804) — tam jest
+`Prof. dr hab. n. med. Ewa Stachowska`, z wielkiego „P". Okładka niesie też podtytuł
+(pionowo, różowym): **`Przewodnik żywieniowy po diagnozie osteoporozy`** — stąd NASTĘPNY KROK.
 
-### Strona tytułowa — ZOSTAJE (decyzja właściciela)
+**Uwaga: stary tytuł był jedynym miejscem z em dashem w polach projektu — już go nie ma.**
 
-Nie jest duplikatem okładki: okładka to grafika, strona tytułowa to tekstowy rekord książki
-(w EPUB standard `titlepage`). Kod nie zmieniony. Uwaga na przyszłość: title page w
-[pdf_generator.py:468-473](tiolibri-api/app/services/pdf_generator.py#L468-L473) jest
-**bezwarunkowa** — nie ma flagi do wyłączenia, generuje się nawet przy okładce.
+### 3. Strona tytułowa — ZOSTAJE (decyzja właściciela)
 
-## Kanon: od teraz BAZA, nie Fabryka
+Kod nietknięty. Uwaga na przyszłość: title page jest **bezwarunkowa**, nie ma flagi
+do wyłączenia, generuje się nawet przy okładce.
 
-Decyzja właściciela z tego wątku: w TIOLIBRI doszły już PNG do rozdziału, literatura
-i disclaimer, których dostawa md nie zna. **Fabryka raczej nie będzie drugi raz pracować
-na tym ebooku.** Wniosek praktyczny: `docs/dostawy/_import-ewa/dry-run/` jest **nieaktualny** —
-kanonem treści jest projekt `1f23458e` w bazie. Gdyby Fabryka jednak wróciła, roundtrip
-trzeba będzie wymyślić od nowa.
+## Em dashe — sprawdzone, jest czysto
+
+Właściciel pilnuje, żeby w książce były **półpauzy (– U+2013), nigdy em dashe (— U+2014)**.
+Stan po policzeniu w całej treści (14 rozdziałów, odczyt z bazy):
+
+- **719 półpauz, 1 em dash.**
+- Ten jeden em dash siedzi w R14 (Literatura), w **oryginalnym angielskim tytule publikacji**:
+  `The Importance of Nutrition in Menopause and Perimenopause—A Review.` (Nutrients 2024).
+  To dosłowny cytat bibliograficzny i angielska konwencja — **zostawić, nie „poprawiać".**
+- Zamiany wersalików nie mogły dołożyć myślnika: podmiana szła token po tokenie i zmieniała
+  wyłącznie wielkość liter.
+
+**Reguła na przyszłość: nie wstawiać em dashy do treści ani do pól projektu.**
+
+## Kanon: BAZA, nie Fabryka
+
+Decyzja właściciela: w TIOLIBRI doszły PNG, literatura i disclaimer, których dostawa md nie zna;
+Fabryka raczej nie będzie drugi raz pracować na tym ebooku. **`docs/dostawy/_import-ewa/dry-run/`
+jest nieaktualny** — kanonem treści jest projekt `1f23458e` w bazie.
 
 ## Znane, nietknięte
 
-- **Błąd numeracji w treści R10**: ostatni H2 brzmi `Podsumowanie rozdziału 11.`,
-  a to jest rozdział 10. Nie ruszałem — to treść merytoryczna, nie formatowanie.
-- **Druga runda R8** — cofnięcie `e-006` (KLU) i `e-001` (WAR). Nadal wiszą.
-- **Bożena** — jedna linijka do Fabryki; u nich „sporne, do potwierdzenia",
-  od tego wisi ich zaparkowany agregator (PHASE-22).
-- **`.DS_Store` jest śledzony w gicie** i nie ma go w `.gitignore`. Nie commitowałem go.
-- **Spec `porzadek-wersji` — NADAL ZAPARKOWANY.** Uwaga: jego §78 („trzy nośniki poza
-  tytułem: notatka, etykieta wersji, **nazwa książki") to dokładnie ten ból, przez który
-  tytuł projektu musi naraz służyć stronie tytułowej i wyszukiwaniu w dashboardzie.
+- **Błąd numeracji w treści R10**: ostatni H2 to `Podsumowanie rozdziału 11.`, a to rozdział 10.
+- **Druga runda R8** — cofnięcie `e-006` (KLU) i `e-001` (WAR).
+- **Bożena** — linijka do Fabryki; od tego wisi ich agregator (PHASE-22).
+- **`.DS_Store` śledzony w gicie**, brak go w `.gitignore`.
+- **Spec `porzadek-wersji` — ZAPARKOWANY.** Jego §78 („trzy nośniki poza tytułem: notatka,
+  etykieta wersji, **nazwa książki**") to dokładnie ten ból: tytuł projektu musi naraz
+  służyć stronie tytułowej i wyszukiwaniu w dashboardzie.
 
-## Skrypty
+## Stan: pliki, commity
 
-`docs/dostawy/_wersaliki/` — odpalać z venv API (`tiolibri-api/venv/bin/python3`):
+- **HEAD `b4613e1`** — wersaliki + zaległa dostawa `ewa-2026-08-15` i konwerter `_import-ewa`.
+  **Nie pushowane.**
+- Zmiana `title`/`author` jest **wyłącznie w bazie**, nie ma jej w żadnym commicie.
+- Skrypty: `docs/dostawy/_wersaliki/` — `pobierz.py` (backup + inwentarz),
+  `zdejmij_wersaliki.py` (bez argumentu podgląd, `--wykonaj` zapisuje; bramki fail-closed
+  przed i po zapisie). `backup-przed.json` = pełny stan sprzed zmian, do rollbacku.
+- Projekt: `1f23458e-b63a-4b29-a912-cced19ce3e47` · https://app.tiolibri.com/editor/1f23458e-b63a-4b29-a912-cced19ce3e47
 
-- `pobierz.py` — pobiera projekt + rozdziały, zapisuje `backup-przed.json`
-  (pełny stan przed zmianą, do rollbacku) i `inwentarz-naglowkow.json`;
-- `zdejmij_wersaliki.py` — bez argumentu **podgląd**, `--wykonaj` zapisuje.
-  Tabela `ZAMIANY` trzyma **jawnie** pełny tekst każdego nagłówka (przed → po),
-  podmiana idzie **token po tokenie tylko w segmentach tekstowych**, więc wewnętrzny
-  markup (`<strong>`, `<img>`, `<a>`) i encje zostają nietknięte. Niedzielące spacje
-  (`\xa0`) przeżywają — `title` R2 miał jedną i przez to początkowo umykał tabeli.
-  **Bramki fail-closed:** backup musi się zgadzać z bazą co do znaku przed zapisem;
-  po podmianie goły tekst musi równać się docelowemu; żaden nagłówek ani `title`
-  z CAPS nie może zostać poza tabelą i poza `ZOSTAJE`; po zapisie weryfikacja odczytem.
-
-**Weryfikacja po zapisie:** 12/12 rozdziałów zgodnych co do znaku,
-0 nagłówków z CAPS nieobsłużonych, 10 zostawionych świadomie.
+**Model docelowy: Opus.**
