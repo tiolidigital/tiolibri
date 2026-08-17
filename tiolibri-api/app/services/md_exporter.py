@@ -116,11 +116,15 @@ class _Blk:
 
 # --- funkcje pomocnicze ----------------------------------------------------
 
-def slugify(text: str, fallback: str = "rozdzial") -> str:
+def to_ascii(text: str) -> str:
+    """Diakrytyki na ASCII bez gubienia liter: "Kości na całe życie" → "Kosci na cale zycie"."""
     s = unicodedata.normalize("NFC", text or "").translate(_LATIN_MAP)
     s = unicodedata.normalize("NFKD", s)
-    s = "".join(c for c in s if not unicodedata.combining(c))
-    s = re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+    return "".join(c for c in s if not unicodedata.combining(c))
+
+
+def slugify(text: str, fallback: str = "rozdzial") -> str:
+    s = re.sub(r"[^a-z0-9]+", "-", to_ascii(text).lower()).strip("-")
     return s[:40].strip("-") or fallback
 
 

@@ -26,6 +26,7 @@ from app.services.md_exporter import (
     chapter_to_markdown,
     sha256_nfc,
     slugify,
+    to_ascii,
 )
 from app.dependencies import verify_supabase_jwt
 
@@ -116,7 +117,10 @@ async def export_project(
     # Build a safe ASCII filename for the legacy `filename=` param; separately
     # expose the full UTF-8 title via `filename*=` (RFC 5987) for modern clients.
     raw_title = project.get("title") or "project"
-    ascii_title = "".join(c if c.isascii() and (c.isalnum() or c in " -_") else "_" for c in raw_title).strip("_") or "project"
+    # to_ascii najpierw, inaczej polskie litery wypadaja jako "_" ("Kości" → "Ko_ci").
+    ascii_title = "".join(
+        c if c.isascii() and (c.isalnum() or c in " -_") else "_" for c in to_ascii(raw_title)
+    ).strip("_") or "project"
     ascii_filename = f"{ascii_title}.tiolibri"
     utf8_filename = quote(f"{raw_title}.tiolibri", safe="")
 

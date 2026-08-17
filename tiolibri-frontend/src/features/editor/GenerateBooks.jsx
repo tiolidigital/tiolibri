@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Button from '../../components/ui/Button'
 import { authedFetch } from '../../lib/authedFetch'
+import { bookFilename } from '../../lib/filename'
 
 export default function GenerateBooks({ projectId, projectTitle = 'book', stylePreset = 'classic', typographySettings = {}, coverImageUrl = null }) {
   const [urls, setUrls] = useState(null)
@@ -8,13 +9,7 @@ export default function GenerateBooks({ projectId, projectTitle = 'book', styleP
   const [error, setError] = useState(null)
 
   // Create safe filename from project title
-  const getSafeFilename = (extension) => {
-    const safeName = projectTitle
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with dash
-      .replace(/^-+|-+$/g, '') // Remove leading/trailing dashes
-    return `${safeName}.${extension}`
-  }
+  const getSafeFilename = (extension) => bookFilename(projectTitle, extension)
 
   const handleDownload = async (url, filename) => {
     try {

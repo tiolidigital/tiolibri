@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { authedFetch } from '../../lib/authedFetch'
+import { transliterate } from '../../lib/filename'
 import { useChapters } from './useChapters'
 import { useTypography } from './useTypography'
 import { useCover } from './useCover'
@@ -343,7 +344,7 @@ export default function EditorPage() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${(project?.title || 'ksiazka').replace(/[^a-zA-Z0-9\-_]/g, '_')}-redaktor.zip`
+      a.download = `${transliterate(project?.title || 'ksiazka').replace(/[^a-zA-Z0-9\-_]/g, '_')}-redaktor.zip`
       document.body.appendChild(a)
       a.click()
       a.remove()

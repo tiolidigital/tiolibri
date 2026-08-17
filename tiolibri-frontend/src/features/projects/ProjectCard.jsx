@@ -4,6 +4,7 @@ import Card from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
 import Button from '../../components/ui/Button'
 import { timeAgo } from '../../lib/utils'
+import { transliterate } from '../../lib/filename'
 import { authedFetch } from '../../lib/authedFetch'
 
 // 3-dot kebab menu
@@ -200,7 +201,7 @@ export default function ProjectCard({ project, onDelete, onDuplicate, sharedByEm
       })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
-      const safeName = (project.title || 'project').replace(/[^a-zA-Z0-9 \-_]/g, '_')
+      const safeName = transliterate(project.title || 'project').replace(/[^a-zA-Z0-9 \-_]/g, '_')
       a.href = url
       a.download = `${safeName}.tiolibri`
       document.body.appendChild(a)
