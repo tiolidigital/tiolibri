@@ -1,112 +1,104 @@
-**Temat:** książka Ewy — podtytuł na stronie tytułowej wdrożony na produkcję — bo Ewa ogląda 2026-08-18 i ma zobaczyć komplet: tytuł, podtytuł, autora, a pliki mają się nazywać po ludzku
+**Temat:** książka Ewy — strona tytułowa, plansze rozdziałów i spis treści doprowadzone do porządku na produkcji — bo Ewa ogląda plik 2026-08-18 i ma zobaczyć złożoną książkę, a nie wydruk z generatora
 
 # HANDOFF — 2026-08-17
 
 ## NASTĘPNY KROK — jeden
 
-**Klik-test na produkcji: wejść na projekt Ewy, wygenerować PDF i EPUB, sprawdzić dwie rzeczy naraz.**
+**Obejrzeć gotowy PDF własnymi oczami i powiedzieć, czy idzie do Ewy.**
 
+Świeży plik z produkcji leży w scratchpadzie tego wątku:
+`…/8a8af80e-baef-4b2f-be12-88f643f6edf5/scratchpad/ewa-final.pdf` (246 stron, z okładką,
+ze spisem treści). Jeśli scratchpad zniknął — wygenerować z UI:
 https://app.tiolibri.com/editor/1f23458e-b63a-4b29-a912-cced19ce3e47
 
-1. Strona tytułowa niesie **trzy** linijki: `Kości na całe życie` /
-   `Przewodnik żywieniowy po diagnozie osteoporozy` / `Prof. dr hab. n. med. Ewa Stachowska`.
-2. Pobrany plik nazywa się **`kosci-na-cale-zycie.pdf`**, a nie `ko-ci-na-ca-e-ycie.pdf`.
-
-Wszystkie warstwy są wdrożone i sprawdzone osobno (kod na produkcji, kolumna w bazie,
-wartość wpisana, generator przetestowany lokalnie na tym samym kodzie). Czego NIE ma:
-jednego przebiegu end-to-end na produkcji — wymagał JWT, a wątek dobijał do progu kontekstu.
-To jest jedno kliknięcie „Generuj".
+Wszystko poniżej jest zmierzone maszynowo na produkcji. Czego NIE ma: oceny człowieka,
+czy to ładnie wygląda jako całość.
 
 ## Co zrobiono w tym wątku
 
-### 1. Podtytuł książki — commit `40c8ffb`
+Wątek zaczął się od klik-testu z poprzedniego handoffu; testy przeszły, ale odsłoniły
+cztery rzeczy do poprawy. Wszystkie naprawione i wdrożone.
 
-Tabela `projects` nie miała pola na podtytuł. Doszło przez wszystkie cztery warstwy:
+### 1. Klik-test podtytułu i nazw plików — ZALICZONY
 
-- **Migracja** [20260817_add_subtitle.sql](tiolibri-frontend/docs/migrations/20260817_add_subtitle.sql)
-  — `ALTER TABLE projects ADD COLUMN IF NOT EXISTS subtitle text`, nullable, bez defaultu.
-  **Wykonana na produkcji**, zweryfikowana przez `information_schema`.
-- **PDF** — reguła `.title-page .subtitle` (15pt, #333) + warunkowy render między `h1` a autorem.
-- **EPUB** — analogicznie. Uwaga: w EPUB `.title-page`/`.author` **nie mają żadnego CSS**
-  (nav.css to preset treści), więc strona tytułowa jedzie na domyślnych stylach czytnika.
-  Podtytuł zrobiony spójnie z autorem, presetów nie ruszałem.
-- **Nie ginie po drodze**: duplikacja projektu, eksport/import `.tiolibri`, snapshoty + restore.
-- **Escapowany** przez `html.escape` — `&` w tym polu łamało XHTML w EPUB (czytnik odmawia).
+Przebieg end-to-end przez `POST https://api.tiolibri.com/generate` z prawdziwym JWT.
+Strona tytułowa niesie trzy linijki w PDF i EPUB. Nazwa pliku sprawdzona **funkcją
+wyciągniętą z wdrożonego bundla** (`app.tiolibri.com/assets/index-*.js`), nie ze źródeł:
+`Kości na całe życie` → `kosci-na-cale-zycie.pdf`.
 
-Sprawdzone na czterech przypadkach (z podtytułem, bez, brak klucza, znaki XML), PDF + EPUB.
-**Wariant bez podtytułu daje PDF identycznego rozmiaru co przed zmianą** — zero regresji
-dla pozostałych projektów.
+### 2. Tytuł na stronie tytułowej był do lewej — `2f31091`
 
-### 2. Bug skaczącego kursora — ten sam commit
+Presety mają twarde `h1 { text-align: left }` (nagłówki rozdziałów), które wygrywa
+z wyśrodkowaniem dziedziczonym po `.title-page`. Reguła `.title-page h1` jest bardziej
+specyficzna — tam dopisane `text-align: center`.
 
-Przyczyna: `handleUpdateProject` w EditorPage awaitował Supabase **przed** `setProject`,
-a input jest kontrolowany przez `project.title`. Między keystrokiem a odpowiedzią bazy
-React przerysowywał input starą wartością. Stąd „Życie**b**".
+### 3. Autor miał wcięcie akapitowe — `5151b9a` (PDF) + `7ff7b3a` (EPUB)
 
-Rozbite na `persistProjectField` (zapis) i `handleUpdateProjectText` (stan synchronicznie,
-zapis debounced 600 ms). Przy okazji koniec z jednym `UPDATE` na każdy znak. Sprawdzone,
-że nic innego nie nadpisuje `project` w trakcie pisania — `fetchProject` woła się tylko
-przy montowaniu i po restore snapshotu.
+**To była nasza regresja z `40c8ffb`.** Preset ma `p { text-indent: 1.5em }` z wyjątkiem
+`h1 + p { text-indent: 0 }`. Dopóki strona tytułowa miała tytuł + autora, autor łapał się
+na wyjątek. Podtytuł wszedł między nie i autor zaczął brać wcięcie — na wyśrodkowanej
+linijce widać to jako przesunięcie o pół wcięcia w prawo (zmierzone: 10,4 pt).
 
-### 3. Nazwy plików: transliteracja zamiast wycinania — commit `1758807`
+Reguła obejmuje teraz `h1` i wszystkie akapity strony tytułowej. W EPUB strona tytułowa
+**dostała własny CSS po raz pierwszy** (wcześniej jechała na domyślnych stylach czytnika)
+— środek, zero wcięcia, rozmiary w `em`. Decyzja właściciela: oba pliki mają wyglądać tak samo.
 
-Zgłoszone przez właściciela: pobierane pliki nazywały się `ko-ci-na-ca-e-ycie…`.
-Przyczyna: `[^a-z0-9]` po `toLowerCase()` — każda polska litera stawała się myślnikiem.
+### 4. Numer strony na planszy otwierającej rozdział — `b36969c`
 
-Nowy [lib/filename.js](tiolibri-frontend/src/lib/filename.js) (`transliterate` + `bookFilename`)
-powtarza kroki `slugify()` z `md_exporter.py`, żeby front i backend nazywały pliki tak samo.
-**Mapa liter jest konieczna, bo NFKD nie rozkłada `ł`** — to osobny znak, nie `l` z diakrytykiem,
-i właśnie on wypadał (`całe` → `cae`).
+Zgłoszone przez właściciela ze zrzutu: cyfra leżąca na ilustracji. Wybrany wariant
+(za zgodą): **zdjąć numer, nie zmniejszać grafiki** — konwencja składu mówi, że
+całostronicowe plansze folio nie noszą.
 
-Ten sam błąd siedział w **trzech** miejscach, nie w jednym: `GenerateBooks` (PDF/EPUB, na `-`),
-`ProjectCard` (eksport `.tiolibri`, na `_`), `EditorPage` (paczka dla redaktora, na `_`).
-Poprawione wszystkie + ASCII-fallback nagłówka `Content-Disposition` po stronie backendu;
-`slugify()` korzysta teraz ze wspólnego `to_ascii()`.
+Grafika (edytor trzyma ją jako pierwsze dziecko `H1`) idzie do `.chapter-opener`
+na nazwanej stronie `@page chapter-opener` bez `@bottom-center`. **Licznik stron leci dalej**,
+numer po prostu nie jest drukowany — ten sam mechanizm co przy okładce. Dodatkowo
+`max-height` liczone z marginesów strony, żeby grafika nie mogła wejść w dolny margines.
+Nagłówek zostaje nietknięty poza usunięciem obrazka, więc ID i tekst do spisu treści
+są te same.
 
-Sprawdzone: `Kości na całe życie` → `kosci-na-cale-zycie.pdf`, `ŁÓDŹ ŹDŹBŁO` → `lodz-zdzblo`,
-`ąćęłńóśźż ĄĆĘŁŃÓŚŹŻ` → `acelnoszz ACELNOSZZ`. Front i backend dają identyczny wynik.
+### 5. Spis treści drobniejszy od tekstu książki — ten sam commit
 
-### 4. Dane projektu Ewy
+Miał **sztywne 9-11pt**, podczas gdy treść jedzie na ustawieniu użytkownika (16px = 12pt)
+— czyli spis w ogóle nie brał udziału w ustaleniu „ma się czytać na telefonie".
+Rozmiary są teraz w `em` (1.05 / 1 / 0.95), odstępy 0,45em, kolory ciemniejsze.
 
-`subtitle` = `Przewodnik żywieniowy po diagnozie osteoporozy` (dosłownie z okładki).
-Bez myślnika, więc sprawa półpauz vs em dashy tu nie występuje.
+## Dowód z produkcji (nie z lokalnego builda)
 
-### 5. Deploy — zrobiony
+Ostatni przebieg, payload wierny temu, co wysyła UI (z okładką):
 
-Push `main` (4 commity: `b4613e1`, `2fa86e0`, `40c8ffb`, `1758807`). Zweryfikowane:
+- 246 stron, 13 stron z grafiką, **na żadnej nie ma numeru**, zero pustych stron
+- strona tytułowa: `tytuł L=114,1 P=114,1` · `podtytuł L=56,5 P=56,4` · `autor L=102,8 P=102,8`
+- numeracja ciągła: 11, [12 bez numeru], 13
+- EPUB z produkcji ma blok `.title-page` w `nav.css` i trzy linijki w `title.xhtml`
+- nagłówki rozdziałów nadal do lewej (`x=42,5` = lewy margines) — reguła nie wyciekła
 
-- **Vercel / app.tiolibri.com** — bundle zawiera „Podtytuł (opcjonalny)" i mapę transliteracji.
-  Uwaga: hash bundla na produkcji ≠ hash z lokalnego builda, bo `VITE_API_URL` się różni
-  — nie porównywać hashy, szukać stringów.
-- **Railway / API** — `subtitle` widoczny w `Project` w `/openapi.json`. Deploy zszedł w ~30 s.
+Skrypty sprawdzianu: `scratchpad/klik_test_final.py` (produkcja), `lokalny_pdf.py`
+(ten sam kod lokalnie na prawdziwych danych — szybsza iteracja niż czekanie na Railway).
 
 ## Stan: pliki, commity
 
-- **HEAD `1758807`**, `main` == `origin/main`, wszystko wypchnięte.
-- `40c8ffb` — podtytuł + fix kursora (9 plików). `1758807` — transliteracja nazw (7 plików).
-- Hook repo bumpuje wersję przy commicie: `1.0.31 → 1.0.33`.
-- Projekt: `1f23458e-b63a-4b29-a912-cced19ce3e47`
+- **HEAD `b36969c`**, `main` == `origin/main`, wszystko wypchnięte i wdrożone.
+- `2f31091`, `5151b9a`, `7ff7b3a`, `b36969c` — cztery poprawki z tego wątku.
+- Wersja repo: `1.0.34 → 1.0.38` (hook bumpuje przy commicie).
+- Projekt Ewy: `1f23458e-b63a-4b29-a912-cced19ce3e47`
 
-## Jak wykonać SQL na tej bazie (przydało się, zapisane w pamięci)
+## Pułapka przy powtarzaniu klik-testu
 
-Management API `POST https://api.supabase.com/v1/projects/{ref}/database/query`,
-autoryzacja **samym `SUPABASE_ACCESS_TOKEN`, który już jest w `tiolibri-api/.env`**.
-Ref: `klhnyagtobgtxnexdsls`. **Pułapka: Cloudflare odbija domyślny User-Agent `urllib`
-błędem HTTP 403 / `error code: 1010`** — wygląda jak brak uprawnień, a to blokada UA.
-Ustawić własny nagłówek `User-Agent`. Skrypt: `scratchpad/run_migration.py`.
+`GET /projects/{id}` **nie zwraca `cover_image_url`** (nie ma go w modelu Pydantic).
+Front bierze okładkę wprost z Supabase (`useCover.js`). Sprawdzian, który buduje payload
+z odpowiedzi API, wygeneruje książkę **bez okładki** i będzie wyglądał na zielony.
+Okładkę dociągnąć z `rest/v1/projects?select=cover_image_url`. Zapisane w pamięci.
 
 ## Znane, nietknięte
 
 - **`title` i `author` NIE są escapowane w generatorach** — `&` w tytule złamie XHTML w EPUB.
-  Podtytuł już jest bezpieczny, tamte dwa nie. Nie ruszałem, żeby nie dokładać regresji
-  dzień przed pokazem.
+  Podtytuł jest bezpieczny, tamte dwa nie.
 - **`NewProjectModal` nie ma pola podtytułu** — ustawia się go w Project Details.
 - **Błąd numeracji w treści R10**: ostatni H2 to `Podsumowanie rozdziału 11.`, a to rozdział 10.
 - **Druga runda R8** — cofnięcie `e-006` (KLU) i `e-001` (WAR).
 - **Bożena** — linijka do Fabryki; od tego wisi ich agregator (PHASE-22).
 - **`.DS_Store` śledzony w gicie**, brak go w `.gitignore`.
 - **Spec `porzadek-wersji` — ZAPARKOWANY** (R4 = REQUEST_CHANGES, 12 blokerów).
-  Jego §78 o „nazwie książki" dotyka tego samego bólu co dzisiejsza robota.
 
 ## Kanon: BAZA, nie Fabryka
 
@@ -116,6 +108,6 @@ Kanonem treści jest projekt `1f23458e` w bazie. `docs/dostawy/_import-ewa/dry-r
 
 W książce mają być **półpauzy (– U+2013), nigdy em dashe (— U+2014)**. Stan: 719 półpauz,
 1 em dash — w oryginalnym angielskim tytule publikacji w R14, cytat bibliograficzny,
-**zostawić**. Nie wstawiać em dashy do treści ani do pól projektu.
+**zostawić**.
 
 **Model docelowy: Opus.**
