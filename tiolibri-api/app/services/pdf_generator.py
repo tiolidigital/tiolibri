@@ -13,6 +13,7 @@ from pathlib import Path
 import urllib.request
 import base64
 import re
+from html import escape
 
 # macOS fix - musi być PRZED jakimkolwiek importem weasyprint
 if sys.platform == "darwin":
@@ -183,6 +184,12 @@ img:not(.cover-page img) {
 .title-page h1 {
     font-size: 24pt;
     page-break-before: avoid;
+}
+
+.title-page .subtitle {
+    font-size: 15pt;
+    color: #333;
+    margin-top: 0.6em;
 }
 
 .title-page .author {
@@ -468,6 +475,8 @@ def generate_pdf(
     # Title page
     html_parts.append('<div class="title-page">')
     html_parts.append(f'<h1>{project["title"]}</h1>')
+    if project.get("subtitle"):
+        html_parts.append(f'<p class="subtitle">{escape(project["subtitle"])}</p>')
     if project.get("author"):
         html_parts.append(f'<p class="author">{project["author"]}</p>')
     html_parts.append('</div>')

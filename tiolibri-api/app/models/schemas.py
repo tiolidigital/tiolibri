@@ -77,6 +77,7 @@ class Project(BaseModel):
     id: str
     user_id: str
     title: str
+    subtitle: Optional[str] = None
     author: Optional[str]
     language: str
     status: str  # "draft" | "published"

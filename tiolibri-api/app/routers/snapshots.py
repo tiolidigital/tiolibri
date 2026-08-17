@@ -98,7 +98,7 @@ async def restore_snapshot(
     project_fields = target.get("project", {})
     restorable = {
         k: v for k, v in project_fields.items()
-        if k in ("title", "author", "language", "style_preset", "typography_settings")
+        if k in ("title", "subtitle", "author", "language", "style_preset", "typography_settings")
     }
     if restorable:
         supabase.table("projects").update({
@@ -176,7 +176,7 @@ def _assert_project_access(project_id: str, user_id: str) -> None:
 def _build_snapshot(project_id: str) -> dict:
     """Fetch the current project + non-deleted chapters and return as a dict."""
     project_resp = supabase.table("projects") \
-        .select("id, title, author, language, style_preset, typography_settings, cover_image_url, status") \
+        .select("id, title, subtitle, author, language, style_preset, typography_settings, cover_image_url, status") \
         .eq("id", project_id) \
         .execute()
 

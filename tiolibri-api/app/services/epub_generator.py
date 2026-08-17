@@ -11,6 +11,7 @@ import urllib.request
 import tempfile
 import re
 import uuid
+from html import escape
 
 
 def fix_polish_orphans(html_content: str) -> str:
@@ -318,8 +319,9 @@ def generate_epub(
         lang=project.get("language", "pl")
     )
     
+    subtitle_html = f'<p class="subtitle">{escape(project["subtitle"])}</p>' if project.get("subtitle") else ""
     author_html = f'<p class="author">{project["author"]}</p>' if project.get("author") else ""
-    
+
     title_page.content = f'''
     <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
@@ -329,6 +331,7 @@ def generate_epub(
     <body>
         <div class="title-page">
             <h1>{project["title"]}</h1>
+            {subtitle_html}
             {author_html}
         </div>
     </body>

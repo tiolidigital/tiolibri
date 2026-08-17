@@ -87,6 +87,7 @@ async def export_project(
         # project.json — curated subset (no internal IDs leaked unnecessarily)
         project_export = {
             "title": project.get("title"),
+            "subtitle": project.get("subtitle"),
             "author": project.get("author"),
             "language": project.get("language"),
             "style_preset": project.get("style_preset"),
@@ -389,6 +390,7 @@ async def import_project(
         "id": new_project_id,
         "user_id": user["id"],
         "title": f"{original_title} (import)",
+        "subtitle": project_data.get("subtitle"),
         "author": project_data.get("author"),
         "language": project_data.get("language", "pl"),
         "status": "draft",

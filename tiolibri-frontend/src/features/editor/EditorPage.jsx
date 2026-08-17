@@ -221,19 +221,51 @@ export default function EditorPage() {
     }
   }, [selectedChapterId, chapters, getChapterContent])
 
-  const handleUpdateProject = async (field, value) => {
-    try {
-      const { error } = await supabase
-        .from('projects')
-        .update({ [field]: value, updated_at: new Date().toISOString() })
-        .eq('id', projectId)
+  // Timery debounce per pole (title/subtitle/author) — patrz handleUpdateProjectText.
+  const projectSaveTimers = useRef({})
 
-      if (error) throw error
-      setProject((prev) => ({ ...prev, [field]: value }))
-    } catch (err) {
-      console.error('Failed to update project:', err)
-    }
-  }
+  const persistProjectField = useCallback(
+    async (field, value) => {
+      try {
+        const { error } = await supabase
+          .from('projects')
+          .update({ [field]: value, updated_at: new Date().toISOString() })
+          .eq('id', projectId)
+
+        if (error) throw error
+      } catch (err) {
+        console.error('Failed to update project:', err)
+      }
+    },
+    [projectId]
+  )
+
+  const handleUpdateProject = useCallback(
+    (field, value) => {
+      setProject((prev) => (prev ? { ...prev, [field]: value } : prev))
+      persistProjectField(field, value)
+    },
+    [persistProjectField]
+  )
+
+  // Pola, w których pisze się znak po znaku. Stan MUSI się zmienić w tym samym
+  // ticku co keystroke — inputy są kontrolowane przez `project`, więc gdy zapis
+  // do Supabase jest awaitowany przed setProject, React zdąży przerysować input
+  // starą wartością i kursor skacze na koniec linii (ten sam wzorzec co race
+  // w loadContent). Zapis leci osobno, po przerwie w pisaniu: jeden UPDATE
+  // zamiast jednego na keystroke.
+  const handleUpdateProjectText = useCallback(
+    (field, value) => {
+      setProject((prev) => (prev ? { ...prev, [field]: value } : prev))
+      clearTimeout(projectSaveTimers.current[field])
+      // Timer celowo przeżywa unmount — persistProjectField nie dotyka stanu,
+      // więc ostatnia zmiana dojdzie do bazy nawet po zamknięciu inspektora.
+      projectSaveTimers.current[field] = setTimeout(() => {
+        persistProjectField(field, value)
+      }, 600)
+    },
+    [persistProjectField]
+  )
 
   const handleSaveChapter = useCallback(
     async (html) => {
@@ -539,15 +571,23 @@ export default function EditorPage() {
                         <label className="block text-xs text-gray-500 mb-1.5">Title</label>
                         <Input
                           value={project.title}
-                          onChange={(e) => handleUpdateProject('title', e.target.value)}
+                          onChange={(e) => handleUpdateProjectText('title', e.target.value)}
                           placeholder="Book title"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1.5">Subtitle</label>
+                        <Input
+                          value={project.subtitle || ''}
+                          onChange={(e) => handleUpdateProjectText('subtitle', e.target.value)}
+                          placeholder="Podtytuł (opcjonalny)"
                         />
                       </div>
                       <div>
                         <label className="block text-xs text-gray-500 mb-1.5">Author</label>
                         <Input
                           value={project.author || ''}
-                          onChange={(e) => handleUpdateProject('author', e.target.value)}
+                          onChange={(e) => handleUpdateProjectText('author', e.target.value)}
                           placeholder="Author name"
                         />
                       </div>

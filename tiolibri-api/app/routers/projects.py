@@ -120,6 +120,7 @@ async def duplicate_project(project_id: str, user: dict = Depends(verify_supabas
             "id": new_id,
             "user_id": original["user_id"],
             "title": f"{original['title']} (kopia)",
+            "subtitle": original.get("subtitle"),
             "author": original.get("author"),
             "language": original.get("language", "pl"),
             "status": "draft",
