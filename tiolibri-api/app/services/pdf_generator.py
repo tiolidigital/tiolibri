@@ -181,13 +181,19 @@ img:not(.cover-page img) {
     padding-top: 35%;
 }
 
+/* Presety mają twarde `h1 { text-align: left }` (nagłówki rozdziałów) i
+   `p { text-indent: 1.5em }` (akapity treści) — jedno i drugie wygrywa
+   z tym, co .title-page dziedziczy w dół. Na stronie tytułowej nie chcemy
+   ani lewej, ani wcięcia: to nie jest rozdział. */
+.title-page h1,
+.title-page p {
+    text-align: center;
+    text-indent: 0;
+}
+
 .title-page h1 {
     font-size: 24pt;
     page-break-before: avoid;
-    /* Presety mają twarde `h1 { text-align: left }` (nagłówki rozdziałów),
-       które wygrywa z wyśrodkowaniem dziedziczonym po .title-page.
-       Tu chcemy środek — strona tytułowa to nie nagłówek rozdziału. */
-    text-align: center;
 }
 
 .title-page .subtitle {
