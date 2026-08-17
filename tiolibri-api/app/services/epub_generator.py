@@ -220,7 +220,36 @@ def generate_epub(
     css_final = css_final.replace('var(--line-height, 1.7)', str(line_height))
     css_final = css_final.replace('var(--margin, 2em 1.5em)', margin_value)
     css_final = css_final.replace('var(--chapter-spacing, 2em)', f'{chapter_spacing}em')
-    
+
+    # Strona tytułowa: preset ma `h1 { text-align: left }` (nagłówki rozdziałów)
+    # i `p { text-indent: 1.5em }` (akapity treści). Autor, odkąd stoi pod
+    # podtytułem, nie łapie się już na wyjątek `h1 + p` i brał wcięcie.
+    # Tu chcemy to samo co w PDF: środek, zero wcięcia.
+    css_final += """
+
+.title-page {
+    text-align: center;
+}
+
+.title-page h1,
+.title-page p {
+    text-align: center;
+    text-indent: 0;
+}
+
+.title-page .subtitle {
+    font-size: 1.15em;
+    color: #333;
+    margin-top: 0.6em;
+}
+
+.title-page .author {
+    font-size: 1.05em;
+    color: #444;
+    margin-top: 1.5em;
+}
+"""
+
     # Dodaj CSS jako item
     nav_css = epub.EpubItem(
         uid="style_nav",
