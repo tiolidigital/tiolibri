@@ -9,7 +9,8 @@ export default function TypographyControls({ value, onChange }) {
     marginRight: 1.5,
     chapterSpacing: 2,
     tocEnabled: false,
-    tocDepth: 2
+    tocDepth: 2,
+    hideOpenerTitle: true
   }
 
   const handleChange = (key, newValue) => {
@@ -219,6 +220,32 @@ export default function TypographyControls({ value, onChange }) {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Tytul rozdzialu pod grafika otwierajaca */}
+      <div className="space-y-2 pt-2 border-t border-gray-100">
+        <div className="flex items-center justify-between gap-3">
+          <label className="text-xs font-medium text-gray-600">
+            Ukryj tytuł pod grafiką rozdziału
+          </label>
+          <button
+            type="button"
+            onClick={() => handleChange('hideOpenerTitle', settings.hideOpenerTitle === false)}
+            className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+              settings.hideOpenerTitle !== false ? 'bg-[#e3704a]' : 'bg-gray-200'
+            }`}
+          >
+            <span
+              className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                settings.hideOpenerTitle !== false ? 'translate-x-4' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+        <p className="text-xs text-gray-400 leading-snug">
+          Gdy rozdział otwiera grafika z wpisanym tytułem, nagłówek nie drukuje go drugi raz.
+          Pojedynczy rozdział ustawisz guzikiem „Tytuł” w pasku edytora.
+        </p>
       </div>
     </div>
   )

@@ -29,6 +29,12 @@ class GenerateRequest(BaseModel):
     toc_enabled: bool = False
     toc_depth: int = 2  # 1=H1 only, 2=H1+H2, 3=H1+H2+H3
 
+    # Rozdzial otwarty grafika: tytul zwykle jest juz NA grafice, wiec drukowany
+    # naglowek powtarzalby go drugi raz. Domyslnie chowamy — naglowek zostaje
+    # w tresci (spis tresci ma dokad skakac), tylko przestaje byc widoczny.
+    # Wyjatek per rozdzial: atrybut data-chapter-title na <h1>.
+    hide_opener_title: bool = True
+
     @validator('toc_depth')
     def validate_toc_depth(cls, v):
         if v not in [1, 2, 3]:

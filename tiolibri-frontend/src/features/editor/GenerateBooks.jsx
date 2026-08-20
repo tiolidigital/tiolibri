@@ -46,6 +46,9 @@ export default function GenerateBooks({ projectId, projectTitle = 'book', styleP
           cover_image_url: coverImageUrl,
           toc_enabled: typographySettings.tocEnabled || false,
           toc_depth: typographySettings.tocDepth || 2,
+          // `!== false`, bo domyslnie chowamy — brak ustawienia w starym projekcie
+          // ma znaczyc „chowaj", a nie „pokazuj".
+          hide_opener_title: typographySettings.hideOpenerTitle !== false,
         }),
       })
       setUrls(data.files)

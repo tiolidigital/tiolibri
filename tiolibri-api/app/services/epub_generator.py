@@ -93,6 +93,45 @@ def extract_first_heading(html: str) -> Optional[str]:
     return None
 
 
+CHAPTER_TITLE_ATTR_RE = re.compile(r'data-chapter-title\s*=\s*"([^"]*)"', re.IGNORECASE)
+
+OPENER_H1_RE = re.compile(
+    r'\s*(<h1[^>]*>)\s*(<img[^>]*>)(.*?)(</h1>)',
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def hide_opener_title(html: str, book_default: bool = True) -> str:
+    """Chowa tytuł rozdziału, który już jest wpisany w grafikę otwierającą.
+
+    Rozdział otwarty grafiką trzyma ją w nagłówku: `<h1><img ...>Rozdział 1: …</h1>`.
+    U Ewy grafika ma tytuł w sobie, więc drukowany nagłówek powtarza go drugi raz.
+
+    Chowamy sam TEKST nagłówka, nie cały `<h1>` — w EPUB-ie grafika siedzi w środku
+    nagłówka, a ukrycie nagłówka zabrałoby ją razem z tytułem. Nagłówek zostaje
+    w treści, więc spis treści i nazwa rozdziału mają skąd się wziąć.
+
+    Wyjątek per rozdział siedzi w atrybucie `data-chapter-title` ("visible"/"hidden"),
+    ustawianym guzikiem w edytorze; bez niego decyduje ustawienie książki.
+    """
+    match = OPENER_H1_RE.match(html)
+    if not match:
+        return html
+
+    h1_open, img, title, h1_close = match.groups()
+
+    attr = CHAPTER_TITLE_ATTR_RE.search(h1_open)
+    hidden = attr.group(1).strip().lower() == 'hidden' if attr else book_default
+    if not hidden or not title.strip():
+        return html
+
+    return (
+        html[:match.start()]
+        + f'{h1_open}{img}<span class="opener-title-hidden">{title}</span>{h1_close}'
+        + html[match.end():]
+    )
+
+
 def extract_image_urls(html: str) -> List[str]:
     """Extract all image URLs from HTML."""
     img_pattern = r'<img[^>]+src="([^"]+)"'
@@ -235,7 +274,8 @@ def generate_epub(
     chapter_spacing: float = 2.0,
     cover_image_url: Optional[str] = None,
     toc_enabled: bool = False,
-    toc_depth: int = 2
+    toc_depth: int = 2,
+    hide_opener_title_setting: bool = True
 ) -> str:
     """
     Generuje EPUB z projektu i rozdziałów.
@@ -357,6 +397,12 @@ figure[data-full-page] {
 figure[data-full-page] img {
     max-height: 85vh;
     width: auto;
+}
+
+/* Tytuł rozdziału, który już jest na grafice otwierającej. Nagłówek zostaje
+   w treści (spis treści bierze z niego nazwę rozdziału), znika sam tekst. */
+.opener-title-hidden {
+    display: none;
 }
 """
 
@@ -506,6 +552,10 @@ figure[data-full-page] img {
         
         # Pobierz prawdziwy tytuł z pierwszego H1/H2 w treści
         chapter_heading = extract_first_heading(content) or chapter.get("title", f"Chapter {idx}")
+
+        # Tytuł spod grafiki otwierającej chowamy dopiero TU — wyżej jest jeszcze
+        # potrzebny jako nazwa rozdziału w spisie treści.
+        content = hide_opener_title(content, hide_opener_title_setting)
 
         chapter_item = epub.EpubHtml(
             title=chapter_heading,

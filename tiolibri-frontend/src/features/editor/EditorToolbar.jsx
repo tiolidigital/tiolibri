@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useEditorState } from '@tiptap/react'
 import { supabase } from '../../lib/supabase'
+import { openerTitleState } from './extensions/ChapterTitle'
 
 function DividerButton({ editor }) {
   const [showMenu, setShowMenu] = useState(false);
@@ -116,7 +117,7 @@ function DividerButton({ editor }) {
   );
 }
 
-export default function EditorToolbar({ editor, projectId, showInspector, onInspectorToggle, showPreview, onPreviewToggle }) {
+export default function EditorToolbar({ editor, projectId, hideOpenerTitle = true, showInspector, onInspectorToggle, showPreview, onPreviewToggle }) {
   const [isUploading, setIsUploading] = useState(false)
 
   // Guzik „Plansza" musi widzieć bieżące zaznaczenie. TipTap 3 nie odświeża
@@ -129,7 +130,22 @@ export default function EditorToolbar({ editor, projectId, showInspector, onInsp
     }),
   })
 
+  // Guzik „Tytuł" pokazuje się tylko w nagłówku otwierającym rozdział grafiką —
+  // tam, gdzie generator w ogóle patrzy. Ta sama sztuczka z useEditorState:
+  // pasek musi zobaczyć samo przejście kursora.
+  const openerTitle = useEditorState({
+    editor,
+    selector: ({ editor: e }) => openerTitleState(e),
+  })
+
   if (!editor) return null
+
+  // Wyjątek wpisany w nagłówek wygrywa; bez niego decyduje ustawienie książki.
+  const openerTitleVisible = openerTitle
+    ? openerTitle.setting
+      ? openerTitle.setting === 'visible'
+      : !hideOpenerTitle
+    : false
 
   const handleImageUpload = () => {
     const input = document.createElement('input')
@@ -312,6 +328,29 @@ export default function EditorToolbar({ editor, projectId, showInspector, onInsp
           title="Plansza — cała strona dla tej grafiki (bez numeru strony)"
         >
           Plansza
+        </ToolbarButton>
+      )}
+
+      {/* Tytuł rozdziału pod grafiką otwierającą: grafika zwykle ma go w sobie,
+          więc domyślnie (ustawienie książki) nagłówek nie idzie do książki.
+          Ten guzik robi wyjątek dla jednego rozdziału — gdy grafika niesie co innego. */}
+      {openerTitle && (
+        <ToolbarButton
+          onClick={() =>
+            editor
+              .chain()
+              .focus()
+              .setChapterTitleVisibility(openerTitleVisible ? 'hidden' : 'visible')
+              .run()
+          }
+          isActive={openerTitleVisible}
+          title={
+            openerTitleVisible
+              ? 'Tytuł rozdziału wchodzi do książki pod grafiką. Kliknij, żeby go ukryć.'
+              : 'Tytuł rozdziału jest ukryty w książce (grafika ma go w sobie). Kliknij, żeby pokazać.'
+          }
+        >
+          Tytuł
         </ToolbarButton>
       )}
 

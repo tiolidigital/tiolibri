@@ -510,3 +510,27 @@
   color: #fff;
   border-radius: 2px;
 }
+
+/* ============================================
+   Tytuł rozdziału pod grafiką otwierającą
+   ============================================
+   Gdy książka chowa taki tytuł (ustawienie `hideOpenerTitle`), w edytorze zostaje
+   widoczny — bo tu się go edytuje i to z niego bierze się nazwa w spisie treści.
+   Bez żadnego znaku autor patrzyłby na nagłówek i nie miał skąd wiedzieć, że
+   w PDF-ie go nie ma. Stąd przygaszenie i mała notka na marginesie.
+   Wyjątek per rozdział (guzik „Tytuł") zdejmuje przygaszenie. */
+.tiptap-editor.hides-opener-title > h1:first-child:has(img):not([data-chapter-title='visible']) {
+  opacity: 0.45;
+}
+
+.tiptap-editor.hides-opener-title > h1:first-child:has(img):not([data-chapter-title='visible'])::after {
+  content: 'nie wchodzi do książki';
+  display: block;
+  margin-top: 0.25em;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  user-select: none;
+}

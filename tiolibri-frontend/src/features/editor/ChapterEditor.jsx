@@ -4,6 +4,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import { Divider } from './extensions/Divider'
 import { Figure } from './extensions/Figure'
+import { ChapterTitle } from './extensions/ChapterTitle'
 import { SearchAndReplace } from './extensions/SearchAndReplace'
 import EditorToolbar from './EditorToolbar'
 import { getPreset } from '../../lib/presets'
@@ -50,6 +51,7 @@ export default function ChapterEditor({
     marginBottom: 2,
     marginLeft: 1.5,
     marginRight: 1.5,
+    hideOpenerTitle: true,
   }
 
   // Get preset with fontFamily
@@ -66,6 +68,7 @@ export default function ChapterEditor({
         },
       }),
       Figure,
+      ChapterTitle,
       Divider,
       SearchAndReplace,
     ],
@@ -105,6 +108,21 @@ export default function ChapterEditor({
       loadedKeyRef.current = key
     }
   }, [editor, chapter?.id, content])
+
+  // Obszar edycji dostaje klasę, gdy książka chowa tytuł spod grafiki otwierającej.
+  // Bez tego autor patrzy na widoczny nagłówek w edytorze i nie ma skąd wiedzieć,
+  // że w PDF-ie go nie będzie (CSS sam nie zna ustawienia książki).
+  useEffect(() => {
+    if (!editor) return
+    const base = 'tiptap-editor prose max-w-none focus:outline-none min-h-[500px]'
+    editor.setOptions({
+      editorProps: {
+        attributes: {
+          class: settings.hideOpenerTitle !== false ? `${base} hides-opener-title` : base,
+        },
+      },
+    })
+  }, [editor, settings.hideOpenerTitle])
 
   // Sync editable flag when lock state changes after mount.
   useEffect(() => {
@@ -232,6 +250,7 @@ export default function ChapterEditor({
             <EditorToolbar
               editor={editor}
               projectId={projectId}
+              hideOpenerTitle={settings.hideOpenerTitle !== false}
               showInspector={showInspector}
               onInspectorToggle={onInspectorToggle}
               showPreview={showPreview}

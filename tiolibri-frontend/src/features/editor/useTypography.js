@@ -12,7 +12,11 @@ const DEFAULT_SETTINGS = {
   marginRight: 1.5,
   chapterSpacing: 2,
   tocEnabled: false,
-  tocDepth: 2
+  tocDepth: 2,
+  // Rozdzial otwarty grafika: tytul zwykle jest juz NA grafice, wiec drukowany
+  // naglowek powtarzalby go drugi raz. Domyslnie chowamy — naglowek zostaje
+  // w tresci (spis tresci ma dokad skakac), tylko przestaje byc widoczny.
+  hideOpenerTitle: true
 }
 
 export function useTypography(projectId) {

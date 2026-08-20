@@ -125,13 +125,47 @@ FIGURE_PAGE_SHAVE_PT = 6.0
 PX_TO_PT = 0.75
 
 
-def split_chapter_opener(html: str) -> tuple:
+CHAPTER_TITLE_ATTR_RE = re.compile(r'data-chapter-title\s*=\s*"([^"]*)"', re.IGNORECASE)
+
+
+def opener_title_hidden(h1_tag: str, book_default: bool) -> bool:
+    """Czy tytuł tego rozdziału ma zniknąć spod grafiki otwierającej.
+
+    Rozstrzyga wyjątek wpisany w sam nagłówek (`data-chapter-title="visible"`
+    albo `"hidden"`, ustawiany guzikiem w edytorze); gdy go nie ma, decyduje
+    ustawienie książki. Dzięki temu autor niczego nie musi klikać rozdział po
+    rozdziale, a i tak może zrobić wyjątek tam, gdzie grafika niesie inny tekst
+    niż nagłówek.
+    """
+    match = CHAPTER_TITLE_ATTR_RE.search(h1_tag)
+    if match:
+        return match.group(1).strip().lower() == 'hidden'
+    return book_default
+
+
+def add_class(tag: str, class_name: str) -> str:
+    """Dokleja klasę do otwierającego znacznika, nie gubiąc tego, co już w nim jest."""
+    existing = re.search(r'class\s*=\s*"([^"]*)"', tag, re.IGNORECASE)
+    if existing:
+        if class_name in existing.group(1).split():
+            return tag
+        return tag[:existing.start(1)] + f'{existing.group(1)} {class_name}' + tag[existing.end(1):]
+    return tag[:-1].rstrip() + f' class="{class_name}"' + ('/>' if tag.rstrip().endswith('/>') else '>')
+
+
+def split_chapter_opener(html: str, hide_title: bool = False) -> tuple:
     """Wydziela całostronicową grafikę otwierającą rozdział z pierwszego H1.
 
     Edytor trzyma ją jako pierwsze dziecko nagłówka: `<h1><img ...>Rozdział 1: …</h1>`.
     Zwraca `(img_html, reszta)` — albo `(None, html)`, gdy rozdział zaczyna się inaczej.
     Nagłówek zostaje nietknięty poza usunięciem obrazka, więc ID i tekst do spisu
     treści są te same co przed zmianą.
+
+    `hide_title` (ustawienie książki) chowa sam nagłówek klasą `.opener-title-hidden`:
+    grafika u Ewy ma tytuł w sobie, więc drukowany H1 powtarzałby go drugi raz.
+    Nagłówek ZOSTAJE w treści — bez niego spis treści nie miałby dokąd skoczyć,
+    a EPUB nie miałby skąd wziąć nazwy rozdziału. Wyjątek per rozdział czyta
+    `opener_title_hidden()`.
     """
     match = re.match(
         r'\s*(<h1[^>]*>)\s*(<img[^>]*>)',
@@ -141,8 +175,13 @@ def split_chapter_opener(html: str) -> tuple:
     if not match:
         return None, html
 
+    h1_open = match.group(1)
     img = match.group(2)
     rest = html[:match.end(1)] + html[match.end(2):]
+
+    if opener_title_hidden(h1_open, hide_title):
+        rest = rest[:match.start(1)] + add_class(h1_open, 'opener-title-hidden') + rest[match.end(1):]
+
     return img, rest
 
 
@@ -333,6 +372,21 @@ img:not(.cover-page img) {
     max-width: 100%;
     width: auto;
     /* max-height dokłada się niżej, bo zależy od marginesów strony */
+}
+
+/* Tytuł rozdziału, który już jest na grafice otwierającej — zostaje w treści,
+   ale przestaje być widoczny. NIE `display: none`: element bez pudełka nie ma
+   pozycji w dokumencie, więc link ze spisu treści nie miałby dokąd skoczyć.
+   Zerowa wysokość + `visibility: hidden` zostawiają kotwicę na właściwej
+   stronie, a nie zostawiają po nagłówku ani śladu farby, ani pustego miejsca. */
+.chapter h1.opener-title-hidden {
+    visibility: hidden;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+    font-size: 0;
+    overflow: hidden;
 }
 
 .title-page {
@@ -545,7 +599,8 @@ def generate_pdf(
     chapter_spacing: float = 2.0,
     cover_image_url: Optional[str] = None,
     toc_enabled: bool = False,
-    toc_depth: int = 2
+    toc_depth: int = 2,
+    hide_opener_title: bool = True
 ) -> str:
     """
     Generuje PDF z projektu i rozdziałów używając WeasyPrint.
@@ -761,7 +816,7 @@ def generate_pdf(
 
         # Grafika otwierająca dostaje własną stronę bez numeru; łamanie strony
         # przenosi się na nią, bo to ona zaczyna rozdział.
-        opener, content_body = split_chapter_opener(content)
+        opener, content_body = split_chapter_opener(content, hide_title=hide_opener_title)
         if opener:
             html_parts.append(f'<div class="chapter-opener"{break_before}>{opener}</div>')
             html_parts.append(f'<div class="chapter">{content_body}</div>')
