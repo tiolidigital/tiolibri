@@ -2,9 +2,20 @@
 
 # HANDOFF — 2026-08-20 19:29 · HEAD 8a0ce4b
 
-## STAN: wszystko LEŻY W WORKING TREE, NIC NIE WYPCHNIĘTE
+## STAN: WYPCHNIĘTE I NA PRODUKCJI (20.08 wieczorem)
 
-Właściciel świadomie wstrzymał deploy („będzie jeszcze kilka rzeczy"). Zmienione pliki:
+Właściciel dał zielone światło na deploy, żeby móc rano klikać na produkcji.
+Trzy commity na `main`: `2b1ed95` (pobieranie EPUB-a), `6d645ef` (podpisy i plansze),
+`493a098` (handoff). Vercel projekt `tiolibri` i Railway: **success** dla `493a098`
+(sprawdzone przez `gh api .../commits/493a098/status`).
+
+Weryfikacja, że kod NAPRAWDĘ jest na produkcji: bundle
+`https://app.tiolibri.com/assets/index-Wzr7w1nq.js` zawiera `data-full-page`
+i `download=`. **Uwaga na pułapkę**: hash nazwy bundla na produkcji jest inny niż
+z lokalnego `npm run build` (inne zmienne środowiskowe), więc porównywanie nazw
+plików nic nie mówi — trzeba grepować zawartość. `api.tiolibri.com/health` → 200.
+
+Pliki, których to dotyczy:
 
 - `tiolibri-frontend/src/features/editor/GenerateBooks.jsx` — naprawione pobieranie EPUB-a
 - `tiolibri-api/app/services/epub_generator.py` — okładka bez duplikatu + `img` na środku + figury
@@ -81,20 +92,35 @@ fragmencie. Grafika i podpis są jednym blokiem, więc łamanie strony ich nie r
 
 ## NASTĘPNY KROK — jeden
 
-**Kliknąć to w przeglądarce na projekcie *test book*** (`70e90efb-230b-428f-85dd-dd6dffb63beb`):
-wgrać zdjęcie, wpisać podpis, pochylić nazwę łacińską, włączyć „Planszę", wygenerować PDF
-i EPUB. Testy bez przeglądarki przeszły, ale kursora w podpisie i guzika „Plansza" nikt
-jeszcze nie dotknął ręką.
+**Odebrać od właściciela wynik porannego klikania na produkcji** (*test book*
+`70e90efb-230b-428f-85dd-dd6dffb63beb`): wgrać zdjęcie, wpisać podpis, pochylić nazwę
+łacińską, włączyć „Planszę", wygenerować PDF i EPUB. Testy bez przeglądarki przeszły,
+ale kursora w podpisie i guzika „Plansza" nikt jeszcze nie dotknął ręką — to jedyne,
+czego nie sprawdziliśmy.
 
-Potem: **deploy całości** (punkty 1–4 razem) — push na `main`.
+Gdyby coś nie grało, pierwsze miejsca do sprawdzenia: guzik „Plansza" pojawia się tylko
+wtedy, gdy kursor stoi w figurze (`useEditorState` w `EditorToolbar.jsx`), a podkładka
+pod pusty podpis w edytorze stoi na selektorze `:has()` w `editor.css`.
 
-## Kolejka od właściciela
+## Kolejka od właściciela — ZAMKNIĘTA
 
-1. ~~EPUB się nie pobiera~~ — zrobione, czeka na deploy
-2. ~~zdublowana okładka~~ — zrobione, czeka na deploy
-3. ~~obraz w EPUB nie na środku~~ — zrobione, czeka na deploy
-4. ~~podpisy pod obrazami + plansze na całą stronę~~ — zrobione, czeka na klik i deploy
-5. deploy dopiero jak zbierzemy całość
+1. ~~EPUB się nie pobiera~~ — na produkcji
+2. ~~zdublowana okładka~~ — na produkcji
+3. ~~obraz w EPUB nie na środku~~ — na produkcji
+4. ~~podpisy pod obrazami + plansze na całą stronę~~ — na produkcji, czeka na klik
+5. ~~deploy jak zbierzemy całość~~ — zrobiony 20.08 wieczorem
+
+## Pomysły zgłoszone właścicielowi, jeszcze NIEKUPIONE
+
+- **Zmniejszanie zdjęć przy wgrywaniu** (canvas → dłuższy bok 2000 px, JPEG ~0,82,
+  przed wysłaniem do Supabase). Znosi cały problem „jak duże ma być zdjęcie", trzyma
+  300 dpi na A5 i przestaje boleć limit 5 MB. Największy zysk z całej listy.
+- **Dwie drogi do jednej rzeczy**: grafika otwierająca rozdział (`<h1><img>`,
+  `split_chapter_opener` w `pdf_generator.py`) i nowa plansza (`figure[data-full-page]`)
+  robią prawie to samo, innym mechanizmem. Warto kiedyś scalić — dziś nie boli.
+- **Gdy zdjęcie nie pobierze się przy generowaniu**, WeasyPrint rysuje w jego miejscu
+  tekst z `alt` — czyli podpis pojawia się dwa razy. Zmierzone w teście. Drobiazg,
+  ale wygląda jak błąd.
 
 ## Czego właściciel NIE kupił
 
