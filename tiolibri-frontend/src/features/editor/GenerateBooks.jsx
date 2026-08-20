@@ -11,27 +11,18 @@ export default function GenerateBooks({ projectId, projectTitle = 'book', styleP
   // Create safe filename from project title
   const getSafeFilename = (extension) => bookFilename(projectTitle, extension)
 
-  const handleDownload = async (url, filename) => {
-    try {
-      const response = await fetch(url)
-      const blob = await response.blob()
-      const blobUrl = window.URL.createObjectURL(blob)
-
-      const link = document.createElement('a')
-      link.href = blobUrl
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      // Clean up
-      window.URL.revokeObjectURL(blobUrl)
-    } catch (err) {
-      console.error('Download failed:', err)
-      // Fallback: open in new tab
-      window.open(url, '_blank')
-    }
-  }
+  // Pobieranie idzie zwyklym linkiem, nie przez fetch+blob.
+  //
+  // Powod: blob wymagal `await fetch(...)` miedzy klikiem a wywolaniem `.click()`.
+  // Chromium (Arc) liczy gest uzytkownika na sekundy — gdy odpowiedz z CDN-a przyszla
+  // pozniej, pobranie bylo po cichu blokowane i nic sie nie dzialo. Do tego
+  // `revokeObjectURL()` lecial synchronicznie zaraz po `.click()`, co potrafi uciac
+  // pobieranie zanim wystartuje. EPUB (wiekszy, czesciej cache MISS) obrywal, PDF nie.
+  //
+  // Supabase Storage przyjmuje `?download=nazwa` i odsyla
+  // `Content-Disposition: attachment; filename=...`, wiec nazwa pliku zostaje nasza.
+  const downloadUrl = (url, filename) =>
+    `${url}${url.includes('?') ? '&' : '?'}download=${encodeURIComponent(filename)}`
 
   const handleGenerate = async () => {
     setLoading(true)
@@ -93,20 +84,24 @@ export default function GenerateBooks({ projectId, projectTitle = 'book', styleP
       {urls && (
         <div className="flex gap-2">
           {urls.epub && (
-            <button
-              onClick={() => handleDownload(urls.epub, getSafeFilename('epub'))}
+            <a
+              href={downloadUrl(urls.epub, getSafeFilename('epub'))}
+              download={getSafeFilename('epub')}
+              rel="noopener"
               className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer"
             >
               EPUB
-            </button>
+            </a>
           )}
           {urls.pdf && (
-            <button
-              onClick={() => handleDownload(urls.pdf, getSafeFilename('pdf'))}
+            <a
+              href={downloadUrl(urls.pdf, getSafeFilename('pdf'))}
+              download={getSafeFilename('pdf')}
+              rel="noopener"
               className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer"
             >
               PDF
-            </button>
+            </a>
           )}
         </div>
       )}
