@@ -1,150 +1,99 @@
-**Temat:** obrazy w książce Bożeny — pobieranie EPUB-a, środkowanie grafik i podpisy pod nimi — bo Piotrek wgrywa teraz zdjęcia grzybów do testów i chce, żeby każde zdjęcie miało pod sobą nazwę grzyba, a nic się przy tym nie rozsypało
+**Temat:** obrazy w książce — podpisy, plansze i tytuł rozdziału spod grafiki otwierającej — bo u Ewy grafika ma tytuł w sobie i ten sam tytuł stał w książce drugi raz jako nagłówek, a Piotrek chce klikać gotowe na produkcji
 
-# HANDOFF — 2026-08-20 19:29 · HEAD 8a0ce4b
+# HANDOFF — 2026-08-20 · HEAD b03f6b4 (na produkcji)
 
-## STAN: WYPCHNIĘTE I NA PRODUKCJI (20.08 wieczorem)
+## STAN: NA PRODUKCJI — **WYPCHNIĘTE 20.08**
 
-Właściciel dał zielone światło na deploy, żeby móc rano klikać na produkcji.
-Trzy commity na `main`: `2b1ed95` (pobieranie EPUB-a), `6d645ef` (podpisy i plansze),
-`493a098` (handoff). Vercel projekt `tiolibri` i Railway: **success** dla `493a098`
-(sprawdzone przez `gh api .../commits/493a098/status`).
+Właściciel powiedział „pushnij". `2e43099..b03f6b4` poszło na `origin/main`, więc
+ukrywanie tytułu spod grafiki jest na Vercelu (projekt `tiolibri`) i Railwayu razem
+z resztą. Nikt tego jeszcze nie klikał ręką na produkcji — patrz NASTĘPNY KROK.
 
-Weryfikacja, że kod NAPRAWDĘ jest na produkcji: bundle
-`https://app.tiolibri.com/assets/index-Wzr7w1nq.js` zawiera `data-full-page`
-i `download=`. **Uwaga na pułapkę**: hash nazwy bundla na produkcji jest inny niż
-z lokalnego `npm run build` (inne zmienne środowiskowe), więc porównywanie nazw
-plików nic nie mówi — trzeba grepować zawartość. `api.tiolibri.com/health` → 200.
+Wcześniejsze trzy commity (`2b1ed95`, `6d645ef`, `493a098` + fix `2e43099`) są na
+produkcji od 20.08 wieczorem: pobieranie EPUB-a, podpisy pod obrazami, plansze na
+całą stronę, znikanie niepobranej grafiki.
 
-Pliki, których to dotyczy:
+## Co zrobione w TYM wątku — ukrywanie tytułu spod grafiki
 
-- `tiolibri-frontend/src/features/editor/GenerateBooks.jsx` — naprawione pobieranie EPUB-a
-- `tiolibri-api/app/services/epub_generator.py` — okładka bez duplikatu + `img` na środku + figury
-- `tiolibri-api/app/services/pdf_generator.py` — figury, plansze, alt z podpisu
-- `tiolibri-frontend/src/features/editor/extensions/Figure.js` — NOWY węzeł TipTap
-- `tiolibri-frontend/src/features/editor/ChapterEditor.jsx` — rejestracja Figure
-- `tiolibri-frontend/src/features/editor/EditorToolbar.jsx` — wgranie wstawia figurę + guzik „Plansza"
-- `tiolibri-frontend/src/features/editor/editor.css` — figura w edytorze i w podglądzie
+### Decyzja właściciela (jego słowa, 20.08 wieczorem)
 
-Build frontu przechodzi (`npm run build`). Backend sprawdzony realnym generowaniem PDF-a
-i EPUB-a (poniżej, sekcja „Jak to sprawdzono").
+Pytanie brzmiało: automat czy przełącznik. Odpowiedź: **przełącznik, ale tak
+ustawiony, żeby u Ewy nie trzeba było klikać rozdział po rozdziale** — „chciałbym,
+żeby już były wyłączone". Powód, dla którego przełącznik w ogóle ma być: grafika
+może kiedyś nieść co innego niż nagłówek (inny tytuł, sam obraz, podtytuł obok).
 
-## Co zrobione — wcześniejszy wątek (czeka na deploy)
+Zbudowane więc dwa piętra, bo to jedno bez drugiego nie robi tego, o co prosił:
 
-1. **Guzik EPUB nie pobierał pliku.** `handleDownload` robił `fetch → blob → sztuczny <a>`;
-   Chromium unieważniał gest użytkownika, zanim CDN odesłał plik. Teraz guziki to zwykłe
-   `<a href={url}?download=nazwa>` — Supabase odsyła `Content-Disposition: attachment`.
-2. **Zdublowana okładka w EPUB.** `set_cover(..., create_page=False)` + zostaje nasza
-   strona okładki. 12 plików zamiast 14, jedna okładka w manifeście.
-3. **Obraz w EPUB przy lewej krawędzi.** Presety nie miały reguły dla `img`; doklejona
-   do `css_final` w `epub_generator.py`.
-
-## Co zrobione w TYM wątku — podpisy pod obrazami
-
-### Decyzje właściciela (jego słowa, 20.08)
-
-- numeracja „Ryc. 1" — **NIE robimy**. Jeden do trzech obrazów na rozdział, numer byłby
-  robotą bez zysku.
-- kursywa w podpisie — **nie domyślnie, ale na fragmencie**. Nazwa łacińska pochylona,
-  reszta prosto.
-- numer strony na planszy — **zdjąć**, tak jak przy grafice otwierającej rozdział.
-- podpis do `alt` — **tak**, automatem, bez dodatkowego pola w interfejsie.
+1. **Ustawienie książki** — `hideOpenerTitle` w typografii, suwak „Ukryj tytuł pod
+   grafiką rozdziału", **domyślnie WŁĄCZONY**. Ewa dostaje efekt bez klikania,
+   u Bożeny nic się nie rusza (jej rozdziały otwiera zwykły `<h1>` bez grafiki).
+2. **Wyjątek per rozdział** — guzik **„Tytuł"** w pasku edytora, widoczny tylko
+   wtedy, gdy kursor stoi w nagłówku otwierającym grafiką. Zapisuje
+   `data-chapter-title="visible"` albo `"hidden"` na `<h1>`. Bez kliknięcia żaden
+   atrybut nie dochodzi — zapisany HTML zostaje czysty, stare rozdziały nietknięte.
 
 ### Jak to zbudowane
 
-**Front — węzeł TipTap `Figure`** (`extensions/Figure.js`). Podpis jest TREŚCIĄ węzła
-(`content: 'inline*'`), nie atrybutem — dlatego działa w nim Ctrl+I na zaznaczonym
-fragmencie. Grafika i podpis są jednym blokiem, więc łamanie strony ich nie rozdzieli.
+**PDF** (`pdf_generator.py`): `split_chapter_opener(html, hide_title=)` dokleja
+nagłówkowi klasę `.opener-title-hidden`. Reguła to `visibility: hidden` + zerowa
+wysokość, **nie `display: none`** — element bez pudełka nie ma pozycji w dokumencie,
+więc link ze spisu treści nie miałby dokąd skoczyć. `opener_title_hidden()` czyta
+wyjątek z atrybutu, `add_class()` dokleja klasę nie gubiąc tego, co już w tagu jest.
 
-- wgranie obrazu („Media") wstawia figurę i **stawia kursor w podpisie** — autor pisze od razu
-- Enter w podpisie wychodzi akapitem pod figurę (bez tego `isolating` zamyka w podpisie)
-- guzik **„Plansza"** pojawia się w pasku, gdy kursor stoi w figurze; przełącza
-  `data-full-page`. Stan czytany przez `useEditorState` — TipTap 3 nie przerenderowuje
-  paska na samą zmianę zaznaczenia (reszta guzików w pasku ma ten problem do dziś)
-- zapisany HTML jest czysty i przenośny: `<figure><img src><figcaption>…</figcaption></figure>`,
-  bez atrybutów pod edytor. Plansza to `<figure data-full-page>`
-- **stare rozdziały nietknięte** — goły `<img>` w akapicie nadal parsuje się jak dawniej
+**EPUB** (`epub_generator.py`): `hide_opener_title()` chowa sam **TEKST** nagłówka,
+zawijając go w `<span class="opener-title-hidden">`. Powód rozjazdu z PDF-em: w EPUB-ie
+grafika siedzi w środku `<h1>` (nie ma wydzielania strony otwierającej), więc ukrycie
+całego nagłówka zabrałoby ją razem z tytułem. Wołane PO `extract_first_heading()` —
+wyżej tytuł jest jeszcze potrzebny jako nazwa rozdziału w spisie treści.
 
-**PDF** (`pdf_generator.py`):
-- `.chapter figure` — środek, `page-break-inside: avoid`; `figcaption` 0.85em, wyśrodkowany,
-  bez wcięcia akapitowego
-- plansza: `page: figure-page` (własny `@page` **bez numeru strony**), łamanie przed i po,
-  grafika z podpisem wyśrodkowana w pionie (flex)
-- `CAPTION_RESERVE_LINES = 6.0` — zapas wysokości pod podpisem, liczony ze stopnia pisma;
-  `FIGURE_PAGE_SHAVE_PT = 6.0` — luz, bez którego WeasyPrint wypycha podpis na kolejną stronę
-- `fill_alt_from_caption()` — podpis do `alt`, gdy `alt` pusty; własny `alt` nietknięty
+**Front**: nowe rozszerzenie `extensions/ChapterTitle.js` (globalny atrybut na
+`heading` + `openerTitleState()` dla paska), guzik w `EditorToolbar.jsx` na tym samym
+`useEditorState` co „Plansza", suwak w `TypographyControls.jsx`, `hideOpenerTitle`
+w `DEFAULT_SETTINGS` (`useTypography.js`), mapowanie na `hide_opener_title`
+w `GenerateBooks.jsx` (przez `!== false`, bo brak ustawienia w starym projekcie ma
+znaczyć „chowaj"). W edytorze taki nagłówek jest przygaszony i ma notkę „NIE WCHODZI
+DO KSIĄŻKI" (`editor.css`) — bez tego autor patrzy na widoczny tytuł i nie ma skąd
+wiedzieć, że w PDF-ie go nie będzie.
 
-**EPUB** (`epub_generator.py`): te same reguły w `css_final` (`figure`, `figcaption`,
-`figure[data-full-page]` z `max-height: 85vh`) + ta sama `fill_alt_from_caption()`.
+Pliki: `pdf_generator.py`, `epub_generator.py`, `schemas.py` (`hide_opener_title:
+bool = True`), `routers/generate.py`, `ChapterTitle.js` (NOWY), `EditorToolbar.jsx`,
+`ChapterEditor.jsx`, `TypographyControls.jsx`, `useTypography.js`, `GenerateBooks.jsx`,
+`editor.css`.
 
 ### Jak to sprawdzono (pomiar, nie wiara)
 
-- PDF z trzema rozdziałami: figura w tekście, plansza pozioma, plansza pionowa z podpisem
-  na dwie linijki. Rasteryzacja stron + `pdftotext`: **plansze bez numeru strony**, podpis
-  na tej samej stronie co grafika, kursywa na fragmencie podpisu wychodzi, tekst po planszy
-  wraca na stronę z numerem, **żadnej pustej strony**
-- przemiatanie 240 kombinacji (marginesy 1–3 cm × stopień pisma 12–24 px × interlinia
-  1.4–2.0 × podpisy 1–5 linijek × grafika pionowa/pozioma): **0 nieudanych**.
-  Przy `CAPTION_RESERVE_LINES = 46pt` na sztywno wysypywało się 25 kombinacji — stąd wzór
-- EPUB: `figure` w CSS-ie, `alt` uzupełniony z podpisu, `<img/>` domknięty przez ebooklib
-- front: test bez przeglądarki (jsdom + TipTap): wstawienie, podpis, kursywa na fragmencie,
-  plansza, **round-trip zapis→odczyt→zapis stabilny**, stary `<img>` przeżywa, figura bez
-  `<figcaption>` parsuje się bez wywrotki. jsdom instalowany `--no-save`, `package.json` czysty
+- **Kanon Ewy `1f23458e`, prawdziwy PDF, 381 stron**: wszystkie **262 kotwice** na
+  miejscu, każdy rozdział ląduje na tej samej stronie co przed zmianą (rozdział 1:
+  strona 18, grafika na 17), tekst zaczyna się od góry strony bez śladu po nagłówku
+  i bez pustego miejsca, numer strony jest. Książka schudła o 7 stron.
+- **EPUB Ewy**: 12 z 14 rozdziałów z ukrytym tytułem (dwa bez grafiki nietknięte),
+  nazwy w `toc.ncx` nietknięte.
+- **Regresja u Bożeny `507b3ee4`**: 24 rozdziały, **0 zmienionych** w obu generatorach.
+  To samo w *test book* `70e90efb`.
+- **Wyjątek per rozdział**: rozdział z `data-chapter-title="visible"` drukuje tytuł
+  mimo włączonego ustawienia książki (PDF syntetyczny, sprawdzone `pdftotext`).
+- **Front, 11 testów bez przeglądarki** (jsdom + TipTap, instalowany `--no-save`):
+  round-trip HTML bez atrybutu i z atrybutem, przełączanie w obie strony, guzik
+  nie pokazuje się w `<h1>` bez grafiki ani w nagłówku, który nie otwiera rozdziału,
+  figura z podpisem nietknięta. `npm run build` przechodzi.
 
 ## NASTĘPNY KROK — jeden
 
-**Ukryć powtórzony tytuł rozdziału u Ewy — do decyzji i zrobienia.**
-
-Właściciel nazwał rzecz po imieniu (20.08 wieczorem): u Ewy grafika otwierająca rozdział
-MA W SOBIE tytuł, a `<h1>` i tak musiał zostać, bo bez niego nie ma klikalnego spisu
-treści. Efekt: tytuł widać dwa razy — raz na grafice, raz jako nagłówek na następnej
-stronie. U Bożeny problemu nie ma, bo tam rozdziały otwiera zwykły `<h1>` bez grafiki.
-
-Kierunek (mój, do zatwierdzenia): `<h1>` zostaje w treści, ale przestaje być widoczny —
-`height: 0; overflow: hidden; margin: 0`. **Nie `display: none`** — element bez pudełka
-nie ma pozycji, więc link ze spisu treści nie miałby gdzie skoczyć. Rozdziały otwierane
-grafiką rozpoznaje już `split_chapter_opener()` w `pdf_generator.py`, więc jest gdzie
-wpiąć klasę na ten jeden nagłówek.
-
-Do zmierzenia, nie do założenia: czy przy zerowej wysokości nagłówka link ze spisu treści
-nadal ląduje na właściwej stronie. Sprawdzić realnym PDF-em kanonu Ewy (`1f23458e`).
-
-Do rozstrzygnięcia z właścicielem: automat (każdy rozdział otwierany grafiką chowa swój
-`<h1>`) czy przełącznik. Automat jest prostszy i u Bożeny niczego nie rusza — ale to
-jego decyzja, nie moja.
-
-## POTEM
-
-**Odebrać od właściciela wynik porannego klikania na produkcji** (*test book*
-`70e90efb-230b-428f-85dd-dd6dffb63beb`): wgrać zdjęcie, wpisać podpis, pochylić nazwę
-łacińską, włączyć „Planszę", wygenerować PDF i EPUB. Testy bez przeglądarki przeszły,
-ale kursora w podpisie i guzika „Plansza" nikt jeszcze nie dotknął ręką — to jedyne,
-czego nie sprawdziliśmy.
-
-Gdyby coś nie grało, pierwsze miejsca do sprawdzenia: guzik „Plansza" pojawia się tylko
-wtedy, gdy kursor stoi w figurze (`useEditorState` w `EditorToolbar.jsx`), a podkładka
-pod pusty podpis w edytorze stoi na selektorze `:has()` w `editor.css`.
-
-## Kolejka od właściciela — ZAMKNIĘTA
-
-1. ~~EPUB się nie pobiera~~ — na produkcji
-2. ~~zdublowana okładka~~ — na produkcji
-3. ~~obraz w EPUB nie na środku~~ — na produkcji
-4. ~~podpisy pod obrazami + plansze na całą stronę~~ — na produkcji, czeka na klik
-5. ~~deploy jak zbierzemy całość~~ — zrobiony 20.08 wieczorem
+**Odebrać wynik klikania na produkcji** (*test book* `70e90efb-230b-428f-85dd-dd6dffb63beb`):
+wgrać zdjęcie, wpisać podpis, pochylić nazwę łacińską, włączyć „Planszę", wygenerować
+PDF i EPUB. Testy bez przeglądarki przeszły, ale kursora w podpisie i guzika „Plansza"
+nikt jeszcze nie dotknął ręką. Po deployu doszedł do tego guzik „Tytuł" i suwak
+w typografii — też nietknięte ręką.
 
 ## Pomysły zgłoszone właścicielowi, jeszcze NIEKUPIONE
 
 - **Zmniejszanie zdjęć przy wgrywaniu** (canvas → dłuższy bok 2000 px, JPEG ~0,82,
-  przed wysłaniem do Supabase). Znosi cały problem „jak duże ma być zdjęcie", trzyma
-  300 dpi na A5 i przestaje boleć limit 5 MB. Największy zysk z całej listy.
-- **Dwie drogi do jednej rzeczy**: grafika otwierająca rozdział (`<h1><img>`,
-  `split_chapter_opener` w `pdf_generator.py`) i nowa plansza (`figure[data-full-page]`)
-  robią prawie to samo, innym mechanizmem. Warto kiedyś scalić — dziś nie boli.
-- ~~Gdy zdjęcie nie pobierze się przy generowaniu, podpis wychodzi dwa razy~~ — ZROBIONE
-  20.08 wieczorem (`remove_broken_image()` w obu generatorach): niepobrana grafika znika
-  z treści, a razem z nią cała figura, bo sam podpis bez zdjęcia niczego nie opisuje.
-  Zmierzone: PDF i EPUB, figura / plansza / luźny `<img>` / obrazek w `<h1>`; przy dwóch
-  figurach znika tylko ta z zepsutym obrazkiem.
+  przed wysłaniem do Supabase). Znosi problem „jak duże ma być zdjęcie", trzyma 300 dpi
+  na A5 i przestaje boleć limit 5 MB. Największy zysk z całej listy.
+- **Dwie drogi do jednej rzeczy**: grafika otwierająca rozdział (`<h1><img>`) i plansza
+  (`figure[data-full-page]`) robią prawie to samo, innym mechanizmem. Kiedyś scalić.
+- **Podgląd w aplikacji** (`BookPreview.jsx`) nie zna ani strony otwierającej, ani
+  ukrywania tytułu — dzieli tekst po liczbie słów. Kto kiedyś będzie go urealniał,
+  ma tu dwie rzeczy do dołożenia.
 
 ## Czego właściciel NIE kupił
 
@@ -155,15 +104,16 @@ pod pusty podpis w edytorze stoi na selektorze `:has()` w `editor.css`.
 
 Kolumna tekstu w A5 przy domyślnych marginesach 1,5 cm to **11,8 cm ≈ 4,65 cala**.
 Przy 300 dpi wychodzi **~1400 px szerokości** — więcej drukarnia i tak wyrzuci.
-Plansza na całą stronę: pole 11,8 × 17 cm → **~1400 × 2000 px**.
-Generatory **nie zmniejszają grafik** — PDF wkleja plik bajt w bajt jako data URI, EPUB
-kopiuje go do środka. Ile waży plik, tyle waży książka.
+Plansza na całą stronę: pole 11,8 × 17 cm → **~1400 × 2000 px**. Generatory **nie
+zmniejszają grafik** — ile waży plik, tyle waży książka.
 
 ## Wskaźniki
 
+- kanon Ewy: `1f23458e-b63a-4b29-a912-cced19ce3e47` (12 z 14 rozdziałów otwiera grafika)
+- kanon Bożeny: `507b3ee4-a07d-4a69-b6a8-f88b53dc2ba6` (zero grafik otwierających)
 - projekt testowy: *test book* `70e90efb-230b-428f-85dd-dd6dffb63beb`
-- kanon Bożeny: `507b3ee4-a07d-4a69-b6a8-f88b53dc2ba6`
-- deploy frontu: push na `main` → Vercel projekt `tiolibri` (NIE `tiolibri-frontend`, to zombie)
-- lokalny PDF: `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib venv/bin/python` (inaczej
-  WeasyPrint nie znajdzie `libgobject`)
+- deploy frontu: push na `main` → Vercel projekt `tiolibri` (NIE `tiolibri-frontend`)
+- lokalny PDF: `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib venv/bin/python`
+- tabela `chapters`: treść w `processed_html` (kolumny `content` nie ma), kolejność
+  `sort_order` — jawna lista kolumn w `select()` wywraca skrypt
 - model docelowy: Opus
