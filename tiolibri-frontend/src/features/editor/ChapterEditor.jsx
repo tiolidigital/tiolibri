@@ -3,6 +3,7 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import { Divider } from './extensions/Divider'
+import { Figure } from './extensions/Figure'
 import { SearchAndReplace } from './extensions/SearchAndReplace'
 import EditorToolbar from './EditorToolbar'
 import { getPreset } from '../../lib/presets'
@@ -64,6 +65,7 @@ export default function ChapterEditor({
           class: 'editor-image',
         },
       }),
+      Figure,
       Divider,
       SearchAndReplace,
     ],

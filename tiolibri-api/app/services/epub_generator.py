@@ -11,7 +11,7 @@ import urllib.request
 import tempfile
 import re
 import uuid
-from html import escape
+from html import escape, unescape
 
 
 def fix_polish_orphans(html_content: str) -> str:
@@ -127,6 +127,41 @@ def download_image(url: str) -> Tuple[Optional[bytes], Optional[str]]:
     except Exception as e:
         print(f"Failed to download image {url}: {e}")
         return None, None
+
+
+FIGURE_BLOCK_RE = re.compile(r'<figure\b[^>]*>.*?</figure>', re.IGNORECASE | re.DOTALL)
+FIGCAPTION_RE = re.compile(r'<figcaption[^>]*>(.*?)</figcaption>', re.IGNORECASE | re.DOTALL)
+IMG_TAG_RE = re.compile(r'<img\b[^>]*>', re.IGNORECASE)
+ALT_ATTR_RE = re.compile(r'\s*alt\s*=\s*"[^"]*"', re.IGNORECASE)
+
+
+def fill_alt_from_caption(html: str) -> str:
+    """Podpis spod obrazka wędruje do `alt`, gdy autor nie wpisał własnego.
+
+    Bliźniak funkcji z pdf_generator.py — oba generatory są rozdzielne i każdy
+    przetwarza treść u siebie.
+    """
+
+    def fix_figure(block_match):
+        block = block_match.group(0)
+        caption_match = FIGCAPTION_RE.search(block)
+        if not caption_match:
+            return block
+
+        text = unescape(re.sub(r'<[^>]+>', '', caption_match.group(1))).strip()
+        if not text:
+            return block
+
+        def fix_img(img_match):
+            tag = img_match.group(0)
+            existing = re.search(r'alt\s*=\s*"([^"]*)"', tag, re.IGNORECASE)
+            if existing and existing.group(1).strip():
+                return tag
+            return '<img alt="%s"%s' % (escape(text, quote=True), ALT_ATTR_RE.sub('', tag)[4:])
+
+        return IMG_TAG_RE.sub(fix_img, block, count=1)
+
+    return FIGURE_BLOCK_RE.sub(fix_figure, html)
 
 
 def extract_headings(html: str, max_depth: int = 2) -> List[Dict]:
@@ -248,6 +283,54 @@ def generate_epub(
     color: #444;
     margin-top: 1.5em;
 }
+
+/* Obrazy w treści. Edytor wstawia je jako element inline wewnątrz akapitu
+   (`<p><img ...>dalszy tekst</p>`), więc bez tej reguły czytnik trzymał grafikę
+   przy lewej krawędzi i oblewał ją tekstem z prawej. PDF miał to od dawna
+   (pdf_generator: `img:not(.cover-page img)`), EPUB nie miał żadnej reguły dla
+   `img` — stąd rozjazd między plikami. Okładka ma style inline, więc jej to nie tyka. */
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5em auto;
+    page-break-inside: avoid;
+}
+
+/* Obraz z podpisem. Grafika i podpis trzymają się razem; reguła `figure img`
+   jest mocniejsza od `img` wyżej, więc zdejmuje margines spod grafiki —
+   podpis ma przylegać do zdjęcia, nie odpływać. */
+figure {
+    margin: 1.5em 0;
+    padding: 0;
+    text-align: center;
+    page-break-inside: avoid;
+}
+
+figure img {
+    margin: 0 auto;
+}
+
+figcaption {
+    margin-top: 0.5em;
+    font-size: 0.85em;
+    line-height: 1.35;
+    color: #444;
+    text-align: center;
+    text-indent: 0;
+}
+
+/* Plansza: grafika na całą stronę czytnika. Wysokość z zapasem na podpis. */
+figure[data-full-page] {
+    margin: 0;
+    page-break-before: always;
+    page-break-after: always;
+}
+
+figure[data-full-page] img {
+    max-height: 85vh;
+    width: auto;
+}
 """
 
     # Dodaj CSS jako item
@@ -260,7 +343,7 @@ def generate_epub(
     book.add_item(nav_css)
     
     # Dodaj cover image (jeśli istnieje)
-    cover_item = None
+    cover_page = None
     if cover_image_url:
         try:
             # Download cover image
@@ -272,20 +355,15 @@ def generate_epub(
             if image_ext == 'jpg':
                 image_ext = 'jpeg'
             
-            media_type = f'image/{image_ext}'
-            
-            # Create cover image item
-            cover_item = epub.EpubItem(
-                uid="cover_image",
-                file_name=f"images/cover.{image_ext}",
-                media_type=media_type,
-                content=cover_data
-            )
-            book.add_item(cover_item)
-            
-            # Set as cover
-            book.set_cover(f"images/cover.{image_ext}", cover_data)
-            
+            # `set_cover()` samo zakłada item obrazka (z properties="cover-image")
+            # i — przy create_page=True — własną stronę cover.xhtml. Wcześniej
+            # dokładaliśmy do tego swój EpubItem i swoje cover.xhtml pod tymi samymi
+            # nazwami: plik lądował w zipie dwa razy, a w manifeście ten sam href
+            # miał dwa różne id. To błąd wg epubcheck i powód, dla którego czytniki
+            # (m.in. Apple Books) potrafią odmówić otwarcia. Zostaje jedna okładka —
+            # nasza strona, bo trzyma pełnospadowy layout.
+            book.set_cover(f"images/cover.{image_ext}", cover_data, create_page=False)
+
             # Create cover page HTML
             cover_page = epub.EpubHtml(
                 title='Cover',
@@ -305,7 +383,7 @@ def generate_epub(
             
         except Exception as e:
             print(f"Warning: Could not add cover image: {e}")
-            cover_item = None
+            cover_page = None
     
     # Collect all image URLs from all chapters (for deduplication)
     all_image_urls = set()
@@ -374,7 +452,7 @@ def generate_epub(
     chapters_processed = []  # Równoległa lista rozdziałów do epub_chapters (dla TOC)
     spine_items = [title_page]
 
-    if cover_item:
+    if cover_page:
         spine_items.insert(0, cover_page)
     
     for idx, chapter in enumerate(chapters, start=1):
@@ -385,6 +463,9 @@ def generate_epub(
         
         # 🆕 FIX POLISH ORPHANS - dodaj &nbsp; po spójnikach
         content = fix_polish_orphans(content)
+
+        # Podpis pod obrazem trafia też do alt (jeśli alt pusty)
+        content = fill_alt_from_caption(content)
         
         # Replace image URLs with local paths
         for img_url, local_path in image_map.items():

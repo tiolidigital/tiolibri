@@ -13,7 +13,7 @@ from pathlib import Path
 import urllib.request
 import base64
 import re
-from html import escape
+from html import escape, unescape
 
 # macOS fix - musi być PRZED jakimkolwiek importem weasyprint
 if sys.platform == "darwin":
@@ -114,6 +114,16 @@ def download_and_encode_image(url: str) -> Optional[str]:
 A5_HEIGHT_PT = 595.276
 CM_TO_PT = 28.3465
 
+# Zapas wysokości pod podpisem planszy, liczony w wierszach tekstu podstawowego.
+# Bez niego wysokie zdjęcie spycha podpis na następną stronę. Wartość wyszła
+# z pomiaru: przy 6 wierszach mieści się nawet podpis zawijający się na pięć
+# linijek, dla marginesów 1–3 cm i stopnia pisma 12–24 px.
+CAPTION_RESERVE_LINES = 6.0
+# Ile figura oddaje z wysokości pola tekstowego. WeasyPrint przy flexie liczy
+# wysokość na styk i bez tego luzu wypycha podpis na kolejną stronę.
+FIGURE_PAGE_SHAVE_PT = 6.0
+PX_TO_PT = 0.75
+
 
 def split_chapter_opener(html: str) -> tuple:
     """Wydziela całostronicową grafikę otwierającą rozdział z pierwszego H1.
@@ -134,6 +144,42 @@ def split_chapter_opener(html: str) -> tuple:
     img = match.group(2)
     rest = html[:match.end(1)] + html[match.end(2):]
     return img, rest
+
+
+FIGURE_BLOCK_RE = re.compile(r'<figure\b[^>]*>.*?</figure>', re.IGNORECASE | re.DOTALL)
+FIGCAPTION_RE = re.compile(r'<figcaption[^>]*>(.*?)</figcaption>', re.IGNORECASE | re.DOTALL)
+IMG_TAG_RE = re.compile(r'<img\b[^>]*>', re.IGNORECASE)
+ALT_ATTR_RE = re.compile(r'\s*alt\s*=\s*"[^"]*"', re.IGNORECASE)
+
+
+def fill_alt_from_caption(html: str) -> str:
+    """Podpis spod obrazka wędruje do `alt`, gdy autor nie wpisał własnego.
+
+    Czytnik ekranowy i EPUB bez grafiki mają wtedy co przeczytać, a autor nie
+    musi wpisywać tego samego dwa razy. Własny `alt` (gdyby kiedyś doszła jego
+    edycja) zostaje nietknięty.
+    """
+
+    def fix_figure(block_match):
+        block = block_match.group(0)
+        caption_match = FIGCAPTION_RE.search(block)
+        if not caption_match:
+            return block
+
+        text = unescape(re.sub(r'<[^>]+>', '', caption_match.group(1))).strip()
+        if not text:
+            return block
+
+        def fix_img(img_match):
+            tag = img_match.group(0)
+            existing = re.search(r'alt\s*=\s*"([^"]*)"', tag, re.IGNORECASE)
+            if existing and existing.group(1).strip():
+                return tag
+            return '<img alt="%s"%s' % (escape(text, quote=True), ALT_ATTR_RE.sub('', tag)[4:])
+
+        return IMG_TAG_RE.sub(fix_img, block, count=1)
+
+    return FIGURE_BLOCK_RE.sub(fix_figure, html)
 
 
 BASE_CSS = """
@@ -199,6 +245,49 @@ img:not(.cover-page img) {
     display: block;
     margin: 0;
     padding: 0;
+}
+
+/* Obraz z podpisem. `figure` trzyma grafikę i podpis jednym blokiem, więc
+   łamanie strony ich nie rozdzieli. Selektor zaczyna się od `.chapter`, żeby
+   był mocniejszy niż `img:not(.cover-page img)` wyżej — treść rozdziałów zawsze
+   siedzi w `<div class="chapter">`, więc trafia dokładnie tam, gdzie trzeba. */
+.chapter figure {
+    margin: 1.5em 0;
+    padding: 0;
+    text-align: center;
+    page-break-inside: avoid;
+}
+
+.chapter figure img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+}
+
+.chapter figcaption {
+    margin-top: 0.5em;
+    font-size: 0.85em;
+    line-height: 1.35;
+    color: #444;
+    text-align: center;
+    text-indent: 0;
+    orphans: 2;
+    widows: 2;
+}
+
+/* Plansza: grafika dostaje całą stronę i traci numer strony — ta sama
+   konwencja co przy grafice otwierającej rozdział (patrz @page figure-page).
+   Grafika z podpisem stoi pośrodku wysokości strony; sama wysokość dokłada się
+   niżej, bo zależy od marginesów. */
+.chapter figure[data-full-page] {
+    page: figure-page;
+    page-break-before: always;
+    page-break-after: always;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 /* Strona otwierająca rozdział: sama grafika, bez numeru strony.
@@ -470,6 +559,15 @@ def generate_pdf(
     # Replace var(--margin, ...) with 0 so @page margins control everything
     css_final = css_final.replace('margin: var(--margin, 2em 1.5em);', 'margin: 0;')
     
+    # Wysokości dla plansz (figura na całą stronę) — zależą od marginesów strony
+    # i od stopnia pisma, więc liczymy je tutaj, nie w statycznym BASE_CSS.
+    text_area_height_pt = A5_HEIGHT_PT - (margin_top + margin_bottom) * CM_TO_PT
+    figure_page_height = text_area_height_pt - FIGURE_PAGE_SHAVE_PT
+    caption_reserve_pt = min(
+        CAPTION_RESERVE_LINES * font_size * PX_TO_PT,
+        text_area_height_pt * 0.35,
+    )
+
     # @page rule for PDF page margins (this controls ACTUAL page margins)
     page_margins = f"""
     @page {{
@@ -505,6 +603,30 @@ def generate_pdf(
         @bottom-center {{
             content: none;
         }}
+    }}
+
+    @page figure-page {{
+        size: A5 portrait;
+        margin-top: {margin_top}cm;
+        margin-bottom: {margin_bottom}cm;
+        margin-left: {margin_left}cm;
+        margin-right: {margin_right}cm;
+
+        @bottom-center {{
+            content: none;
+        }}
+    }}
+
+    /* Plansza: grafika mieści się w polu tekstowym, z zapasem na podpis pod nią.
+       Figura dostaje (prawie) pełną wysokość pola tekstowego, żeby flex miał co
+       centrować — patrz FIGURE_PAGE_SHAVE_PT. */
+    .chapter figure[data-full-page] {{
+        height: {figure_page_height:.1f}pt;
+    }}
+
+    .chapter figure[data-full-page] img {{
+        max-height: {figure_page_height + FIGURE_PAGE_SHAVE_PT - caption_reserve_pt:.1f}pt;
+        width: auto;
     }}
 
     /* Grafika otwierająca nie może wyjść poza pole tekstowe — inaczej wchodzi
@@ -567,6 +689,7 @@ def generate_pdf(
             continue
 
         c = fix_polish_orphans(raw)
+        c = fill_alt_from_caption(c)
 
         # Inject heading IDs z unikalnym prefiksem per rozdział
         if toc_enabled:

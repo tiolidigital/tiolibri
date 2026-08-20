@@ -179,6 +179,49 @@
   outline-offset: 2px;
 }
 
+/* Obraz z podpisem (figure). Reguła musi być mocniejsza niż .tiptap-editor img,
+   bo tam siedzi margines 1.5em — w figurze podpis ma przylegać do grafiki. */
+.tiptap-editor figure {
+  margin: 1.5em 0;
+  padding: 0;
+  text-align: center;
+}
+
+.tiptap-editor figure img {
+  margin: 0 auto;
+}
+
+.tiptap-editor figcaption {
+  margin-top: 0.5em;
+  font-size: 0.85em;
+  line-height: 1.4;
+  color: #4b5563;
+  text-align: center;
+  min-height: 1.4em;
+  outline: none;
+}
+
+/* Pusty podpis pokazuje podpowiedź. ProseMirror wkłada do pustej linii <br>,
+   więc :empty samo nie wystarcza. */
+.tiptap-editor figcaption:empty::before,
+.tiptap-editor figcaption:has(> br:only-child)::before {
+  content: 'Podpis pod obrazem…';
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+/* Plansza — grafika dostanie w PDF własną stronę. W edytorze tylko sygnał. */
+.tiptap-editor figure[data-full-page] {
+  border-left: 3px solid #e3704a;
+  padding-left: 0.75rem;
+}
+
+.tiptap-editor figure.ProseMirror-selectednode {
+  outline: 2px solid #e3704a;
+  outline-offset: 4px;
+  border-radius: 0.375rem;
+}
+
 /* Book Preview Styles */
 .book-content {
   overflow-wrap: break-word;
@@ -263,6 +306,26 @@
   display: block;
   margin: 1.5em auto;
   border-radius: 0.25rem;
+}
+
+/* Obraz z podpisem w podglądzie — tak jak w PDF: grafika, pod nią podpis */
+.book-content figure {
+  margin: 1.5em 0;
+  padding: 0;
+  text-align: center;
+}
+
+.book-content figure img {
+  margin: 0 auto;
+}
+
+.book-content figcaption {
+  margin-top: 0.5em;
+  font-size: 0.85em;
+  line-height: 1.4;
+  color: #4b5563;
+  text-align: center;
+  text-indent: 0;
 }
 
 /* Horizontal rules */

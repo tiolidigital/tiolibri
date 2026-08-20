@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useEditorState } from '@tiptap/react'
 import { supabase } from '../../lib/supabase'
 
 function DividerButton({ editor }) {
@@ -118,6 +119,16 @@ function DividerButton({ editor }) {
 export default function EditorToolbar({ editor, projectId, showInspector, onInspectorToggle, showPreview, onPreviewToggle }) {
   const [isUploading, setIsUploading] = useState(false)
 
+  // Guzik „Plansza" musi widzieć bieżące zaznaczenie. TipTap 3 nie odświeża
+  // paska przy samej zmianie kursora — stąd useEditorState.
+  const figureState = useEditorState({
+    editor,
+    selector: ({ editor: e }) => ({
+      active: !!e?.isActive('figure'),
+      fullPage: !!e?.getAttributes('figure').fullPage,
+    }),
+  })
+
   if (!editor) return null
 
   const handleImageUpload = () => {
@@ -163,8 +174,9 @@ export default function EditorToolbar({ editor, projectId, showInspector, onInsp
           .from('assets')
           .getPublicUrl(filePath)
 
-        // Insert image in editor at cursor position
-        editor.chain().focus().setImage({ src: publicUrl }).run()
+        // Wstaw obraz razem z miejscem na podpis; kursor ląduje w podpisie,
+        // więc autor pisze nazwę od razu po wgraniu.
+        editor.chain().focus().setFigure({ src: publicUrl }).run()
 
         setIsUploading(false)
       } catch (error) {
@@ -291,6 +303,17 @@ export default function EditorToolbar({ editor, projectId, showInspector, onInsp
       >
         {isUploading ? 'Uploading...' : 'Media'}
       </button>
+
+      {/* Plansza: zaznaczona grafika dostaje całą stronę, bez numeru strony */}
+      {figureState?.active && (
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleFigureFullPage().run()}
+          isActive={figureState.fullPage}
+          title="Plansza — cała strona dla tej grafiki (bez numeru strony)"
+        >
+          Plansza
+        </ToolbarButton>
+      )}
 
       {/* Divider */}
       <DividerButton editor={editor} />
