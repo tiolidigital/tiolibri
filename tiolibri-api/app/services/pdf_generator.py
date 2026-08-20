@@ -182,6 +182,33 @@ def fill_alt_from_caption(html: str) -> str:
     return FIGURE_BLOCK_RE.sub(fix_figure, html)
 
 
+
+def remove_broken_image(html: str, img_url: str) -> str:
+    """Wyrzuca z treści obrazek, którego nie udało się pobrać.
+
+    Bez tego WeasyPrint rysuje w miejscu grafiki tekst z `alt` — a że `alt`
+    bierzemy z podpisu, ten sam podpis wychodził na stronie dwa razy i wyglądało
+    to jak błąd składu. Jeśli obrazek siedział w figurze, znika cała figura:
+    sam podpis bez zdjęcia niczego nie opisuje.
+    """
+    escaped = re.escape(img_url)
+
+    # Najpierw całe figury z tym obrazkiem...
+    html = re.sub(
+        r'<figure\b[^>]*>(?:(?!</figure>).)*?<img\b[^>]*src="%s"(?:(?!</figure>).)*?</figure>' % escaped,
+        '',
+        html,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+
+    # ...potem luźne obrazki poza figurą (starsze rozdziały).
+    return re.sub(
+        r'<img\b[^>]*src="%s"[^>]*>' % escaped,
+        '',
+        html,
+        flags=re.IGNORECASE,
+    )
+
 BASE_CSS = """
 body {
     font-family: "DejaVu Serif", "Liberation Serif", Georgia, serif;
@@ -701,6 +728,8 @@ def generate_pdf(
                 data_uri = download_and_encode_image(img_url)
                 if data_uri:
                     c = c.replace(f'src="{img_url}"', f'src="{data_uri}"')
+                else:
+                    c = remove_broken_image(c, img_url)
 
         processed_contents.append(c)
         chapter_render_idx += 1

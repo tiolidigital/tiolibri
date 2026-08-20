@@ -164,6 +164,33 @@ def fill_alt_from_caption(html: str) -> str:
     return FIGURE_BLOCK_RE.sub(fix_figure, html)
 
 
+
+def remove_broken_image(html: str, img_url: str) -> str:
+    """Wyrzuca z treści obrazek, którego nie udało się pobrać.
+
+    Bez tego WeasyPrint rysuje w miejscu grafiki tekst z `alt` — a że `alt`
+    bierzemy z podpisu, ten sam podpis wychodził na stronie dwa razy i wyglądało
+    to jak błąd składu. Jeśli obrazek siedział w figurze, znika cała figura:
+    sam podpis bez zdjęcia niczego nie opisuje.
+    """
+    escaped = re.escape(img_url)
+
+    # Najpierw całe figury z tym obrazkiem...
+    html = re.sub(
+        r'<figure\b[^>]*>(?:(?!</figure>).)*?<img\b[^>]*src="%s"(?:(?!</figure>).)*?</figure>' % escaped,
+        '',
+        html,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+
+    # ...potem luźne obrazki poza figurą (starsze rozdziały).
+    return re.sub(
+        r'<img\b[^>]*src="%s"[^>]*>' % escaped,
+        '',
+        html,
+        flags=re.IGNORECASE,
+    )
+
 def extract_headings(html: str, max_depth: int = 2) -> List[Dict]:
     """
     Wyciąga listę nagłówków (H1/H2/H3) z HTML z zachowaniem hierarchii.
@@ -470,6 +497,12 @@ figure[data-full-page] img {
         # Replace image URLs with local paths
         for img_url, local_path in image_map.items():
             content = content.replace(f'src="{img_url}"', f'src="{local_path}"')
+
+        # Czego nie udało się pobrać, tego w książce nie ma — zdalny adres w EPUB-ie
+        # i tak nie zadziała, a zostawiony `alt` powtórzyłby podpis drugi raz.
+        for img_url in extract_image_urls(content):
+            if img_url.startswith('http'):
+                content = remove_broken_image(content, img_url)
         
         # Pobierz prawdziwy tytuł z pierwszego H1/H2 w treści
         chapter_heading = extract_first_heading(content) or chapter.get("title", f"Chapter {idx}")

@@ -92,6 +92,28 @@ fragmencie. Grafika i podpis są jednym blokiem, więc łamanie strony ich nie r
 
 ## NASTĘPNY KROK — jeden
 
+**Ukryć powtórzony tytuł rozdziału u Ewy — do decyzji i zrobienia.**
+
+Właściciel nazwał rzecz po imieniu (20.08 wieczorem): u Ewy grafika otwierająca rozdział
+MA W SOBIE tytuł, a `<h1>` i tak musiał zostać, bo bez niego nie ma klikalnego spisu
+treści. Efekt: tytuł widać dwa razy — raz na grafice, raz jako nagłówek na następnej
+stronie. U Bożeny problemu nie ma, bo tam rozdziały otwiera zwykły `<h1>` bez grafiki.
+
+Kierunek (mój, do zatwierdzenia): `<h1>` zostaje w treści, ale przestaje być widoczny —
+`height: 0; overflow: hidden; margin: 0`. **Nie `display: none`** — element bez pudełka
+nie ma pozycji, więc link ze spisu treści nie miałby gdzie skoczyć. Rozdziały otwierane
+grafiką rozpoznaje już `split_chapter_opener()` w `pdf_generator.py`, więc jest gdzie
+wpiąć klasę na ten jeden nagłówek.
+
+Do zmierzenia, nie do założenia: czy przy zerowej wysokości nagłówka link ze spisu treści
+nadal ląduje na właściwej stronie. Sprawdzić realnym PDF-em kanonu Ewy (`1f23458e`).
+
+Do rozstrzygnięcia z właścicielem: automat (każdy rozdział otwierany grafiką chowa swój
+`<h1>`) czy przełącznik. Automat jest prostszy i u Bożeny niczego nie rusza — ale to
+jego decyzja, nie moja.
+
+## POTEM
+
 **Odebrać od właściciela wynik porannego klikania na produkcji** (*test book*
 `70e90efb-230b-428f-85dd-dd6dffb63beb`): wgrać zdjęcie, wpisać podpis, pochylić nazwę
 łacińską, włączyć „Planszę", wygenerować PDF i EPUB. Testy bez przeglądarki przeszły,
@@ -118,9 +140,11 @@ pod pusty podpis w edytorze stoi na selektorze `:has()` w `editor.css`.
 - **Dwie drogi do jednej rzeczy**: grafika otwierająca rozdział (`<h1><img>`,
   `split_chapter_opener` w `pdf_generator.py`) i nowa plansza (`figure[data-full-page]`)
   robią prawie to samo, innym mechanizmem. Warto kiedyś scalić — dziś nie boli.
-- **Gdy zdjęcie nie pobierze się przy generowaniu**, WeasyPrint rysuje w jego miejscu
-  tekst z `alt` — czyli podpis pojawia się dwa razy. Zmierzone w teście. Drobiazg,
-  ale wygląda jak błąd.
+- ~~Gdy zdjęcie nie pobierze się przy generowaniu, podpis wychodzi dwa razy~~ — ZROBIONE
+  20.08 wieczorem (`remove_broken_image()` w obu generatorach): niepobrana grafika znika
+  z treści, a razem z nią cała figura, bo sam podpis bez zdjęcia niczego nie opisuje.
+  Zmierzone: PDF i EPUB, figura / plansza / luźny `<img>` / obrazek w `<h1>`; przy dwóch
+  figurach znika tylko ta z zepsutym obrazkiem.
 
 ## Czego właściciel NIE kupił
 
