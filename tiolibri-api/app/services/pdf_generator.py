@@ -390,6 +390,10 @@ img:not(.cover-page img) {
 }
 
 .title-page {
+    /* Wlasna nazwana strona — patrz @page title-page. Numer strony na stronie
+       tytulowej to blad skladu: paginacja zaczyna sie od tekstu, nie od karty
+       tytulowej. */
+    page: title-page;
     page-break-after: always;
     text-align: center;
     padding-top: 35%;
@@ -447,6 +451,8 @@ img:not(.cover-page img) {
 /* Strona redakcyjna. To blok informacyjny, nie treść: drobniejsze pismo,
    bez wcięć akapitowych, ciaśniej — całość ma się zmieścić na jednej stronie. */
 .chapter.colophon {
+    /* Karta redakcyjna stoi poza paginacja tak samo jak tytulowa. */
+    page: colophon-page;
     font-size: 8.5pt;
     line-height: 1.4;
 }
@@ -711,6 +717,30 @@ def generate_pdf(
     }}
 
     @page chapter-opener {{
+        size: A5 portrait;
+        margin-top: {margin_top}cm;
+        margin-bottom: {margin_bottom}cm;
+        margin-left: {margin_left}cm;
+        margin-right: {margin_right}cm;
+
+        @bottom-center {{
+            content: none;
+        }}
+    }}
+
+    @page title-page {{
+        size: A5 portrait;
+        margin-top: {margin_top}cm;
+        margin-bottom: {margin_bottom}cm;
+        margin-left: {margin_left}cm;
+        margin-right: {margin_right}cm;
+
+        @bottom-center {{
+            content: none;
+        }}
+    }}
+
+    @page colophon-page {{
         size: A5 portrait;
         margin-top: {margin_top}cm;
         margin-bottom: {margin_bottom}cm;

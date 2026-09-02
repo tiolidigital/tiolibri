@@ -89,6 +89,9 @@ def extract_first_heading(html: str) -> Optional[str]:
         # Usuń tagi HTML z tekstu nagłówka (np. <strong>, <em>)
         heading_html = match.group(1)
         clean = re.sub(r'<[^>]+>', '', heading_html).strip()
+        # Encje na prawdziwe znaki: tytul idzie do metadanych (NCX/nav), a te
+        # ebooklib escapuje samo — `&nbsp;` zrobilby sie tam `&amp;nbsp;`.
+        clean = unescape(clean)
         return clean if clean else None
     return None
 
@@ -248,7 +251,7 @@ def extract_headings(html: str, max_depth: int = 2) -> List[Dict]:
     headings = []
     for tag, attrs, content in matches:
         level = int(tag[1])
-        text = re.sub(r'<[^>]+>', '', content).strip()
+        text = unescape(re.sub(r'<[^>]+>', '', content).strip())
         if not text:
             continue
         # Sprawdź czy nagłówek ma id
@@ -616,7 +619,7 @@ figure[data-full-page] img {
         chapter_item.content = f'''
         <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
-            <title>{chapter_heading}</title>
+            <title>{escape(chapter_heading)}</title>
             <link rel="stylesheet" href="style/nav.css" type="text/css" />
         </head>
         <body>
