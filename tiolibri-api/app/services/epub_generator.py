@@ -351,6 +351,40 @@ def generate_epub(
     margin-top: 1.5em;
 }
 
+/* Wydawca, miejsce i rok — dolna część strony tytułowej. */
+.title-page .publisher {
+    font-size: 1em;
+    color: #444;
+    margin-top: 2.5em;
+}
+
+.title-page .place-year {
+    font-size: 0.95em;
+    color: #555;
+    margin-top: 0.2em;
+}
+
+/* Nota o prawach. Pełne zastrzeżenie zostaje w kolofonie; tu stoi skrót. */
+.title-page .rights {
+    font-size: 0.75em;
+    color: #666;
+    margin-top: 3em;
+    line-height: 1.35;
+}
+
+/* Strona redakcyjna. Blok informacyjny, nie treść: drobniej, bez wcięć.
+   Stopień względny, bo czytelnik skaluje pismo po swojemu. */
+.colophon {
+    font-size: 0.85em;
+    line-height: 1.4;
+}
+
+.colophon p {
+    text-indent: 0;
+    text-align: left;
+    margin: 0 0 0.5em 0;
+}
+
 /* Obrazy w treści. Edytor wstawia je jako element inline wewnątrz akapitu
    (`<p><img ...>dalszy tekst</p>`), więc bez tej reguły czytnik trzymał grafikę
    przy lewej krawędzi i oblewał ją tekstem z prawej. PDF miał to od dawna
@@ -502,6 +536,19 @@ figure[data-full-page] img {
     subtitle_html = f'<p class="subtitle">{escape(project["subtitle"])}</p>' if project.get("subtitle") else ""
     author_html = f'<p class="author">{project["author"]}</p>' if project.get("author") else ""
 
+    # Dane wydawnicze. Projekt bez `imprint` składa stronę tytułową dokładnie
+    # tak jak dotąd — każdy wiersz jest warunkowy.
+    imprint = project.get("imprint") or {}
+    imprint_html = "".join(
+        f'<p class="{css_class}">{escape(imprint[key])}</p>'
+        for key, css_class in (
+            ("publisher", "publisher"),
+            ("place_year", "place-year"),
+            ("rights_note", "rights"),
+        )
+        if imprint.get(key)
+    )
+
     title_page.content = f'''
     <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
@@ -513,6 +560,7 @@ figure[data-full-page] img {
             <h1>{project["title"]}</h1>
             {subtitle_html}
             {author_html}
+            {imprint_html}
         </div>
     </body>
     </html>
@@ -563,6 +611,8 @@ figure[data-full-page] img {
             lang=project.get("language", "pl")
         )
 
+        body_class = 'book-content colophon' if chapter.get("role") == 'colophon' else 'book-content'
+
         chapter_item.content = f'''
         <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
@@ -570,7 +620,7 @@ figure[data-full-page] img {
             <link rel="stylesheet" href="style/nav.css" type="text/css" />
         </head>
         <body>
-            <div class="book-content">
+            <div class="{body_class}">
                 {content}
             </div>
         </body>
@@ -597,6 +647,9 @@ figure[data-full-page] img {
                 toc_entries.append(chapter_item)
                 continue
 
+            if chapter.get("role") == 'colophon':
+                continue
+
             content = chapter.get("content") or chapter.get("processed_html", "")
             sub_headings = extract_headings(content, max_depth=toc_depth)
 
@@ -618,7 +671,11 @@ figure[data-full-page] img {
 
         book.toc = tuple(toc_entries)
     else:
-        book.toc = tuple(epub_chapters)
+        book.toc = tuple(
+            chapter_item
+            for chapter_item, chapter in zip(epub_chapters, chapters_processed)
+            if chapter.get("role") != 'colophon'
+        )
 
     # Spine (reading order)
     book.spine = spine_items

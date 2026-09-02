@@ -421,6 +421,41 @@ img:not(.cover-page img) {
     color: #444;
     margin-top: 1em;
 }
+
+/* Wydawca, miejsce i rok — dolna część strony tytułowej. */
+.title-page .publisher {
+    font-size: 12pt;
+    color: #444;
+    margin-top: 2.5em;
+}
+
+.title-page .place-year {
+    font-size: 11pt;
+    color: #555;
+    margin-top: 0.2em;
+}
+
+/* Nota o prawach. Pełne zastrzeżenie zostaje w kolofonie; tu stoi skrót,
+   drobnym pismem, odsunięty od bloku tytułowego. */
+.title-page .rights {
+    font-size: 8pt;
+    color: #666;
+    margin-top: 3.5em;
+    line-height: 1.35;
+}
+
+/* Strona redakcyjna. To blok informacyjny, nie treść: drobniejsze pismo,
+   bez wcięć akapitowych, ciaśniej — całość ma się zmieścić na jednej stronie. */
+.chapter.colophon {
+    font-size: 8.5pt;
+    line-height: 1.4;
+}
+
+.chapter.colophon p {
+    text-indent: 0;
+    text-align: left;
+    margin: 0 0 0.5em 0;
+}
 """
 
 
@@ -758,6 +793,19 @@ def generate_pdf(
         html_parts.append(f'<p class="subtitle">{escape(project["subtitle"])}</p>')
     if project.get("author"):
         html_parts.append(f'<p class="author">{project["author"]}</p>')
+
+    # Dane wydawnicze. Projekt bez `imprint` drukuje stronę tytułową
+    # dokładnie tak jak dotąd — każdy wiersz jest warunkowy.
+    imprint = project.get("imprint") or {}
+    for key, css_class in (
+        ("publisher", "publisher"),
+        ("place_year", "place-year"),
+        ("rights_note", "rights"),
+    ):
+        value = imprint.get(key)
+        if value:
+            html_parts.append(f'<p class="{css_class}">{escape(value)}</p>')
+
     html_parts.append('</div>')
 
     # Pre-process chapters: orphans, heading IDs, images
@@ -816,12 +864,14 @@ def generate_pdf(
 
         # Grafika otwierająca dostaje własną stronę bez numeru; łamanie strony
         # przenosi się na nią, bo to ona zaczyna rozdział.
+        chapter_class = 'chapter colophon' if chapter.get("role") == 'colophon' else 'chapter'
+
         opener, content_body = split_chapter_opener(content, hide_title=hide_opener_title)
         if opener:
             html_parts.append(f'<div class="chapter-opener"{break_before}>{opener}</div>')
-            html_parts.append(f'<div class="chapter">{content_body}</div>')
+            html_parts.append(f'<div class="{chapter_class}">{content_body}</div>')
         else:
-            html_parts.append(f'<div class="chapter"{break_before}>{content}</div>')
+            html_parts.append(f'<div class="{chapter_class}"{break_before}>{content}</div>')
         render_idx += 1
 
     html_parts.append('</div>')
