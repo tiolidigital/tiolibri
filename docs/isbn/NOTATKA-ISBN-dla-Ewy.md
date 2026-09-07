@@ -1,5 +1,10 @@
 # Notatka dla Ewy — jak zdobyć ISBN dla swojej książki
 
+> **NIEAKTUALNE — nie wysyłać.** 2026-09-07 Ewa zdecydowała, że ISBN-u nie robi.
+> ISBN nie jest obowiązkowy, a wydawcą jej książki jest ona sama, więc to jej
+> decyzja. Notatka zostaje w repo jako gotowa procedura na wypadek, gdyby Ewa
+> albo inna autorka zmieniła zdanie.
+
 > Stan: 2026-08-25. Źródła: Biblioteka Narodowa (zasady nadawania ISBN), serwis e-ISBN.
 > Zastrzeżenie dla Piotrka: procedura opisana ze źródeł, nie z autopsji — formularza
 > jeszcze nie przechodziłem. Po rejestracji Tioli (książka Bożeny) będę wiedział,
