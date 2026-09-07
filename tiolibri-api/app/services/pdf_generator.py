@@ -791,13 +791,25 @@ def generate_pdf(
     
     css_final = page_margins + css_final
     
+    # Metadane dokumentu. WeasyPrint bierze je z <meta> w <head>; ISBN nie ma
+    # w PDF własnego pola, więc idzie jako metadana niestandardowa i dlatego
+    # `write_pdf` dostaje `custom_metadata=True`.
+    imprint = project.get("imprint") or {}
+    meta_tags = ['<meta charset="UTF-8">']
+    if project.get("author"):
+        meta_tags.append(f'<meta name="author" content="{escape(project["author"])}">')
+    if project.get("subtitle"):
+        meta_tags.append(f'<meta name="description" content="{escape(project["subtitle"])}">')
+    if imprint.get("isbn_pdf"):
+        meta_tags.append(f'<meta name="ISBN" content="{escape(imprint["isbn_pdf"])}">')
+
     # Zbuduj HTML
     html_parts = [
         '<!DOCTYPE html>',
         '<html>',
         '<head>',
-        f'<title>{project["title"]}</title>',
-        '<meta charset="UTF-8">',
+        f'<title>{escape(project["title"])}</title>',
+        *meta_tags,
         '<style>',
         BASE_CSS,
         css_final,
@@ -826,7 +838,6 @@ def generate_pdf(
 
     # Dane wydawnicze. Projekt bez `imprint` drukuje stronę tytułową
     # dokładnie tak jak dotąd — każdy wiersz jest warunkowy.
-    imprint = project.get("imprint") or {}
     for key, css_class in (
         ("publisher", "publisher"),
         ("place_year", "place-year"),
@@ -917,7 +928,8 @@ def generate_pdf(
     html_obj.write_pdf(
         output_path,
         stylesheets=[CSS(string=css_final, font_config=font_config)],
-        font_config=font_config
+        font_config=font_config,
+        custom_metadata=True
     )
     
     return output_path

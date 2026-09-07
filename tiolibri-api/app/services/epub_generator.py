@@ -306,8 +306,14 @@ def generate_epub(
     # Stwórz obiekt książki
     book = epub.EpubBook()
     
-    # Metadata
-    book.set_identifier(str(project["id"]))
+    # Metadata. Identyfikatorem jest ISBN wydania EPUB, gdy jest nadany — tego
+    # numeru szukają katalogi i czytniki, UUID projektu nic im nie mówi.
+    # Książka bez nadanego ISBN-u zostaje przy UUID, tak jak dotąd.
+    imprint = project.get("imprint") or {}
+    isbn_epub = (imprint.get("isbn_epub") or "").strip()
+    book.set_identifier(
+        f"urn:isbn:{isbn_epub.replace('-', '')}" if isbn_epub else str(project["id"])
+    )
     book.set_title(project["title"])
     book.set_language(project.get("language", "pl"))
     
@@ -541,7 +547,6 @@ figure[data-full-page] img {
 
     # Dane wydawnicze. Projekt bez `imprint` składa stronę tytułową dokładnie
     # tak jak dotąd — każdy wiersz jest warunkowy.
-    imprint = project.get("imprint") or {}
     imprint_html = "".join(
         f'<p class="{css_class}">{escape(imprint[key])}</p>'
         for key, css_class in (
