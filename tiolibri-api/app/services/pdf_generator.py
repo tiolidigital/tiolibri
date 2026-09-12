@@ -48,11 +48,23 @@ def fix_polish_orphans(html_content: str) -> str:
     # Regex pattern: word boundary + orphan + space (not already &nbsp;)
     # Negative lookahead (?!nbsp;) ensures we don't replace already fixed spaces
     pattern = r'\b(' + '|'.join(re.escape(word) for word in all_orphans) + r') (?!nbsp;)'
-    
-    # Replace space with &nbsp;
-    result = re.sub(pattern, r'\1&nbsp;', html_content)
-    
-    return result
+
+    # Podmieniamy WYLACZNIE w tekscie miedzy znacznikami. Puszczone na caly
+    # HTML to samo wyrazenie trafialo takze w srodek tagow: `<a href=` ma
+    # przeciez "a" i spacje, wiec wychodzilo `<a&nbsp;href=`. W XHTML (a EPUB
+    # to XML, nie HTML) taki zapis jest bledem krytycznym — nazwa tagu jest
+    # rozwalona, a `&nbsp;` to encja nieznana XML-owi bez DTD. Parser nie
+    # wybacza: rozdzial nie renderuje sie wcale, a rygorystyczne czytniki
+    # (Apple Books) potrafia odmowic otwarcia calej ksiazki.
+    parts = []
+    last = 0
+    for tag in re.finditer(r'<[^>]*>', html_content):
+        parts.append(re.sub(pattern, r'\1&nbsp;', html_content[last:tag.start()]))
+        parts.append(tag.group(0))          # znacznik przepisany bez zmian
+        last = tag.end()
+    parts.append(re.sub(pattern, r'\1&nbsp;', html_content[last:]))
+
+    return ''.join(parts)
 
 
 def load_css_preset(preset_name: str) -> str:
