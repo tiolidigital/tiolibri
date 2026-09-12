@@ -830,11 +830,14 @@ def generate_pdf(
     
     # Title page
     html_parts.append('<div class="title-page">')
-    html_parts.append(f'<h1>{project["title"]}</h1>')
+    # Strona tytułowa też przechodzi przez łamanie sierot — dotąd robiła to
+    # wyłącznie treść rozdziałów, przez co w podtytule zostawał na końcu
+    # wiersza wiszący spójnik.
+    html_parts.append(f'<h1>{fix_polish_orphans(project["title"])}</h1>')
     if project.get("subtitle"):
-        html_parts.append(f'<p class="subtitle">{escape(project["subtitle"])}</p>')
+        html_parts.append(f'<p class="subtitle">{fix_polish_orphans(escape(project["subtitle"]))}</p>')
     if project.get("author"):
-        html_parts.append(f'<p class="author">{project["author"]}</p>')
+        html_parts.append(f'<p class="author">{fix_polish_orphans(project["author"])}</p>')
 
     # Dane wydawnicze. Projekt bez `imprint` drukuje stronę tytułową
     # dokładnie tak jak dotąd — każdy wiersz jest warunkowy.
@@ -845,7 +848,7 @@ def generate_pdf(
     ):
         value = imprint.get(key)
         if value:
-            html_parts.append(f'<p class="{css_class}">{escape(value)}</p>')
+            html_parts.append(f'<p class="{css_class}">{fix_polish_orphans(escape(value))}</p>')
 
     html_parts.append('</div>')
 
