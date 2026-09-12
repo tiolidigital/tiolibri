@@ -8,10 +8,37 @@ from typing import List, Dict, Optional, Tuple
 import os
 from pathlib import Path
 import urllib.request
+import io
 import tempfile
 import re
 import uuid
 from html import escape, unescape
+
+
+def _cover_backdrop_color(image_bytes: bytes) -> str:
+    """
+    Kolor tła strony okładki — średnia z obwódki obrazka, przyciemniona.
+
+    Okładka jest wpasowywana w ekran w całości (nie przycinana), więc na
+    czytnikach o innych proporcjach niż plik zostają pasy u góry/dołu albo
+    po bokach. Biały pas przy ciemnej okładce wygląda jak błąd; kolor zdjęty
+    z krawędzi zdjęcia wtapia je w kadr.
+
+    Przy braku Pillow albo nieczytelnym pliku wracamy do ciemnej szarości —
+    okładka ma się wygenerować nawet wtedy.
+    """
+    try:
+        from PIL import Image
+        im = Image.open(io.BytesIO(image_bytes)).convert("RGB").resize((48, 48))
+        px = im.load()
+        edge = [px[x, y] for x in range(48) for y in (0, 47)]
+        edge += [px[x, y] for y in range(48) for x in (0, 47)]
+        n = len(edge)
+        r, g, b = (sum(c[i] for c in edge) // n for i in range(3))
+        r, g, b = (int(v * 0.75) for v in (r, g, b))
+        return f"#{r:02x}{g:02x}{b:02x}"
+    except Exception:
+        return "#1a1a1a"
 
 
 def fix_polish_orphans(html_content: str) -> str:
@@ -480,6 +507,52 @@ figure[data-full-page] img {
             # nasza strona, bo trzyma pełnospadowy layout.
             book.set_cover(f"images/cover.{image_ext}", cover_data, create_page=False)
 
+            # Osobny arkusz tylko dla okładki. Reguł dla html/body NIE da się
+            # podać inline: ebooklib buduje <head> i <body> od zera ze swojego
+            # szablonu i przepisuje wyłącznie DZIECI naszego <body> — czyli
+            # style="" na <body> oraz <style> w <head> lądują w koszu.
+            # Przez <link> przechodzi, bo te ebooklib odtwarza z self.links.
+            backdrop = _cover_backdrop_color(cover_data)
+            cover_css = epub.EpubItem(
+                uid="style_cover",
+                file_name="style/cover.css",
+                media_type="text/css",
+                content=f'''html, body {{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: {backdrop};
+    text-align: center;
+}}
+
+body {{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}}
+
+/* Cała okładka ma być widoczna. Wcześniej było `object-fit: cover`, czyli
+   "wypełnij ekran i przytnij nadmiar" — na telefonie ucinało to ~30%
+   szerokości razem z brzegami tytułu. Para max-width/max-height daje to
+   samo co `contain`, ale bez object-fit, które starsze czytniki ignorują
+   (a wtedy width+height rozciągnęłyby obrazek). */
+img.cover {{
+    display: block;
+    margin: 0 auto;
+    width: auto;
+    height: auto;
+    /* min-* muszą być wyzerowane: jako element flex obrazek dostaje
+       min-width/min-height: auto, czyli własny rozmiar w pikselach, a to
+       bije max-width i okładka i tak wychodzi poza ekran. */
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    max-height: 100vh;
+}}
+'''.encode('utf-8')
+            )
+            book.add_item(cover_css)
+
             # Create cover page HTML
             cover_page = epub.EpubHtml(
                 title='Cover',
@@ -489,12 +562,12 @@ figure[data-full-page] img {
             cover_page.content = f'''
             <html xmlns="http://www.w3.org/1999/xhtml">
             <head><title>Cover</title></head>
-            <body style="margin: 0; padding: 0;">
-                <img src="images/cover.{image_ext}" alt="Cover" style="width: 100%; height: 100vh; object-fit: cover; object-position: center; display: block;" />
+            <body>
+                <img class="cover" src="images/cover.{image_ext}" alt="Cover" />
             </body>
             </html>
             '''
-            cover_page.add_item(nav_css)
+            cover_page.add_item(cover_css)
             book.add_item(cover_page)
             
         except Exception as e:
@@ -542,13 +615,17 @@ figure[data-full-page] img {
         lang=project.get("language", "pl")
     )
     
-    subtitle_html = f'<p class="subtitle">{escape(project["subtitle"])}</p>' if project.get("subtitle") else ""
-    author_html = f'<p class="author">{project["author"]}</p>' if project.get("author") else ""
+    # Strona tytułowa też przechodzi przez łamanie sierot. Dotąd robiła to
+    # wyłącznie treść rozdziałów, więc w podtytule zostawał wiszący spójnik
+    # ("...zastosowaniu w" na końcu wiersza) — na stronie tytułowej widać to
+    # od razu, bo wiersze są krótkie i wyśrodkowane.
+    subtitle_html = f'<p class="subtitle">{fix_polish_orphans(escape(project["subtitle"]))}</p>' if project.get("subtitle") else ""
+    author_html = f'<p class="author">{fix_polish_orphans(project["author"])}</p>' if project.get("author") else ""
 
     # Dane wydawnicze. Projekt bez `imprint` składa stronę tytułową dokładnie
     # tak jak dotąd — każdy wiersz jest warunkowy.
     imprint_html = "".join(
-        f'<p class="{css_class}">{escape(imprint[key])}</p>'
+        f'<p class="{css_class}">{fix_polish_orphans(escape(imprint[key]))}</p>'
         for key, css_class in (
             ("publisher", "publisher"),
             ("place_year", "place-year"),
@@ -565,7 +642,7 @@ figure[data-full-page] img {
     </head>
     <body>
         <div class="title-page">
-            <h1>{project["title"]}</h1>
+            <h1>{fix_polish_orphans(project["title"])}</h1>
             {subtitle_html}
             {author_html}
             {imprint_html}
