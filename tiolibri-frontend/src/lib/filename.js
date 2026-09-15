@@ -20,11 +20,19 @@ export function transliterate(text) {
     .replace(/\p{M}/gu, '')
 }
 
-/** Nazwa pliku książki: "Kości na całe życie" + "pdf" → "kosci-na-cale-zycie.pdf". */
-export function bookFilename(title, extension, fallback = 'ksiazka') {
+/**
+ * Nazwa pliku książki: "Kości na całe życie" + "pdf" → "kosci-na-cale-zycie.pdf".
+ * Z wersją wydania (imprint.version): "Grzyby lecznicze" + "pdf" + "1.0"
+ * → "grzyby-lecznicze-v1.0.pdf". Kropka w wersji zostaje, reszta jak w tytule.
+ */
+export function bookFilename(title, extension, { version = '', fallback = 'ksiazka' } = {}) {
   const stem = transliterate(title)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
-  return `${stem || fallback}.${extension}`
+  const versionPart = transliterate(String(version).trim())
+    .toLowerCase()
+    .replace(/[^a-z0-9.]+/g, '-')
+    .replace(/^[-.]+|[-.]+$/g, '')
+  return `${stem || fallback}${versionPart ? `-v${versionPart}` : ''}.${extension}`
 }

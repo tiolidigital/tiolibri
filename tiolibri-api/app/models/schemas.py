@@ -76,6 +76,7 @@ class GenerateResponse(BaseModel):
     success: bool
     files: dict  # {"epub": "url", "pdf": "url"}
     stats: dict  # {"chapters": 5, "generation_time_seconds": 12}
+    version: Optional[str] = None  # imprint.version — front dokleja ją do nazwy pliku
     message: Optional[str] = None
 
 class Project(BaseModel):

@@ -15,6 +15,13 @@ import base64
 import re
 from html import escape, unescape
 
+from app.services.imprint import (
+    edition_version,
+    inject_version_line,
+    rights_with_version,
+    version_line,
+)
+
 # macOS fix - musi być PRZED jakimkolwiek importem weasyprint
 if sys.platform == "darwin":
     os.environ["DYLD_LIBRARY_PATH"] = f"/opt/homebrew/lib:{os.environ.get('DYLD_LIBRARY_PATH', '')}"
@@ -807,6 +814,7 @@ def generate_pdf(
     # w PDF własnego pola, więc idzie jako metadana niestandardowa i dlatego
     # `write_pdf` dostaje `custom_metadata=True`.
     imprint = project.get("imprint") or {}
+    version = edition_version(project)
     meta_tags = ['<meta charset="UTF-8">']
     if project.get("author"):
         meta_tags.append(f'<meta name="author" content="{escape(project["author"])}">')
@@ -814,6 +822,9 @@ def generate_pdf(
         meta_tags.append(f'<meta name="description" content="{escape(project["subtitle"])}">')
     if imprint.get("isbn_pdf"):
         meta_tags.append(f'<meta name="ISBN" content="{escape(imprint["isbn_pdf"])}">')
+    if version:
+        # Też metadana własna: `pdfinfo -custom` pokaże wersję bez otwierania pliku.
+        meta_tags.append(f'<meta name="version" content="{escape(version)}">')
 
     # Zbuduj HTML
     html_parts = [
@@ -859,6 +870,8 @@ def generate_pdf(
         ("rights_note", "rights"),
     ):
         value = imprint.get(key)
+        if value and key == "rights_note":
+            value = rights_with_version(value, version)
         if value:
             html_parts.append(f'<p class="{css_class}">{fix_polish_orphans(escape(value))}</p>')
 
@@ -873,6 +886,9 @@ def generate_pdf(
         if not raw or not raw.strip():
             processed_contents.append(None)
             continue
+
+        if version and chapter.get("role") == 'colophon':
+            raw = inject_version_line(raw, version_line(version))
 
         c = fix_polish_orphans(raw)
         c = fill_alt_from_caption(c)

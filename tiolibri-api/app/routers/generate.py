@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from app.services.supabase_client import supabase
 from app.services.epub_generator import generate_epub
 from app.services.pdf_generator import generate_pdf
+from app.services.imprint import edition_version
 from app.models.schemas import GenerateRequest, GenerateResponse
 from app.storage import upload_to_supabase
 from app.dependencies import verify_supabase_jwt
@@ -173,6 +174,7 @@ async def generate_ebook(request: GenerateRequest, _user: dict = Depends(verify_
                 "total_chapters": len(chapters),
                 "generation_time_seconds": generation_time
             },
+            version=edition_version(project) or None,
             message=f"Generated {len(files)} file(s) successfully"
         )
 

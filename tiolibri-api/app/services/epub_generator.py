@@ -14,6 +14,13 @@ import re
 import uuid
 from html import escape, unescape
 
+from app.services.imprint import (
+    edition_version,
+    inject_version_line,
+    rights_with_version,
+    version_line,
+)
+
 
 def _cover_backdrop_color(image_bytes: bytes) -> str:
     """
@@ -355,7 +362,13 @@ def generate_epub(
     )
     book.set_title(project["title"])
     book.set_language(project.get("language", "pl"))
-    
+
+    # Wersja wydania w OPF. `schema:` to prefiks zastrzeżony w EPUB 3, więc
+    # nie trzeba go deklarować w <package prefix="...">.
+    version = edition_version(project)
+    if version:
+        book.add_metadata('OPF', 'meta', version, {'property': 'schema:version'})
+
     if project.get("author"):
         book.add_author(project["author"])
     
@@ -637,7 +650,7 @@ img.cover {{
     # Dane wydawnicze. Projekt bez `imprint` składa stronę tytułową dokładnie
     # tak jak dotąd — każdy wiersz jest warunkowy.
     imprint_html = "".join(
-        f'<p class="{css_class}">{fix_polish_orphans(escape(imprint[key]))}</p>'
+        f'<p class="{css_class}">{fix_polish_orphans(escape(rights_with_version(imprint[key], version) if key == "rights_note" else imprint[key]))}</p>'
         for key, css_class in (
             ("publisher", "publisher"),
             ("place_year", "place-year"),
@@ -678,7 +691,10 @@ img.cover {{
         
         if not content or not content.strip():
             continue
-        
+
+        if version and chapter.get("role") == 'colophon':
+            content = inject_version_line(content, version_line(version))
+
         # 🆕 FIX POLISH ORPHANS - dodaj &nbsp; po spójnikach
         content = fix_polish_orphans(content)
 

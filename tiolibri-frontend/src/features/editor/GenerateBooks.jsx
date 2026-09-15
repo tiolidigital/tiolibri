@@ -5,11 +5,13 @@ import { bookFilename } from '../../lib/filename'
 
 export default function GenerateBooks({ projectId, projectTitle = 'book', stylePreset = 'classic', typographySettings = {}, coverImageUrl = null }) {
   const [urls, setUrls] = useState(null)
+  const [version, setVersion] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  // Create safe filename from project title
-  const getSafeFilename = (extension) => bookFilename(projectTitle, extension)
+  // Nazwa z tytułu i wersji wydania, którą backend odsyła razem z plikami
+  const getSafeFilename = (extension) =>
+    bookFilename(projectTitle, extension, { version: version || '' })
 
   // Pobieranie idzie zwyklym linkiem, nie przez fetch+blob.
   //
@@ -52,6 +54,7 @@ export default function GenerateBooks({ projectId, projectTitle = 'book', styleP
         }),
       })
       setUrls(data.files)
+      setVersion(data.version || null)
     } catch (err) {
       setError(err.message || 'Błąd podczas generowania. Spróbuj ponownie.')
       console.error('Generation failed:', err)
