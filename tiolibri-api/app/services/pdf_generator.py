@@ -816,11 +816,18 @@ def generate_pdf(
 
     # Napis XpertLab: element biegnący, osadzony w dolnym marginesie strony
     # tytułowej, żeby stał na dole niezależnie od długości tytułu.
+    # Pod nim zostaje wolny pas: XpertHub stempluje przy sprzedaży linijkę
+    # z kodem egzemplarza na stronie tytułowej, 28 pt od dołu kartki
+    # (XpertHub src/lib/pdf-stamp.ts). Stały margines strony tytułowej
+    # i odstęp od dołu trzymają napis nad nią przy każdej typografii.
     xpertlab = xpertlab_enabled(project)
     if xpertlab:
         css_final += xpertlab_css(FONTS_DIR.as_uri() + "/") + """
     .xlab-logo { position: running(xlab); font-size: 13pt; letter-spacing: 0.01em; }
-    @page title-page { @bottom-center { content: element(xlab); vertical-align: middle; } }
+    @page title-page {
+        margin-bottom: 3cm;
+        @bottom-center { content: element(xlab); vertical-align: bottom; padding-bottom: 46pt; }
+    }
     """
     
     # Metadane dokumentu. WeasyPrint bierze je z <meta> w <head>; ISBN nie ma
