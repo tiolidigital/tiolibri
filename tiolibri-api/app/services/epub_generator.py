@@ -16,9 +16,14 @@ from html import escape, unescape
 
 from app.services.imprint import (
     edition_version,
-    inject_version_line,
+    FONTS_DIR,
+    XPERTLAB_FONTS,
+    XPERTLAB_LOGO_HTML,
+    colophon_lines,
+    inject_colophon_lines,
     rights_with_version,
-    version_line,
+    xpertlab_css,
+    xpertlab_enabled,
 )
 
 
@@ -501,6 +506,21 @@ figure[data-full-page] img {
 }
 """
 
+    # Napis XpertLab pod danymi na stronie tytułowej. Czytnik nie ma stałego
+    # dołu strony, więc napis stoi w treści, z odstępem. Krój jedzie w pliku.
+    xpertlab = xpertlab_enabled(project)
+    if xpertlab:
+        css_final += xpertlab_css("../fonts/") + """
+.title-page .xlab-logo { font-size: 1.1em; margin-top: 3em; }
+"""
+        for name, _weight in XPERTLAB_FONTS:
+            book.add_item(epub.EpubItem(
+                uid=f"font_{name.split('.')[0]}",
+                file_name=f"fonts/{name}",
+                media_type="font/ttf",
+                content=(FONTS_DIR / name).read_bytes(),
+            ))
+
     # Dodaj CSS jako item
     nav_css = epub.EpubItem(
         uid="style_nav",
@@ -671,6 +691,7 @@ img.cover {{
             {subtitle_html}
             {author_html}
             {imprint_html}
+            {XPERTLAB_LOGO_HTML if xpertlab else ""}
         </div>
     </body>
     </html>
@@ -692,8 +713,8 @@ img.cover {{
         if not content or not content.strip():
             continue
 
-        if version and chapter.get("role") == 'colophon':
-            content = inject_version_line(content, version_line(version))
+        if chapter.get("role") == 'colophon' and colophon_lines(project):
+            content = inject_colophon_lines(content, colophon_lines(project))
 
         # 🆕 FIX POLISH ORPHANS - dodaj &nbsp; po spójnikach
         content = fix_polish_orphans(content)

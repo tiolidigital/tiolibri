@@ -16,10 +16,14 @@ import re
 from html import escape, unescape
 
 from app.services.imprint import (
+    FONTS_DIR,
+    XPERTLAB_LOGO_HTML,
+    colophon_lines,
     edition_version,
-    inject_version_line,
+    inject_colophon_lines,
     rights_with_version,
-    version_line,
+    xpertlab_css,
+    xpertlab_enabled,
 )
 
 # macOS fix - musi być PRZED jakimkolwiek importem weasyprint
@@ -809,6 +813,15 @@ def generate_pdf(
     """
     
     css_final = page_margins + css_final
+
+    # Napis XpertLab: element biegnący, osadzony w dolnym marginesie strony
+    # tytułowej, żeby stał na dole niezależnie od długości tytułu.
+    xpertlab = xpertlab_enabled(project)
+    if xpertlab:
+        css_final += xpertlab_css(FONTS_DIR.as_uri() + "/") + """
+    .xlab-logo { position: running(xlab); font-size: 13pt; letter-spacing: 0.01em; }
+    @page title-page { @bottom-center { content: element(xlab); vertical-align: middle; } }
+    """
     
     # Metadane dokumentu. WeasyPrint bierze je z <meta> w <head>; ISBN nie ma
     # w PDF własnego pola, więc idzie jako metadana niestandardowa i dlatego
@@ -853,6 +866,8 @@ def generate_pdf(
     
     # Title page
     html_parts.append('<div class="title-page">')
+    if xpertlab:
+        html_parts.append(XPERTLAB_LOGO_HTML)
     # Strona tytułowa też przechodzi przez łamanie sierot — dotąd robiła to
     # wyłącznie treść rozdziałów, przez co w podtytule zostawał na końcu
     # wiersza wiszący spójnik.
@@ -887,8 +902,8 @@ def generate_pdf(
             processed_contents.append(None)
             continue
 
-        if version and chapter.get("role") == 'colophon':
-            raw = inject_version_line(raw, version_line(version))
+        if chapter.get("role") == 'colophon' and colophon_lines(project):
+            raw = inject_colophon_lines(raw, colophon_lines(project))
 
         c = fix_polish_orphans(raw)
         c = fill_alt_from_caption(c)

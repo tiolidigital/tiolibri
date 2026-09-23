@@ -7,7 +7,11 @@ Runner: `pip install pytest` lokalnie — NIE dopisujemy go do requirements.txt
 from datetime import date
 
 from app.services.imprint import (
+    FONTS_DIR,
+    XPERTLAB_FONTS,
+    colophon_lines,
     edition_version,
+    inject_colophon_lines,
     inject_version_line,
     rights_with_version,
     version_line,
@@ -75,3 +79,31 @@ def test_inject_version_line_does_not_span_paragraphs():
 def test_inject_version_line_without_edition_paragraph():
     out = inject_version_line("<p>Copyright</p>", "Wersja 1.0")
     assert out == "<p>Wersja 1.0</p><p>Copyright</p>"
+
+
+def test_colophon_lines_version_then_xpertlab():
+    project = {"imprint": {"version": "1.0", "xpertlab": True}}
+    assert colophon_lines(project, date(2026, 9, 23)) == [
+        "Wersja 1.0 – wrzesień 2026",
+        "We współpracy z XpertLab",
+    ]
+
+
+def test_colophon_lines_xpertlab_only_when_true():
+    assert colophon_lines({"imprint": {"version": "1.0"}}, date(2026, 9, 23)) == ["Wersja 1.0 – wrzesień 2026"]
+    assert colophon_lines({"imprint": {"xpertlab": "tak"}}) == []
+    assert colophon_lines({}) == []
+
+
+def test_inject_colophon_lines_under_edition():
+    out = inject_colophon_lines(COLOPHON, ["Wersja 1.0 – wrzesień 2026", "We współpracy z XpertLab"])
+    assert (
+        "<p>Wydanie pierwsze elektroniczne. Szczecin 2026.</p>"
+        "<p>Wersja 1.0 – wrzesień 2026</p><p>We współpracy z XpertLab</p>"
+        "<p><strong>Redakcja"
+    ) in out
+
+
+def test_xpertlab_fonts_ship_with_app():
+    for name, _weight in XPERTLAB_FONTS:
+        assert (FONTS_DIR / name).stat().st_size > 10_000

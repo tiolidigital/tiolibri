@@ -11,7 +11,8 @@ Projekt bez `version` generuje się dokładnie tak jak dotąd.
 
 import re
 from datetime import date
-from typing import Optional
+from pathlib import Path
+from typing import List, Optional
 
 # Miesiące w mianowniku, małą literą — tak jak w „Wersja 1.0 – wrzesień 2026".
 POLISH_MONTHS = (
@@ -76,7 +77,54 @@ def inject_version_line(colophon_html: str, line: str) -> str:
     Kolofon bez takiego akapitu dostaje wiersz na początku — wersja ma być
     widoczna zawsze, gdy jest ustawiona.
     """
-    paragraph = f"<p>{line}</p>"
+    return inject_colophon_lines(colophon_html, [line])
+
+
+# --- XpertLab ---------------------------------------------------------------
+# Przełącznik `projects.imprint.xpertlab = true`: linijka w kolofonie pod
+# wersją i napis-logo na dole strony tytułowej. XpertLab nie jest wydawcą,
+# więc nie wchodzi w pole `publisher` ani w linijkę ©.
+
+XPERTLAB_LINE = "We współpracy z XpertLab"
+XPERTLAB_LOGO_HTML = '<div class="xlab-logo"><span class="x">Xpert</span><span class="l">Lab</span></div>'
+FONTS_DIR = Path(__file__).resolve().parent.parent / "fonts"
+XPERTLAB_FONTS = (("HankenGrotesk-Regular.ttf", 400), ("HankenGrotesk-SemiBold.ttf", 600))
+
+
+def xpertlab_enabled(project: dict) -> bool:
+    imprint = project.get("imprint") or {}
+    return imprint.get("xpertlab") is True
+
+
+def xpertlab_css(font_url_prefix: str) -> str:
+    """@font-face i kolory napisu. `font_url_prefix` to katalog z krojem:
+    `file:///…/fonts/` w PDF, `../fonts/` w EPUB."""
+    faces = "".join(
+        f"@font-face {{ font-family: 'Hanken Grotesk'; font-weight: {weight}; "
+        f"src: url('{font_url_prefix}{name}'); }}\n"
+        for name, weight in XPERTLAB_FONTS
+    )
+    return faces + """
+.xlab-logo { font-family: 'Hanken Grotesk', sans-serif; text-align: center; text-indent: 0; }
+.xlab-logo .x { font-weight: 600; color: #3A2342; }
+.xlab-logo .l { font-weight: 400; color: #A0526E; }
+"""
+
+
+def colophon_lines(project: dict, today: Optional[date] = None) -> List[str]:
+    """Wiersze dopisywane do kolofonu pod akapitem o wydaniu: wersja, XpertLab."""
+    lines = []
+    version = edition_version(project)
+    if version:
+        lines.append(version_line(version, today))
+    if xpertlab_enabled(project):
+        lines.append(XPERTLAB_LINE)
+    return lines
+
+
+def inject_colophon_lines(colophon_html: str, lines: List[str]) -> str:
+    """Wstawia akapity pod akapitem o wydaniu, a bez niego na początku kolofonu."""
+    paragraph = "".join(f"<p>{line}</p>" for line in lines)
     match = _EDITION_PARAGRAPH.search(colophon_html)
     if not match:
         return paragraph + colophon_html
