@@ -4,7 +4,7 @@ v1.0-wydawca-xpertlab, bez nadpisywania) i przepina file_path/epub_path w produk
 Klucze czytane z XpertHub/.env.local. Backup produktow: backup-produkty-xperthub-przed.json (stan sprzed 24.09).
 Uzycie: python3 wgraj_xperthub.py            (wgranie + weryfikacja, bez przepiecia)
         python3 wgraj_xperthub.py --przepnij (przepiecie produktow)
-        python3 wgraj_xperthub.py --cofnij   (przywraca sciezki z backupu; pliki w Storage zostaja)"""
+        python3 wgraj_xperthub.py --cofnij   (przywraca sciezki z backupu tej rundy; pliki w Storage zostaja)"""
 import hashlib, json, pathlib, sys, urllib.request, urllib.error
 HERE = pathlib.Path(__file__).parent
 env = {}
@@ -14,8 +14,11 @@ for l in (pathlib.Path.home() / "Documents/SaaS_Factory2026/App_Factory/XpertHub
         k, v = l.split("=", 1); env[k.strip()] = v.strip().strip('"').strip("'")
 URL, KEY = env["NEXT_PUBLIC_SUPABASE_URL"].rstrip("/"), env["SUPABASE_SERVICE_ROLE_KEY"]
 SRC = pathlib.Path.home() / "Downloads/xpertlab-wydawca-2026-09-24"
+# Druga runda 24.09: bez wiersza "Wydawnictwo XpertLab" na stronie tytulowej (logo zostaje).
+# Pierwsza runda: "bozena-muszynska/v1.0-xpertlab/..." -> v1.0-wydawca-xpertlab, backup-produkty-xperthub-przed.json.
+RUNDA = "-2"
 KSIAZKI = {  # stary file_path -> (nowy katalog, nazwa pliku)
-    "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.pdf": ("bozena-muszynska/v1.0-wydawca-xpertlab", "grzyby-lecznicze-v1.0"),
+    "bozena-muszynska/v1.0-wydawca-xpertlab/grzyby-lecznicze-v1.0.pdf": ("bozena-muszynska/v1.0-wydawca-xpertlab-2", "grzyby-lecznicze-v1.0"),
 }
 TYPY = {"pdf": "application/pdf", "epub": "application/epub+zip"}
 
@@ -30,7 +33,7 @@ def produkty(stary_pdf):
     return json.loads(call(f"{URL}/rest/v1/products?file_path=eq.{q}&select=id,slug,file_path,epub_path"))
 
 import urllib.parse
-BK = HERE / "backup-produkty-xperthub-przed.json"
+BK = HERE / f"backup-produkty-xperthub-przed{RUNDA}.json"
 
 if "--cofnij" in sys.argv:
     for p in json.loads(BK.read_text()):
