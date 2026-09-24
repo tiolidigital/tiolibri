@@ -17,11 +17,13 @@ from html import escape, unescape
 
 from app.services.imprint import (
     FONTS_DIR,
+    IMPRINT_CSS_CLASS,
     XPERTLAB_LOGO_HTML,
     colophon_lines,
     edition_version,
     inject_colophon_lines,
     rights_with_version,
+    title_page_imprint_keys,
     xpertlab_css,
     xpertlab_enabled,
 )
@@ -886,11 +888,8 @@ def generate_pdf(
 
     # Dane wydawnicze. Projekt bez `imprint` drukuje stronę tytułową
     # dokładnie tak jak dotąd — każdy wiersz jest warunkowy.
-    for key, css_class in (
-        ("publisher", "publisher"),
-        ("place_year", "place-year"),
-        ("rights_note", "rights"),
-    ):
+    for key in title_page_imprint_keys(project):
+        css_class = IMPRINT_CSS_CLASS[key]
         value = imprint.get(key)
         if value and key == "rights_note":
             value = rights_with_version(value, version)

@@ -83,7 +83,11 @@ def inject_version_line(colophon_html: str, line: str) -> str:
 # --- XpertLab ---------------------------------------------------------------
 # Przełącznik `projects.imprint.xpertlab = true`: linijka w kolofonie pod
 # wersją i napis-logo na dole strony tytułowej. Gdy XpertLab jest też wydawcą
-# (`publisher` z „XpertLab”), linijka o współpracy znika, a napis zostaje.
+# (`publisher` z „XpertLab”), linijka o współpracy znika, a napis zostaje
+# i zastępuje na stronie tytułowej wiersz z nazwą wydawcy.
+
+# Klasa CSS wiersza na stronie tytułowej dla każdego pola `imprint`.
+IMPRINT_CSS_CLASS = {"publisher": "publisher", "place_year": "place-year", "rights_note": "rights"}
 
 XPERTLAB_LINE = "We współpracy z XpertLab"
 XPERTLAB_LOGO_HTML = '<div class="xlab-logo"><span class="x">Xpert</span><span class="l">Lab</span></div>'
@@ -99,6 +103,18 @@ def xpertlab_enabled(project: dict) -> bool:
 def xpertlab_is_publisher(project: dict) -> bool:
     imprint = project.get("imprint") or {}
     return "xpertlab" in str(imprint.get("publisher") or "").lower()
+
+
+def title_page_imprint_keys(project: dict) -> List[str]:
+    """Pola `imprint` drukowane na stronie tytułowej, w kolejności.
+
+    Gdy wydawcą jest XpertLab, wiersz z jego nazwą odpada: napis-logo już stoi
+    na tej samej stronie, a nazwa jest też w linijce ©.
+    """
+    keys = ["publisher", "place_year", "rights_note"]
+    if xpertlab_enabled(project) and xpertlab_is_publisher(project):
+        keys.remove("publisher")
+    return keys
 
 
 def xpertlab_css(font_url_prefix: str) -> str:

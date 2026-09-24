@@ -17,11 +17,13 @@ from html import escape, unescape
 from app.services.imprint import (
     edition_version,
     FONTS_DIR,
+    IMPRINT_CSS_CLASS,
     XPERTLAB_FONTS,
     XPERTLAB_LOGO_HTML,
     colophon_lines,
     inject_colophon_lines,
     rights_with_version,
+    title_page_imprint_keys,
     xpertlab_css,
     xpertlab_enabled,
 )
@@ -670,12 +672,8 @@ img.cover {{
     # Dane wydawnicze. Projekt bez `imprint` składa stronę tytułową dokładnie
     # tak jak dotąd — każdy wiersz jest warunkowy.
     imprint_html = "".join(
-        f'<p class="{css_class}">{fix_polish_orphans(escape(rights_with_version(imprint[key], version) if key == "rights_note" else imprint[key]))}</p>'
-        for key, css_class in (
-            ("publisher", "publisher"),
-            ("place_year", "place-year"),
-            ("rights_note", "rights"),
-        )
+        f'<p class="{IMPRINT_CSS_CLASS[key]}">{fix_polish_orphans(escape(rights_with_version(imprint[key], version) if key == "rights_note" else imprint[key]))}</p>'
+        for key in title_page_imprint_keys(project)
         if imprint.get(key)
     )
 

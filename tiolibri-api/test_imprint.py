@@ -14,6 +14,7 @@ from app.services.imprint import (
     inject_colophon_lines,
     inject_version_line,
     rights_with_version,
+    title_page_imprint_keys,
     version_line,
     xpertlab_enabled,
 )
@@ -102,6 +103,15 @@ def test_colophon_lines_skip_cooperation_when_xpertlab_publishes():
     assert "We współpracy z XpertLab" in colophon_lines(ewa, date(2026, 9, 24))
     assert colophon_lines(bozena, date(2026, 9, 24)) == ["Wersja 1.0 – wrzesień 2026"]
     assert xpertlab_enabled(bozena)
+
+
+def test_title_page_drops_publisher_line_when_xpertlab_publishes():
+    ewa = {"imprint": {"xpertlab": True, "publisher": "Ewa Stachowska"}}
+    bozena = {"imprint": {"xpertlab": True, "publisher": "Wydawnictwo XpertLab"}}
+    bez_napisu = {"imprint": {"publisher": "Wydawnictwo XpertLab"}}
+    assert title_page_imprint_keys(ewa) == ["publisher", "place_year", "rights_note"]
+    assert title_page_imprint_keys(bozena) == ["place_year", "rights_note"]
+    assert title_page_imprint_keys(bez_napisu) == ["publisher", "place_year", "rights_note"]
 
 
 def test_inject_colophon_lines_under_edition():
