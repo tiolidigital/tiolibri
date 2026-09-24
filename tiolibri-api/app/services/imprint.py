@@ -82,8 +82,8 @@ def inject_version_line(colophon_html: str, line: str) -> str:
 
 # --- XpertLab ---------------------------------------------------------------
 # Przełącznik `projects.imprint.xpertlab = true`: linijka w kolofonie pod
-# wersją i napis-logo na dole strony tytułowej. XpertLab nie jest wydawcą,
-# więc nie wchodzi w pole `publisher` ani w linijkę ©.
+# wersją i napis-logo na dole strony tytułowej. Gdy XpertLab jest też wydawcą
+# (`publisher` z „XpertLab”), linijka o współpracy znika, a napis zostaje.
 
 XPERTLAB_LINE = "We współpracy z XpertLab"
 XPERTLAB_LOGO_HTML = '<div class="xlab-logo"><span class="x">Xpert</span><span class="l">Lab</span></div>'
@@ -94,6 +94,11 @@ XPERTLAB_FONTS = (("HankenGrotesk-Regular.ttf", 400), ("HankenGrotesk-SemiBold.t
 def xpertlab_enabled(project: dict) -> bool:
     imprint = project.get("imprint") or {}
     return imprint.get("xpertlab") is True
+
+
+def xpertlab_is_publisher(project: dict) -> bool:
+    imprint = project.get("imprint") or {}
+    return "xpertlab" in str(imprint.get("publisher") or "").lower()
 
 
 def xpertlab_css(font_url_prefix: str) -> str:
@@ -117,7 +122,7 @@ def colophon_lines(project: dict, today: Optional[date] = None) -> List[str]:
     version = edition_version(project)
     if version:
         lines.append(version_line(version, today))
-    if xpertlab_enabled(project):
+    if xpertlab_enabled(project) and not xpertlab_is_publisher(project):
         lines.append(XPERTLAB_LINE)
     return lines
 
