@@ -1,0 +1,44 @@
+[
+ {
+  "id": "b9943b95-f239-4791-9a08-b0a3a8bdf40f",
+  "slug": "ebook-grzyby",
+  "file_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.pdf",
+  "epub_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.epub"
+ },
+ {
+  "id": "1e0a8b09-aa63-4209-a74f-5d676c8cdfd6",
+  "slug": "ebook-grzyby-wl",
+  "file_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.pdf",
+  "epub_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.epub"
+ },
+ {
+  "id": "291b73bd-71f8-43d6-86d5-4a40b6dc5e0f",
+  "slug": "test-p24-bozena",
+  "file_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.pdf",
+  "epub_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.epub"
+ },
+ {
+  "id": "e3f8204c-e4f9-4587-b94d-462577ac0aa3",
+  "slug": "ebook-grzyby-p24",
+  "file_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.pdf",
+  "epub_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.epub"
+ },
+ {
+  "id": "1bc490d8-dd00-4ef8-aa3a-f14fb70babb4",
+  "slug": "ebook-grzyby-wl-p24",
+  "file_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.pdf",
+  "epub_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.epub"
+ },
+ {
+  "id": "79fb8b41-9771-4956-ba08-ddd18bcd6b97",
+  "slug": "ebook-grzyby-premiera",
+  "file_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.pdf",
+  "epub_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.epub"
+ },
+ {
+  "id": "72f040eb-53ff-4125-9e2f-6d11fd40e716",
+  "slug": "ebook-grzyby-premiera-p24",
+  "file_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.pdf",
+  "epub_path": "bozena-muszynska/v1.0-xpertlab/grzyby-lecznicze-v1.0.epub"
+ }
+]
