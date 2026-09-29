@@ -34,3 +34,6 @@
 
 ## Otwarte
 - Piotrek przekazuje Ewie 7 pytań. Po odpowiedziach i jego słowie: poprawki w bazie (z kopią i cofnięciem), 1.0 → 1.1, nowe pliki, XpertHub. Bez maila do kupujących.
+
+## Równoległe karty
+- tiolibri-be (ta): Grzyby 1.1, podpis zdjęcia. tiolibri-b0: Kości Ewy 1.1 (odsyłacze i sprzeczności). Wiersz o Magdzie u Ewy zostaje.
