@@ -19,5 +19,5 @@
 - Zrzut strony wysłany Piotrkowi; XpertHub (karta xperthub-80) powiadomiony o wersji 1.1.
 
 ## Otwarte
-- XpertHub: dopisać 1.1 do rejestru wersji i potwierdzić, że stempel egzemplarza siedzi na nowym PDF.
+- (domknięte) XpertHub potwierdził: sumy się zgadzają, 1.1 w rejestrze wersji, stempel „Egzemplarz…” na stronie tytułowej jak w 1.0.
 - Osoby, które już kupiły, mają 1.0. Nowa wersja trafi do nich tylko przy ponownej wysyłce.
