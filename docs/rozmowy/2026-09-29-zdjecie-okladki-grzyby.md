@@ -37,3 +37,6 @@
 
 ## Równoległe karty
 - tiolibri-be (ta): Grzyby 1.1, podpis zdjęcia. tiolibri-b0: Kości Ewy 1.1 (odsyłacze i sprzeczności). Wiersz o Magdzie u Ewy zostaje.
+
+## Równoległe karty
+- tiolibri-be: Grzyby 1.1 (zamknięte) · tiolibri-b0: Kości 1.1. Wzór na 1.1 u Ewy: skrypty z `docs/dostawy/boz-2026-09-29-zdjecie-okladki/` + `komputer-2026-09-24/generuj_komputer.py`. W Kościach wiersz o Magdzie w kolofonie jest poprawny, zostaje.
