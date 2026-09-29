@@ -26,3 +26,11 @@
 - Piotrek chce przeprosić Pawła mailem ze skrzynki sklepu: błąd przyznany wprost, bez kajania; wersja: „współpracownik pomylił książki” (nie mówimy o AI). Okładki Magdy nie załączamy.
 - Zaproponowane: zamiast linku egzemplarz autorski z XpertHuba (`/egzemplarz grzyby <email> "Pawła Muszyńskiego"`), trzy pliki w załączniku z dedykacją. Szkic maila podany Piotrkowi.
 - Zmiana: Piotrek nie chce załączników, tylko link z XpertHuba. Całość przekazana Bazie (baza-e3), plik `App_Factory/BAZA/HANDOFF-2026-09-29-mail-do-pawla-grzyby.md`. Piotrek ustala resztę z Bazą; w TIOLIBRI nic otwartego.
+
+# Kości Ewy: odsyłacze i sprzeczności (handoff od Bazy, ta sama data)
+- Baza (przez Piotrka): część odsyłaczy wskazuje złe albo nieistniejące rozdziały; na live Ewa odsyła po tytułach; poprawka w 1.1 po stronie TIOLIBRI.
+- Sprawdzone w bazie: 8 złych odsyłaczy (więcej niż w handoffie: także białko, wit. D, trening siłowy w Zakończeniu i alkohol w rozdz. 4). Sprzeczne liczby są w tekście tam, gdzie Baza wskazała.
+- Przygotowane: `docs/dostawy/ewa-2026-09-29-odsylacze-v1.1/POPRAWKI.md` (tabela poprawek + 7 pytań do Ewy). W bazie nic nie zmienione.
+
+## Otwarte
+- Piotrek przekazuje Ewie 7 pytań. Po odpowiedziach i jego słowie: poprawki w bazie (z kopią i cofnięciem), 1.0 → 1.1, nowe pliki, XpertHub. Bez maila do kupujących.
