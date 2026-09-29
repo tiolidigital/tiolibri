@@ -25,4 +25,4 @@
 ## Mail do Pawła (w toku)
 - Piotrek chce przeprosić Pawła mailem ze skrzynki sklepu: błąd przyznany wprost, bez kajania; wersja: „współpracownik pomylił książki” (nie mówimy o AI). Okładki Magdy nie załączamy.
 - Zaproponowane: zamiast linku egzemplarz autorski z XpertHuba (`/egzemplarz grzyby <email> "Pawła Muszyńskiego"`), trzy pliki w załączniku z dedykacją. Szkic maila podany Piotrkowi.
-- Otwarte: adres e-mail Pawła; potem pliki przez kartę XpertHuba.
+- Zmiana: Piotrek nie chce załączników, tylko link z XpertHuba. Całość przekazana Bazie (baza-e3), plik `App_Factory/BAZA/HANDOFF-2026-09-29-mail-do-pawla-grzyby.md`. Piotrek ustala resztę z Bazą; w TIOLIBRI nic otwartego.
