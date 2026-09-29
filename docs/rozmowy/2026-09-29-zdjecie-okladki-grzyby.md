@@ -21,3 +21,8 @@
 ## Otwarte
 - (domknięte) XpertHub potwierdził: sumy się zgadzają, 1.1 w rejestrze wersji, stempel „Egzemplarz…” na stronie tytułowej jak w 1.0.
 - Osoby, które już kupiły, mają 1.0. Nowa wersja trafi do nich tylko przy ponownej wysyłce.
+
+## Mail do Pawła (w toku)
+- Piotrek chce przeprosić Pawła mailem ze skrzynki sklepu: błąd przyznany wprost, bez kajania; wersja: „współpracownik pomylił książki” (nie mówimy o AI). Okładki Magdy nie załączamy.
+- Zaproponowane: zamiast linku egzemplarz autorski z XpertHuba (`/egzemplarz grzyby <email> "Pawła Muszyńskiego"`), trzy pliki w załączniku z dedykacją. Szkic maila podany Piotrkowi.
+- Otwarte: adres e-mail Pawła; potem pliki przez kartę XpertHuba.
