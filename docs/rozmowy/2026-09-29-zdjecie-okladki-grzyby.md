@@ -40,3 +40,7 @@
 
 ## Równoległe karty
 - tiolibri-be: Grzyby 1.1 (zamknięte) · tiolibri-b0: Kości 1.1. Wzór na 1.1 u Ewy: skrypty z `docs/dostawy/boz-2026-09-29-zdjecie-okladki/` + `komputer-2026-09-24/generuj_komputer.py`. W Kościach wiersz o Magdzie w kolofonie jest poprawny, zostaje.
+
+## 2026-09-30 · pliki dla Biblioteki Narodowej
+- Zlecenie Bazy (baza-e3, HANDOFF-2026-09-30-grzyby-egzemplarz-bn.md): czyste PDF i EPUB 1.1 w ~/Downloads/Egzemplarz-BN/. Kopie plików źródłowych z 29.09, sumy zgodne ze sklepem, bez stempla; ISBN, wydawca i wersja sprawdzone. Meldunek wysłany Bazie.
+- Zauważone 2026-09-30: metadane plików nie mają pola wydawcy (EPUB dc:publisher pusty, PDF bez publisher). Tak od 1.0; nie blokuje BN. Do backlogu.
